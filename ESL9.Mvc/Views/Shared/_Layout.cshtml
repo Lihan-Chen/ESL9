@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MWD ESL.net Core</title>
+
+    <environment include="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="~/css/site.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/5.3.3./css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/ESL.Mvc.styles.css" asp-append-version="true" />
+    </environment>
+    @* <style>
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown {
+            margin-left: 40rem;
+            margin-right: 40rem;
+        }
+
+        .name {
+            text-align: center;
+            color: green;
+        }
+    </style> *@
+</head>
+
+@* To create a cookie from _Layout for all pages; *@
+@* @inject IHttpContextAccessor HttpContextAccessor;
+@{
+    CookieOptions options = new CookieOptions();
+    options.Expires = DateTime.Now.AddMonths(1);
+    options.IsEssential = true;
+    options.Path = "/";
+
+    HttpContext.Response.Cookies.Append("ESL.Cookie", "2025mwdh2o.OpsSupportTeam", options);
+}
+ *@
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-inverse navbar-toggleable-sm bg-info navbar-dark border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand me-5" asp-area="" asp-controller="Home" asp-action="Index">ESL.net Core</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-2 justify-content-center">
+                        <li class="nav-item me-2">
+                            @* <button class="btn btn-danger rounded-bottom navbar-btn"> *@
+                            @* <a class="nav-link text-dark m-0 align-text-top" asp-area="" asp-controller="Home" asp-action="indexgroup"><strong>Check In</strong></a> *@
+                            <a class="nav-link btn btn-danger btn-sm text-light" role="button" asp-area="" asp-controller="Home" asp-action="indexgroup"><strong>Check In</strong></a>
+                            @* </button> *@
+                            @* <div>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            </div> *@
+                            @* <div>
+                                <a class="nav-link text-dark m-0" asp-area="" asp-controller="Home" asp-action="SelectPlant">Select Plant</a>
+                            </div> *@
+                        </li>
+
+                        <li class="nav-item me-2 active">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="AllEvents" asp-action="Index">AllEvents</a>
+                        </li>
+
+                        <li class="nav-item dropdown me-2">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="logsDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Logs
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="logsDropdownMenu">
+                                <h6 class="dropdown-header">Dropdown header</h6>
+                                <a class="dropdown-item" asp-area="Clearance" asp-controller="Clearance" asp-action="Index">Clearance</a>
+                                <a class="dropdown-item" asp-area="SOC" asp-controller="SOC" asp-action="Index">SOC</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" asp-area="FlowChange" asp-controller="FlowChange" asp-action="Index">FlowChange</a>
+                                <a class="dropdown-item" asp-area="General" asp-controller="General" asp-action="Index">General</a>
+                                <a class="dropdown-item" asp-area="EOS" asp-controller="EOS" asp-action="Index">EOS</a>
+                                <a class="dropdown-item" asp-area="HotLine" asp-controller="HotLine" asp-action="Index">HotLine</a>
+                            </div>
+                        </li>
+
+                        @* <li class="nav-item">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="searchDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Search
+                            </a>
+                            <div class="nav-link" aria-labelledby="searchDropdown">
+                                <form class="d-flex" role="search">
+                                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                                    <button class="btn btn-outline-success" type="submit">Search</button>
+                                </form>
+                            </div>
+                        </li> *@
+
+                        <li class="nav-item dropdown me-2">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="reportsDropdownMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Reports
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="reportsDropdownMenu">
+                                <a class="dropdown-item" href="#">Custom</a>
+                                <a class="dropdown-item" href="#">Daily</a>
+                                <a class="dropdown-item" href="#">Weekly</a>
+                                <a class="dropdown-item" href="#">Monthlyly</a>
+                            </div>
+                        </li>
+
+                        @* @if (Session["isAdmin"] != null && (bool)Session["isAdmin"]) *@
+                        @* @if (1 > 2)
+                            { *@
+                        <li class="nav-item dropdown me-2">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Admin
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="adminDropdownMenu">
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Constant" asp-action="Index">Constant</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Details" asp-action="Index">Details</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Employee" asp-action="List">Employee</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Equipment" asp-action="Index">Equipment</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Location" asp-action="List">Location</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Meter" asp-action="Index">Meter ID</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Subject" asp-action="Index">Subject</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Work" asp-action="Index">Work Be Performed</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Zone" asp-action="Index">Zone</a>
+                            </div>
+                        </li>
+                        @* }  *@
+                        <form class="d-flex me-2">
+                            <input class="form-control form-control-sm me-2" type="text" placeholder="Quick Search">
+                            <button class="btn btn-primary btn-sm" type="button">Search</button>
+                        </form>
+
+                        @* <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>  *@
+                    </ul>
+
+                    @* <button class="btn btn-danger navbar-btn">
+                        <a class="nav-link text-dark m-0" asp-area="" asp-controller="Home" asp-action="SelectPlant">Select Plant</a>
+                    </button> *@
+                    @* <ul class="nav navbar-nav navbar-right">
+                        <li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+                        <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                    </ul> *@
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container background: linear-gradient(360deg, #4097ff3d 50%, #4097ff2b, #38699473);">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2024 - ESL.Mvc - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <environment include="Development">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.7.1.min.js"
+                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+                crossorigin="anonymous"
+                integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT">
+        </script>
+        <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/5.3.3/bootstrap.min.js"
+                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
+                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+                crossorigin="anonymous"
+                integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
+        </script>
+        <script src="~/js/site.min.js" asp-append-version="true"></script>
+    </environment>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
