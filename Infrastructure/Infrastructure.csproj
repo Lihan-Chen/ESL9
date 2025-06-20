@@ -24,7 +24,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="DataAccess\Configurations\" />
     <Folder Include="Repositories\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Application\Application.csproj" />
   </ItemGroup>
 
 </Project>
