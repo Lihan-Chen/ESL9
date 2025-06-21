@@ -1,5 +1,5 @@
 ﻿﻿@{
-    ViewData["IsAdmin"] = false;
+    ViewData["IsAdmin"] = true;
     ViewData["HasNews"] = true;
 }
 
@@ -13,7 +13,7 @@
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-        <link rel="stylesheet" href="~/ESL.styles.css" asp-append-version="true" />
+        @* <link rel="stylesheet" href="~/ESL.styles.css" asp-append-version="true" /> *@
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/5.3.3./css/bootstrap.min.css"
@@ -23,7 +23,7 @@
         <link rel="stylesheet" href="~/ESL.Mvc.styles.css" asp-append-version="true" />
     </environment>
 
-    <style>
+    @* <style>
         .nav-item:hover {
             display: block;
             background-color: #ddd;
@@ -47,7 +47,7 @@
             text-align: center;
             color: green;
         }
-    </style>
+    </style> *@
     @* <style>
         .dropdown:hover .dropdown-menu {
             display: block;
@@ -150,7 +150,7 @@
                         </li>
 
                         @* @if (Session["isAdmin"] != null && (bool)Session["isAdmin"]) *@
-                        @if ((bool)ViewData["IsAdmin"]!)
+                        @if ((bool)ViewData["IsAdmin"])
                         {
                             <li class="nav-item dropdown mx-3">
                                 <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -181,11 +181,7 @@
 
                     @* <button class="btn btn-danger navbar-btn">
                         <a class="nav-link text-dark m-0" asp-area="" asp-controller="Home" asp-action="SelectPlant">Select Plant</a>
-                    </button> *@
-                    @* <ul class="nav navbar-nav navbar-right">
-                        <li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
-                        <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
-                    </ul> *@                   
+                    </button> *@                  
                 </div>
                 
                 <partial name="_LoginPartial" />
@@ -205,7 +201,7 @@
     </footer>
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
-        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
     </environment>
     <environment exclude="Development">
