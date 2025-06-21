@@ -23,18 +23,23 @@
         <link rel="stylesheet" href="~/ESL.Mvc.styles.css" asp-append-version="true" />
     </environment>
 
-    @* <style>
+    <style>
         .nav-item:hover {
             display: block;
             background-color: #ddd;
             color: black;
-            font-weight: 600
+            font-weight: 600;
+            text-decoration: ;
         }
 
-        /*         .dropdown {
-                margin-left: 40rem;
-                margin-right: 40rem;
-                } */
+        .dropdown {
+        margin-left: 40rem;
+        margin-right: 40rem;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: block;            
+        }
 
         .dropdown-item:hover {
             display: block;
@@ -47,11 +52,9 @@
             text-align: center;
             color: green;
         }
-    </style> *@
+    </style>
     @* <style>
-        .dropdown:hover .dropdown-menu {
-            display: block;
-        }
+        
 
         .dropdown {
             margin-left: 40rem;
@@ -106,67 +109,71 @@
                                 Home
                             </a>
                             <div class="dropdown-menu alert-warning" aria-labelledby="homeDropdownMenu">
-                                <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                                <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Search">Search</a>
+                                @* <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index">Home</a> *@
+                                <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="CheckIn" title="Operator Check In Here.">Check In</a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="SelectPlant">Select Plant</a>
+                                <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="SelectPlant" title="Select a plant for quick view Only">Select Plant</a>
                             </div>
                         </li>
 
                         <li class="nav-item active mx-3">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Search" asp-action="Index">AllEvents</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="AllEvent" asp-action="Index" title="All Events">AllEvents</a>
                         </li>
 
 
                         <li class="nav-item dropdown mx-3">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="logsDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="logsDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Outstaning Logs">
                                 Logs
                             </a>
                             <div class="dropdown-menu alert-warning" aria-labelledby="logsDropdownMenu">
-                                <a class="dropdown-item" asp-area="Clearance" asp-controller="Clearance" asp-action="Index">Clearance</a>
-                                <a class="dropdown-item" asp-area="SOC" asp-controller="SOC" asp-action="Index">SOC</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" asp-area="FlowChange" asp-controller="FlowChange" asp-action="Index">FlowChange</a>
-                                <a class="dropdown-item" asp-area="General" asp-controller="General" asp-action="Index">General</a>
-                                <a class="dropdown-item" asp-area="EOS" asp-controller="EOS" asp-action="Index">EOS</a>
-                                <a class="dropdown-item" asp-area="HotLine" asp-controller="HotLine" asp-action="Index">HotLine</a>
+                                <a class="dropdown-item" asp-area="" asp-controller="Clearance" asp-action="Index" title="Outstanding Clearances">Clearance</a>
+                                <a class="dropdown-item" asp-area="" asp-controller="SOC" asp-action="Index" title="Outstanding SOC">SOC</a>
+                                <a class="dropdown-item" asp-area="" asp-controller="FlowChange" asp-action="Index" title="Outstanding FlowChanges">FlowChange</a>
+                                <a class="dropdown-item" asp-area="" asp-controller="General" asp-action="Index" title="Outstanding General">General</a>
+                                <a class="dropdown-item" asp-area="" asp-controller="EOS" asp-action="Index" title="Outstanding EOS">EOS</a>
+                                    <div class="dropdown-divider"></div>
+                                    <div class="dropdown-header">Coming Next...</div>
+                                <a class="dropdown-item text-secondary" asp-area="" asp-controller="HotLine" asp-action="Index" title="Outstanding HotLine Orders">HotLine*</a>
                             </div>
                         </li>
 
                         <li class="nav-item dropdown mx-3">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="reportsDropdownMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="reportsDropdownMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Reports">
                                 Reports
                             </a>
                             <div class="dropdown-menu alert-warning" aria-labelledby="reportsDropdownMenu">
-                                <a class="dropdown-item" href="#">Custom</a>
-                                <a class="dropdown-item" href="#">Daily</a>
-                                <a class="dropdown-item" href="#">Weekly</a>
-                                <a class="dropdown-item" href="#">Monthlyly</a>
+                                <a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="Index" title="Custom Report">Custom</a>
+                                <a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="DailyReport" title="Daily Report">Daily</a>
+                                <a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="WeeklyReport" title="Weekly Report">Weekly</a>
+                                <a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="MonthlyReport" title="Monthly Report">Monthlyly</a>
+                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-header">Coming Next...</div>
+                                <a class="dropdown-item text-secondary" asp-area="" asp-controller="Report" asp-action="QuarterlyReport" title="Quarterly P&E Report">Quarterly P&A Report*</a>
                             </div>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link btn btn-danger btn-sm text-light" role="button" asp-area="" asp-controller="Search" asp-action="Index"><strong>Search</strong></a>
+                            <a class="nav-link btn btn-danger btn-sm text-light" role="button" asp-area="" asp-controller="Search" asp-action="Index" title="Search"><strong>Search</strong></a>
                         </li>
 
                         @* @if (Session["isAdmin"] != null && (bool)Session["isAdmin"]) *@
-                        @if ((bool)ViewData["IsAdmin"])
+                        @if ((bool)ViewData["IsAdmin"]!)
                         {
                             <li class="nav-item dropdown mx-3">
-                                <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="ESL Administrators Only">
                                     Admin
                                 </a>
                                 <div class="dropdown-menu alert-warning" aria-labelledby="adminDropdownMenu">
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Constant" asp-action="Index">Constant</a>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Details" asp-action="Index">Details</a>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Employee" asp-action="List">Employee</a>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Equipment" asp-action="Index">Equipment</a>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Location" asp-action="List">Location</a>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Meter" asp-action="Index">Meter ID</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Constant" asp-action="Index" title="Manage App. Constants">Constants</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Details" asp-action="Index" title="Manage Details">Details</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Employee" asp-action="List" title="View List of Employees">Employees</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Equipment" asp-action="Index" title="Manage Equipment">Equipment</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Location" asp-action="List" title="List of Locations">Locations</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Meter" asp-action="Index" title="Manage Meters.">Meters</a>
                                     <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Subject" asp-action="Index">Subject</a>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Work" asp-action="Index">Work Be Performed</a>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Zone" asp-action="Index">Zone</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Subject" asp-action="Index" title="Manage Subjects">Subjects</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Work" asp-action="Index" title="Manage Work To Be Performed">Work Be Performed</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Zone" asp-action="Index" title="Manage Clearance Zones.">Zones</a>
                                 </div>
                             </li>
                         }
@@ -196,7 +203,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2024 - ESL.Mvc - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; @DateTime.Today.Year - ESL.Mvc Core - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <environment include="Development">
@@ -211,11 +218,11 @@
                 crossorigin="anonymous"
                 integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT">
         </script>
-        <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/5.3.3/bootstrap.min.js"
-                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
-                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"
+                asp-fallback-test="window.bootstrap"
                 crossorigin="anonymous"
-                integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
+                integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz">
         </script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
