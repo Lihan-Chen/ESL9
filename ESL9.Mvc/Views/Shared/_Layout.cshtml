@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿﻿@{
+    ViewData["IsAdmin"] = false;
+    ViewData["HasNews"] = true;
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,7 +12,8 @@
 
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
-        <link rel="stylesheet" href="~/css/site.css" />
+        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/ESL.styles.css" asp-append-version="true" />
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/5.3.3./css/bootstrap.min.css"
@@ -16,6 +22,32 @@
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/ESL.Mvc.styles.css" asp-append-version="true" />
     </environment>
+
+    <style>
+        .nav-item:hover {
+            display: block;
+            background-color: #ddd;
+            color: black;
+            font-weight: 600
+        }
+
+        /*         .dropdown {
+                margin-left: 40rem;
+                margin-right: 40rem;
+                } */
+
+        .dropdown-item:hover {
+            display: block;
+            background-color: #ddd;
+            color: black;
+            font-weight: 600
+        }
+
+        .name {
+            text-align: center;
+            color: green;
+        }
+    </style>
     @* <style>
         .dropdown:hover .dropdown-menu {
             display: block;
@@ -34,51 +66,63 @@
 </head>
 
 @* To create a cookie from _Layout for all pages; *@
-@* @inject IHttpContextAccessor HttpContextAccessor;
-@{
+@* @inject IHttpContextAccessor HttpContextAccessor; *@
+@* @{
     CookieOptions options = new CookieOptions();
     options.Expires = DateTime.Now.AddMonths(1);
     options.IsEssential = true;
     options.Path = "/";
 
     HttpContext.Response.Cookies.Append("ESL.Cookie", "2025mwdh2o.OpsSupportTeam", options);
-}
- *@
+} *@
+ 
 
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-inverse navbar-toggleable-sm bg-info navbar-dark border-bottom box-shadow mb-3">
-            <div class="container">
+        <nav class="navbar sticky-top navbar-expand-sm navbar-inverse navbar-toggleable-sm bg-info navbar-dark border-bottom box-shadow mb-3">
+            <div class="container-fluid">
                 <a class="navbar-brand me-5" asp-area="" asp-controller="Home" asp-action="Index">ESL.net Core</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-center align-items-center" id="navbarNav">
                     <ul class="navbar-nav flex-grow-2 justify-content-center">
-                        <li class="nav-item me-2">
-                            @* <button class="btn btn-danger rounded-bottom navbar-btn"> *@
-                            @* <a class="nav-link text-dark m-0 align-text-top" asp-area="" asp-controller="Home" asp-action="indexgroup"><strong>Check In</strong></a> *@
-                            <a class="nav-link btn btn-danger btn-sm text-light" role="button" asp-area="" asp-controller="Home" asp-action="indexgroup"><strong>Check In</strong></a>
-                            @* </button> *@
-                            @* <div>
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                            </div> *@
-                            @* <div>
-                                <a class="nav-link text-dark m-0" asp-area="" asp-controller="Home" asp-action="SelectPlant">Select Plant</a>
-                            </div> *@
+                        <!-- Main Menu Item 1 -->
+                        @*  @if ((bool)ViewData["HasNews"]!)
+                        {
+                            <li class="nav-item mx-3">
+								<a class="nav-link text-danger" asp-area="" asp-controller="Home" asp-action="News"><strong>ESL News</strong></a>
+                            </li>
+                        } *@
+
+                        @* <li class="nav-item mx-3">
+                            <a class="nav-link btn btn-sm btn-danger bg-opacity-10" role="button" asp-area="" asp-controller="Home" asp-action="indexgroup"><strong>Check In</strong></a>
+                        </li> *@
+
+                        <li class="nav-item dropdown mx-3">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="homeDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Home
+                            </a>
+                            <div class="dropdown-menu alert-warning" aria-labelledby="homeDropdownMenu">
+                                <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                                <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Search">Search</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="SelectPlant">Select Plant</a>
+                            </div>
                         </li>
 
-                        <li class="nav-item me-2 active">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="AllEvents" asp-action="Index">AllEvents</a>
+                        <li class="nav-item active mx-3">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Search" asp-action="Index">AllEvents</a>
                         </li>
 
-                        <li class="nav-item dropdown me-2">
+
+                        <li class="nav-item dropdown mx-3">
                             <a class="nav-link dropdown-toggle text-dark" href="#" id="logsDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Logs
                             </a>
-                            <div class="dropdown-menu" aria-labelledby="logsDropdownMenu">
-                                <h6 class="dropdown-header">Dropdown header</h6>
+                            <div class="dropdown-menu alert-warning" aria-labelledby="logsDropdownMenu">
                                 <a class="dropdown-item" asp-area="Clearance" asp-controller="Clearance" asp-action="Index">Clearance</a>
                                 <a class="dropdown-item" asp-area="SOC" asp-controller="SOC" asp-action="Index">SOC</a>
                                 <div class="dropdown-divider"></div>
@@ -89,23 +133,11 @@
                             </div>
                         </li>
 
-                        @* <li class="nav-item">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="searchDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Search
-                            </a>
-                            <div class="nav-link" aria-labelledby="searchDropdown">
-                                <form class="d-flex" role="search">
-                                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                                    <button class="btn btn-outline-success" type="submit">Search</button>
-                                </form>
-                            </div>
-                        </li> *@
-
-                        <li class="nav-item dropdown me-2">
+                        <li class="nav-item dropdown mx-3">
                             <a class="nav-link dropdown-toggle text-dark" href="#" id="reportsDropdownMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Reports
                             </a>
-                            <div class="dropdown-menu" aria-labelledby="reportsDropdownMenu">
+                            <div class="dropdown-menu alert-warning" aria-labelledby="reportsDropdownMenu">
                                 <a class="dropdown-item" href="#">Custom</a>
                                 <a class="dropdown-item" href="#">Daily</a>
                                 <a class="dropdown-item" href="#">Weekly</a>
@@ -113,35 +145,38 @@
                             </div>
                         </li>
 
-                        @* @if (Session["isAdmin"] != null && (bool)Session["isAdmin"]) *@
-                        @* @if (1 > 2)
-                            { *@
-                        <li class="nav-item dropdown me-2">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Admin
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="adminDropdownMenu">
-                                <a class="dropdown-item" asp-area="Admin" asp-controller="Constant" asp-action="Index">Constant</a>
-                                <a class="dropdown-item" asp-area="Admin" asp-controller="Details" asp-action="Index">Details</a>
-                                <a class="dropdown-item" asp-area="Admin" asp-controller="Employee" asp-action="List">Employee</a>
-                                <a class="dropdown-item" asp-area="Admin" asp-controller="Equipment" asp-action="Index">Equipment</a>
-                                <a class="dropdown-item" asp-area="Admin" asp-controller="Location" asp-action="List">Location</a>
-                                <a class="dropdown-item" asp-area="Admin" asp-controller="Meter" asp-action="Index">Meter ID</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" asp-area="Admin" asp-controller="Subject" asp-action="Index">Subject</a>
-                                <a class="dropdown-item" asp-area="Admin" asp-controller="Work" asp-action="Index">Work Be Performed</a>
-                                <a class="dropdown-item" asp-area="Admin" asp-controller="Zone" asp-action="Index">Zone</a>
-                            </div>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-danger btn-sm text-light" role="button" asp-area="" asp-controller="Search" asp-action="Index"><strong>Search</strong></a>
                         </li>
-                        @* }  *@
-                        <form class="d-flex me-2">
-                            <input class="form-control form-control-sm me-2" type="text" placeholder="Quick Search">
-                            <button class="btn btn-primary btn-sm" type="button">Search</button>
-                        </form>
 
-                        @* <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>  *@
+                        @* @if (Session["isAdmin"] != null && (bool)Session["isAdmin"]) *@
+                        @if ((bool)ViewData["IsAdmin"]!)
+                        {
+                            <li class="nav-item dropdown mx-3">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Admin
+                                </a>
+                                <div class="dropdown-menu alert-warning" aria-labelledby="adminDropdownMenu">
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Constant" asp-action="Index">Constant</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Details" asp-action="Index">Details</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Employee" asp-action="List">Employee</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Equipment" asp-action="Index">Equipment</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Location" asp-action="List">Location</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Meter" asp-action="Index">Meter ID</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Subject" asp-action="Index">Subject</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Work" asp-action="Index">Work Be Performed</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Zone" asp-action="Index">Zone</a>
+                                </div>
+                            </li>
+                        }
+
+                        @* <li>
+                            <form class="d-flex form-inline mx-2 my-2 my-lg-0" role="search">
+                                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                                <button class="btn btn-primary my-2 my-sm-0" type="submit">Search</button>
+                            </form>
+                        </li> *@
                     </ul>
 
                     @* <button class="btn btn-danger navbar-btn">
@@ -150,9 +185,10 @@
                     @* <ul class="nav navbar-nav navbar-right">
                         <li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
                         <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
-                    </ul> *@
-                    <partial name="_LoginPartial" />
+                    </ul> *@                   
                 </div>
+                
+                <partial name="_LoginPartial" />
             </div>
         </nav>
     </header>

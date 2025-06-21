@@ -40,7 +40,7 @@ public partial class EslDbContext : DbContext
 
     public virtual DbSet<ESL_EQUIPMENTINVOLVED> Equipment { get; set; }
 
-    public virtual DbSet<ESL_FACILITy> Facilities { get; set; }
+    public virtual DbSet<ESL_FACILITY> Facilities { get; set; }
 
     public virtual DbSet<ESL_FLOWCHANGE> FlowChangeLog { get; set; }
 

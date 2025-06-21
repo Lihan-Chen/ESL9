@@ -9,7 +9,7 @@ namespace ESL9.Mvc.Domain.BusinessEntities;
 [Keyless]
 [Table("ESL_FACILITIES")]
 [Index("FACILNO", Name = "ESL_FACILITIES_PK", IsUnique = true)]
-public partial class ESL_FACILITy
+public partial class ESL_FACILITY
 {
     [Precision(3)]
     public byte FACILNO { get; set; }
