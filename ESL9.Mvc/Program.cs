@@ -1,14 +1,10 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
-using Microsoft.Extensions.Options;
 using ESL9.Infrastructure.DataAccess;
-using ESL9.Mvc.DataAccess;
 using Microsoft.EntityFrameworkCore;
-using Mvc.DbContext.DataAccess;
 
 namespace ESL9.Mvc;
 
@@ -22,13 +18,13 @@ public class Program
                                                     b.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion23)), poolSize: 1024);
 
         // Register the new DbContext for views
-        builder.Services.AddDbContextPool<EslViewContext>(options =>
-            options.UseOracle(
-                builder.Configuration.GetConnectionString("EslDbContext"),
-                b => b.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion23)
-            ),
-            poolSize: 1024
-        );
+        //builder.Services.AddDbContextPool<EslViewContext>(options =>
+        //    options.UseOracle(
+        //        builder.Configuration.GetConnectionString("EslDbContext"),
+        //        b => b.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion23)
+        //    ),
+        //    poolSize: 1024
+        //);
         //builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
         //// Register with interfaces in Program.cs
