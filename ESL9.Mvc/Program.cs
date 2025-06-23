@@ -6,7 +6,9 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.Extensions.Options;
 using ESL9.Infrastructure.DataAccess;
+using ESL9.Mvc.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Mvc.DbContext.DataAccess;
 
 namespace ESL9.Mvc;
 
@@ -18,8 +20,25 @@ public class Program
 
         builder.Services.AddDbContextPool<EslDbContext>(options => options.UseOracle(builder.Configuration.GetConnectionString("EslDbContext"), b =>
                                                     b.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion23)), poolSize: 1024);
-        
+
+        // Register the new DbContext for views
+        builder.Services.AddDbContextPool<EslViewContext>(options =>
+            options.UseOracle(
+                builder.Configuration.GetConnectionString("EslDbContext"),
+                b => b.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion23)
+            ),
+            poolSize: 1024
+        );
         //builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+        //// Register with interfaces in Program.cs
+        //builder.Services.AddScoped<IEslDbContext>(provider => provider.GetService<EslDbContext>());
+        //builder.Services.AddScoped<IEslViewContext>(provider => provider.GetService<EslViewContext>());
+
+
+        // Register repositories
+        //builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+        //builder.Services.AddScoped<IEventViewRepository, EventViewRepository>();
 
         // Add services to the container.
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)

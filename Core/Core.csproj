@@ -7,13 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Interfaces\IRepositories\" />
     <Folder Include="Models\Aggregates\" />
     <Folder Include="Models\ComplexTypes\" />
-    <Folder Include="Models\Enums\" />
-    <Folder Include="Interfaces\" />
-    <Folder Include="Models\BusinessEntities\" />
-    <Folder Include="Models\Constants\" />
-    <Folder Include="Models\ValueObjects\" />
+    <Folder Include="Models\Exceptions\" />
+    <Folder Include="Models\Validation\" />
   </ItemGroup>
 
 </Project>
