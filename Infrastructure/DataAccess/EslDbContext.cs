@@ -3,7 +3,7 @@ using Core.Models.BusinessEntities;
 
 namespace Infrastructure.DataAccess;
 
-public partial class EslDbContext : DbContext //, IEslViewContext
+public partial class EslDbContext : DbContext //, IEslDbContext
 {
     public EslDbContext()
     {

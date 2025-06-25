@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <Folder Include="DataAccess\Configurations\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
 
   <ItemGroup>

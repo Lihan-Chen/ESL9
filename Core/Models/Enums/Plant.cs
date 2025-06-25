@@ -82,16 +82,19 @@
 
         public static string[] GetPlantNames()
         {
-            return Enum.GetValues<Plant>()
-                       .Select(p => GetPlantName(Convert.ToInt32(p)))
-                       .ToArray(); // Fix: Convert the List<string> to a string[] using ToArray()
+            return [..Enum.GetValues<Plant>()
+                       .Select(p => GetPlantName(Convert.ToInt32(p)))];                       
+
+            //return Enum.GetValues<Plant>()
+            //           .Select(p => GetPlantName(Convert.ToInt32(p)))
+            //           .ToArray(); // Fix: Convert the List<string> to a string[] using ToArray()
         }
 
+        // Converts the enumerable of Plant values into a dictionary with Name as key and Value as value.
         public static Dictionary<string, int> PlantList()
         {
             return Enum.GetValues<Plant>()
-                       .ToDictionary(p => p.ToString(), p => (int)p);
-            // Converts the enumerable of Plant values into a dictionary with Name as key and Value as value.
+                       .ToDictionary(p => p.ToString(), p => (int)p);           
         }
 
         public static int GetPlantNo(string plantName)
