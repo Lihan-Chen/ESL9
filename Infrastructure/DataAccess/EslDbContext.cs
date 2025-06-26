@@ -9,7 +9,7 @@ public partial class EslDbContext : DbContext //, IEslDbContext
     {
     }
 
-    public EslDbContext(DbContextOptions<EslViewContext> options)
+    public EslDbContext(DbContextOptions<EslDbContext> options)
         : base(options)
     {
     }

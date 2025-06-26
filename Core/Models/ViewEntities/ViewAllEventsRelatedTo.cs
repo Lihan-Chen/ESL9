@@ -1,5 +1,10 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This represents a view of all events related to an event.
+/// Needs to check the logic of the view in the database.
+/// ModifyFlag is not in ["Deleted", "Revised", "Rejected"], or like "Replaced...", or null.
+/// </summary>
 public partial record ViewAllEventsRelatedTo
 {
     public int FacilNo { get; set; }

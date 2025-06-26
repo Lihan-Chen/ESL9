@@ -1,5 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This is the same as ViewAllEventsSearch, consider consolidating them.
+/// </summary>
 public partial record ViewSearchAllEvent
 {
     public int FacilNo { get; set; }

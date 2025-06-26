@@ -1,26 +1,26 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿
+@{
+    ViewData["Title"] = "All Events";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Check In or SelectPlant forms are coming soon, based on the user's roles in ESL</p>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h1>@ViewData["Title"]</h1>
 
+<p>You get to here because you have selected a plant, and/or checked in as an operator</p>
+
+<header></header>
 <div class="search-form-container">
     <form method="get" action="@Url.Action("Search", "AllEvent")" class="row g-3 align-items-end">
         <div class="col-md-2">
             <label for="facilityId" class="form-label">Facility</label>
             <select id="facilityId" name="facilityId" class="form-select" required>
                 <option value="">Select Facility</option>
-                @if (ViewBag.Facilities != null)
+                @* @if (ViewBag.Facilities != null)
                 {
                     @foreach (var facility in ViewBag.Facilities)
                     {
-                        <option value="@facility.FACILNO">@facility.DESCRIPTION</option>
+                        <option value="@facility.value">@facility.text</option>
                     }
-                }
+                } *@
             </select>
         </div>
 
@@ -28,13 +28,13 @@
             <label for="logTypeId" class="form-label">Log Type</label>
             <select id="logTypeId" name="logTypeId" class="form-select" required>
                 <option value="">Select Log Type</option>
-                @if (ViewBag.LogTypes != null)
+                @* @if (ViewBag.LogTypes != null)
                 {
                     @foreach (var logType in ViewBag.LogTypes)
                     {
-                        <option value="@logType.LOGTYPENO">@logType.DESCRIPTION</option>
+                        <option value="@logType.value">@logType.text</option>
                     }
-                }
+                } *@
             </select>
         </div>
 
@@ -50,7 +50,7 @@
 
         <div class="col-md-2">
             <label for="searchTerm" class="form-label">Search</label>
-            <input type="text" class="form-control" id="searchTerm" name="searchTerm" placeholder="Enter search term">
+            <input type="search" class="form-control" id="searchTerm" name="searchTerm" placeholder="Enter keywords">
         </div>
 
         <div class="col-md-2">
@@ -58,6 +58,7 @@
         </div>
     </form>
 </div>
+</header>
 
 <style>
     .search-form-container {

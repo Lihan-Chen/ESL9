@@ -1,5 +1,9 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// All CURRENT events for all facilities.
+/// ModifyFlag is null, or not in ["Revised", "Deleted", "Rejected", "Accepte"], or not like "Replaced w/ Rev.%".
+/// </summary>
 public partial record ViewAllEventsCurrent
 {
     public int FacilNo { get; set; }

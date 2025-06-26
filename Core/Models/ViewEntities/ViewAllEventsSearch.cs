@@ -3,7 +3,10 @@ using System.Collections.Generic;
 
 namespace Core.Models.BusinessEntities;
 
-public partial record ViewAllEventsSearch
+/// <summary>
+/// this is the same as ViewSearchAllEvent, consider consolidating them in the future.
+/// </summary>
+public partial record ViewAllEventsSearch 
 {
     public int FacilNo { get; set; }
 

@@ -51,7 +51,7 @@ namespace Infrastructure.DataAccess.Repositories
 
         // TODO: consider using value objects for start-end daterange to capture business logic
         // ESL.ESL_AllEvents_Active_Proc
-        public IQueryable<ViewAllEventsCurrent> GetListQuery(int? facilNo, int? logTypeNo, string strStartDate, string strEndDate, string strSearch, string strOperatorType) // DateTime? startDate, DateTime? endDate, string? searchString, string? alert, int? page, bool? operatorType = false
+        public IQueryable<ViewAllEventsCurrent> GetListQuery(int? facilNo, int? logTypeNo, string strStartDate, string strEndDate, string strSearch, string strOperatorType)
         {
             DateTime _startDate;
             DateTime _endDate;
@@ -65,19 +65,20 @@ namespace Infrastructure.DataAccess.Repositories
             bool isValidStartDate = DateTime.TryParseExact(strStartDate, _dateFormat, provider, DateTimeStyles.None, out _startDate);
             bool isValidEndDate = DateTime.TryParseExact(strEndDate, _dateFormat, provider, DateTimeStyles.None, out _endDate);
 
-
             if (isValidStartDate && isValidEndDate && _endDate >= _startDate)
             {
                 query = query.Where(a => a.EventDate >= _startDate && a.EventDate <= _endDate);
             }
 
-            if (facilNo.HasValue && logTypeNo.HasValue && !string.IsNullOrWhiteSpace(strOperatorType))
-            {
+            query = query.Where(a => (!facilNo.HasValue || a.FacilNo == facilNo) &&
+                               (!logTypeNo.HasValue || a.LogTypeNo == logTypeNo) &&
+                               (string.IsNullOrWhiteSpace(strOperatorType) || a.OperatorType == strOperatorType));
 
-                query = query.Where(a => a.FacilNo == facilNo &&
-                               a.LogTypeNo == logTypeNo &&
-                               a.OperatorType == strOperatorType);
-            }
+            query = query.Where(a => string.IsNullOrWhiteSpace(strSearch) ||
+                               (a.Subject != null && a.Subject.Contains(strSearch, StringComparison.CurrentCultureIgnoreCase)) ||
+                               (a.Details != null && a.Details.Contains(strSearch, StringComparison.CurrentCultureIgnoreCase)) ||
+                               (a.EventID != null && a.EventID.Contains(strSearch, StringComparison.CurrentCultureIgnoreCase)) ||
+                               (a.Notes != null && a.Notes.Contains(strSearch, StringComparison.CurrentCultureIgnoreCase)));
 
             return query.OrderByDescending(e => e.EventDate).ThenByDescending(u => u.UpdateDate);
         }
@@ -87,7 +88,7 @@ namespace Infrastructure.DataAccess.Repositories
             return _dbSetCurrent
                .AsNoTracking()
                .TagWith("GetItemQuery")
-               .Where(a => a.EventID == eventID &&
+               .Where(a => a.EventID.Equals(eventID, StringComparison.CurrentCultureIgnoreCase) &&
                      (!facilNo.HasValue || a.FacilNo == facilNo.Value) &&
                      (!logTypeNo.HasValue || a.LogTypeNo == logTypeNo.Value) &&
                      (!eventID_RevNo.HasValue || a.EventID_RevNo == eventID_RevNo.Value));
@@ -109,7 +110,7 @@ namespace Infrastructure.DataAccess.Repositories
             throw new NotImplementedException();
         }
 
-        // EslSubject is not the right entity.  it Should be the Subject property of ViewAllEventCurrent
+        // EslDetail is not the right entity.  it Should be the Details property of ViewAllEventCurrent
         public IQueryable<EslSubject> GetSubjectListQuery(int facilNo)
         {
             throw new NotImplementedException();
