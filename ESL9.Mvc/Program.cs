@@ -50,6 +50,15 @@ public class Program
         builder.Services.AddRazorPages()
             .AddMicrosoftIdentityUI();
 
+        // 1. Register session services
+        builder.Services.AddSession(options =>
+        {
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true; // Required for GDPR compliance
+                                               // You can set other options like IdleTimeout if needed
+                                               // options.IdleTimeout = TimeSpan.FromMinutes(30);
+        });
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -62,6 +71,9 @@ public class Program
 
         app.UseHttpsRedirection();
         app.UseRouting();
+
+        // 2. Add the session middleware before UseAuthorization
+        app.UseSession();
 
         app.UseAuthorization();
 

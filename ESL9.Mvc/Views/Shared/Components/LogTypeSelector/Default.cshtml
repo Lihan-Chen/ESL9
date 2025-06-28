@@ -1,0 +1,15 @@
+﻿@* ESL9.Mvc/Views/Shared/Components/LogTypeSelector/Default.cshtml *@
+@model List<LogTypeSelectViewModel>
+
+<div class="LogType-selector">
+    <select id="logTypeDropdown" name="selectedLogType" class="form-select">
+        @foreach (var logType in Model)
+        {
+            <option value="@logType.Id @(logType.IsSelected ? "selected" : "")">
+                @logType.Name
+            </option>
+        }
+    </select>
+</div>
+
+<input type="hidden" id="selectedLogType" name="selectedLogType" value="@Model.FirstOrDefault(p => p.IsSelected)?.Id" />

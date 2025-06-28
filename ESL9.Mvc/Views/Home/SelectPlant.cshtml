@@ -1,15 +1,44 @@
-﻿@{
-    ViewData["Title"] = "Select a Plant";
+﻿@* @{
+    ViewData["Title"] = "Select A Plant";
+} *@
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">@ViewBag.Message</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="SetPlant" asp-controller="Home">
+                        <fieldset>
+                            <legend>@ViewData["Title"]</legend>
+                        @await Component.InvokeAsync("PlantSelector", new { selectedPlant = ViewBag.SelectedPlant })
+                        </fieldset>
+                        @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl))
+                        {
+                                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+                        }
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">Confirm Selection</button>
+                            @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl))
+                            {
+                                    <a href="@ViewBag.ReturnUrl" class="btn btn-secondary ml-2">Cancel</a>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script>
+            document.addEventListener('plantSelected', function (e) {
+                // Optional: Add any additional client-side handling here
+                console.log('Plant selected:', document.getElementById('selectedPlant').value);
+            });
+        </script>
 }
-@*
-    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-*@
-<p>This is a partial view for selecting a plant.  A user, who may or may NOT be an operator, can select a plant with plant from session cookie as a default option.</p>
-<blockquote>
-    @* <div class="form-group">
-    <label asp-for="PlantId">Select a Plant</label>
-    <select asp-for="PlantId" class="form-control" asp-items="Model.Plants">
-        <option value="">-- Select a Plant --</option>
-    </select>
-    </div> *@
-</blockquote>

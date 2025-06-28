@@ -3,49 +3,34 @@
     ViewData["Title"] = "All Events";
 }
 
-<h1>@ViewData["Title"]</h1>
+<h4>@ViewData["Title"]</h4>
 
-<p>You get to here because you have selected a plant, and/or checked in as an operator</p>
-
-<header></header>
+<header>
 <div class="search-form-container">
-    <form method="get" action="@Url.Action("Search", "AllEvent")" class="row g-3 align-items-end">
-        <div class="col-md-2">
-            <label for="facilityId" class="form-label">Facility</label>
-            <select id="facilityId" name="facilityId" class="form-select" required>
-                <option value="">Select Facility</option>
-                @* @if (ViewBag.Facilities != null)
-                {
-                    @foreach (var facility in ViewBag.Facilities)
-                    {
-                        <option value="@facility.value">@facility.text</option>
-                    }
-                } *@
-            </select>
+    <form method="get" action="@Url.Action("Search", "AllEvent")" class="row g-3 align-items-end bg-info-subtle">
+        <div class="col-md">
+            <label for="plantId" class="form-label">Facility</label>
+            @await Component.InvokeAsync("FacilSelector", new { selectedPlant = ViewBag.SelectedPlant })
         </div>
 
-        <div class="col-md-2">
-            <label for="logTypeId" class="form-label">Log Type</label>
-            <select id="logTypeId" name="logTypeId" class="form-select" required>
-                <option value="">Select Log Type</option>
-                @* @if (ViewBag.LogTypes != null)
-                {
-                    @foreach (var logType in ViewBag.LogTypes)
-                    {
-                        <option value="@logType.value">@logType.text</option>
-                    }
-                } *@
-            </select>
+        <div class="col-md">
+            <label for="logTypeId" class="form-label">Log Type</label>           
+            @await Component.InvokeAsync("LogTypeSelector", new { selectedLogType = ViewBag.SelectedLogType })
         </div>
 
-        <div class="col-md-2">
+        <div class="col-md">
             <label for="startDate" class="form-label">Start Date</label>
             <input type="date" class="form-control" id="startDate" name="startDate" required>
         </div>
 
-        <div class="col-md-2">
+        <div class="col-md">
             <label for="endDate" class="form-label">End Date</label>
             <input type="date" class="form-control" id="endDate" name="endDate" required>
+        </div>
+        
+        <div class="form-check col-md">
+            <input class="form-check-input" type="checkbox" value="true" id="operatorType" name="primary">  @* checked *@
+            <label class="form-check-label" for="operatorType">Primary?</label>
         </div>
 
         <div class="col-md-2">
@@ -53,7 +38,7 @@
             <input type="search" class="form-control" id="searchTerm" name="searchTerm" placeholder="Enter keywords">
         </div>
 
-        <div class="col-md-2">
+        <div class="col-md-1">
             <button type="submit" class="btn btn-primary w-100">Search</button>
         </div>
     </form>

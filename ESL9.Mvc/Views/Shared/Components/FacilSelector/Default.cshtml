@@ -1,0 +1,12 @@
+﻿@model List<PlantSelectViewModel>
+
+<div class="plant-selector">
+    <select id="plantDropdown" name="selectedPlant" class="form-select">
+        @foreach (var plant in Model)
+        {
+            <option value="@plant.Id @(plant.IsSelected ? "selected" : "")">
+                @plant.Name
+            </option>
+        }
+    </select>
+</div>

@@ -1,0 +1,91 @@
+﻿@* ESL9.Mvc/Views/Shared/Components/PlantSelector/Default.cshtml *@
+@model List<PlantSelectViewModel>
+
+<div class="plant-selector">
+    @foreach (var plant in Model)
+    {
+        <div class="plant-button @(plant.IsSelected ? "selected" : "")"
+             data-plant-id="@plant.Id"
+             role="button"
+             tabindex="0">
+            <span class="plant-name">@plant.Name</span>
+        </div>
+    }
+</div>
+
+<input type="hidden" id="selectedPlantNo" name="selectedPlantNo" value="@Model.FirstOrDefault(p => p.IsSelected)?.Id" />
+
+<style>
+    .plant-selector {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .plant-button {
+        background-color: #f8f9fa;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem 2rem;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        min-width: 120px;
+        text-align: center;
+    }
+
+        .plant-button:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .plant-button.selected {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+
+    .plant-name {
+        font-weight: 500;
+        font-size: 1.1rem;
+    }
+
+    /* Accessibility focus styles */
+    .plant-button:focus {
+        outline: 3px solid #86b7fe;
+        outline-offset: 2px;
+    }    
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const plantButtons = document.querySelectorAll('.plant-button');
+        const hiddenInput = document.getElementById('selectedPlant');
+
+        plantButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove selected class from all buttons
+                plantButtons.forEach(b => b.classList.remove('selected'));
+
+                // Add selected class to clicked button
+                this.classList.add('selected');
+
+                // Update hidden input value
+                hiddenInput.value = this.dataset.plantId;
+
+                // Trigger change event for form handling
+                const event = new Event('plantSelected');
+                document.dispatchEvent(event);
+            });
+
+            // Keyboard accessibility
+            button.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+        });
+    });
+</script>
