@@ -1,0 +1,30 @@
+﻿@using ESL9.Mvc.Domain.BusinessEntities
+@model List<VIEW_ALLEVENTS_CURRENT>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Facility</th>
+            <th>Log Type</th>
+            <th>Operator</th>
+            <th>Keyword</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.EVENTID - @item.EVENTDATE
+                    EventDate
+                </td>
+                <td>@item.FACILNO</td>
+                <td>@item.LOGTYPENAME</td>
+                <td>@item.SUBJECT</td>
+                <td>@item.DETAILS</td>
+            </tr>
+        }
+    </tbody>
+</table>
+

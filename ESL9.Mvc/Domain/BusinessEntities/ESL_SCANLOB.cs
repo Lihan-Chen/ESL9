@@ -12,20 +12,20 @@ public partial class ESL_SCANLOB
 {
     [Key]
     [Column(TypeName = "NUMBER(38)")]
-    public decimal SCANSEQNO { get; set; }
+    public int SCANSEQNO { get; set; }
 
     [Precision(2)]
-    public byte FACILNO { get; set; }
+    public int FACILNO { get; set; }
 
     [Precision(2)]
-    public byte LOGTYPENO { get; set; }
+    public int LOGTYPENO { get; set; }
 
     [StringLength(20)]
     [Unicode(false)]
     public string EVENTID { get; set; } = null!;
 
     [Precision(2)]
-    public byte SCANNO { get; set; }
+    public int SCANNO { get; set; }
 
     [Column(TypeName = "BLOB")]
     public byte[]? SCANBLOB { get; set; }

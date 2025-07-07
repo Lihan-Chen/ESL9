@@ -1,19 +1,19 @@
 ﻿@* ESL9.Mvc/Views/Shared/Components/PlantSelector/Default.cshtml *@
-@model List<PlantSelectViewModel>
+@model List<FacilSelectViewModel>
 
 <div class="plant-selector">
     @foreach (var plant in Model)
     {
         <div class="plant-button @(plant.IsSelected ? "selected" : "")"
-             data-plant-id="@plant.Id"
+             data-plant-id="@plant.FacilNo"
              role="button"
              tabindex="0">
-            <span class="plant-name">@plant.Name</span>
+            <span class="plant-name">@plant.FacilName</span>
         </div>
     }
 </div>
 
-<input type="hidden" id="selectedPlantNo" name="selectedPlantNo" value="@Model.FirstOrDefault(p => p.IsSelected)?.Id" />
+<input type="hidden" id="selectedPlant" name="selectedFacilNo" value="@Model.FirstOrDefault(p => p.IsSelected)?.FacilNo" />
 
 <style>
     .plant-selector {
@@ -22,33 +22,63 @@
         gap: 1rem;
         justify-content: center;
         padding: 1rem;
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.25rem;
+        margin-bottom: 0.5rem;
     }
 
     .plant-button {
-        background-color: #f8f9fa;
+        /* background-color: #f8f9fa;
         border: 2px solid #dee2e6;
         border-radius: 8px;
         padding: 1rem 2rem;
         cursor: pointer;
         transition: all 0.2s ease-in-out;
         min-width: 120px;
+        text-align: center; */
+        border: thin outset #FFFF99;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem 1rem;
+        cursor: pointer;
+        font-size: 0.875rem;
         text-align: center;
+        background-color: #C0C0C0;
+        width: 120px;
+        height: 50px;
+        display: inline-block;
+        vertical-align: middle;
+        float: left;
+        margin-right: 10px;
+        margin-left: 10px;
+        margin-top: 10px;
+        /* padding-top: 20px; */
+        font-weight: 500;
     }
 
         .plant-button:hover {
-            background-color: #e9ecef;
+            /* background-color: #e9ecef; */
             transform: translateY(-2px);
+            background: lightgreen;
+            font-size: 1em;
+            /*color:  #00FFFF; */
+            /* list-style-type: square; */
         }
 
         .plant-button.selected {
-            background-color: #0d6efd;
+            /* background-color: #0d6efd;
             color: white;
-            border-color: #0d6efd;
+            border-color: #0d6efd; */
+            background: #FFCC00;
+            color: orangered;
+            font-size: 1.1em;
+            /* list-style-type: square; */
         }
 
     .plant-name {
         font-weight: 500;
-        font-size: 1.1rem;
+        font-size: 0.9rem;
     }
 
     /* Accessibility focus styles */

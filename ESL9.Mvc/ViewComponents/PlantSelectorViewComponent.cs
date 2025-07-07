@@ -4,21 +4,16 @@ using Mvc.Models.Enum;
 
 public class PlantSelectorViewComponent : ViewComponent
 {
-    //private readonly IFacilityRepository _facilityRepository;
 
-    //public PlantSelectorViewComponent(IFacilityRepository facilityRepository)
-    //{
-    //    _facilityRepository = facilityRepository;
-    //}
-
-    public async Task<IViewComponentResult> InvokeAsync(int? selectedPlantNo = null)
+    public async Task<IViewComponentResult> InvokeAsync(int? selectedFacilNo = null)
     {
-        var plants = Enum.GetValues<Plant>()
-            .Select(p => new PlantSelectViewModel
+        var plants = Enum.GetValues<Facil>()
+            .Cast<Facil>()
+            .Select(p => new FacilSelectViewModel
             {
-                Id = (int)p,
-                Name = PlantExtensions.GetPlantName(p),
-                IsSelected = selectedPlantNo.HasValue && selectedPlantNo.Value == (int)p
+                FacilNo = (int)p,
+                FacilName = FacilExtensions.GetFacilName(p),
+                IsSelected = selectedFacilNo.HasValue && selectedFacilNo.Value == (int)p
             })
             .ToList();
 

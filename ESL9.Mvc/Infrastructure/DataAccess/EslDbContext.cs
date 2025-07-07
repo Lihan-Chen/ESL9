@@ -18,7 +18,7 @@ public partial class EslDbContext : DbContext
 
     public virtual DbSet<ESL_ALLSCADAUSERS_ROLE> UserRoles { get; set; }
 
-    public virtual DbSet<ESL_CALLOUTTYPE> CalloutTypes { get; set; }
+    //public virtual DbSet<ESL_CALLOUTTYPE> CalloutTypes { get; set; }
 
     public virtual DbSet<ESL_CLEARANCEISSUE> ClearanceIssues { get; set; }
 
@@ -44,9 +44,9 @@ public partial class EslDbContext : DbContext
 
     public virtual DbSet<ESL_GENERAL> GeneralLog { get; set; }
 
-    public virtual DbSet<ESL_LOGSTATUS> LogStatus { get; set; }
+    //public virtual DbSet<ESL_LOGSTATUS> LogStatus { get; set; }
 
-    public virtual DbSet<ESL_LOGTABLENAME> LogTables { get; set; }
+    //public virtual DbSet<ESL_LOGTABLENAME> LogTables { get; set; }
 
     public virtual DbSet<ESL_LOGTYPE> LogTypes { get; set; }
 
@@ -60,9 +60,9 @@ public partial class EslDbContext : DbContext
 
     public virtual DbSet<ESL_RPT_MISC> RptMiscs { get; set; }
 
-    public virtual DbSet<ESL_SCADAROLE> ScadaRoles { get; set; }
+    //public virtual DbSet<ESL_SCADAROLE> ScadaRoles { get; set; }
 
-    public virtual DbSet<ESL_SCADA_LOG> ScanLogs { get; set; }
+    //public virtual DbSet<ESL_SCADA_LOG> ScanLogs { get; set; }
 
     public virtual DbSet<ESL_SCANDOC> ScanDocs { get; set; }
 
@@ -151,9 +151,9 @@ public partial class EslDbContext : DbContext
     // Deprecated :The view for selecting all worker records, not needed anymore
     //public virtual DbSet<VIEW_WORKORDER> VIEW_WORKORDERs { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseOracle("Data Source=odev41.world;Persist Security Info=false;User ID=ESL;Password=MWDesl01_#;");
+//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+//        => optionsBuilder.UseOracle("Data Source=odev41.world;Persist Security Info=false;User ID=ESL;Password=MWDesl01_#;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -166,10 +166,10 @@ public partial class EslDbContext : DbContext
             entity.HasKey(e => new { e.FACILNO, e.LOGTYPENO, e.EVENTID, e.EVENTID_REVNO }).HasName("ESL_ALLEVENTS_PK");
         });
 
-        modelBuilder.Entity<ESL_CALLOUTTYPE>(entity =>
-        {
-            entity.HasKey(e => e.CALLOUTTYPENO).HasName("ESL_CALLOUTTYPES_PK");
-        });
+        //modelBuilder.Entity<ESL_CALLOUTTYPE>(entity =>
+        //{
+        //    entity.HasKey(e => e.CALLOUTTYPENO).HasName("ESL_CALLOUTTYPES_PK");
+        //});
 
         modelBuilder.Entity<ESL_CLEARANCETYPE>(entity =>
         {
@@ -181,10 +181,10 @@ public partial class EslDbContext : DbContext
             entity.HasKey(e => new { e.FACILTYPE, e.ZONENO }).HasName("ESL_CLEARANCEZONES_PK");
         });
 
-        modelBuilder.Entity<ESL_DBLINK_XESL>(entity =>
-        {
-            entity.HasKey(e => e.FACILNO).HasName("ESL_DBLINK_XESL_PK");
-        });
+        //modelBuilder.Entity<ESL_DBLINK_XESL>(entity =>
+        //{
+        //    entity.HasKey(e => e.FACILNO).HasName("ESL_DBLINK_XESL_PK");
+        //});
 
         modelBuilder.Entity<ESL_EMPLOYEE>(entity =>
         {
@@ -193,23 +193,23 @@ public partial class EslDbContext : DbContext
             entity.Property(e => e.EMPLOYEENO).ValueGeneratedNever();
         });
 
-        modelBuilder.Entity<ESL_EMPLOYEES_P>(entity =>
-        {
-            entity.ToView("ESL_EMPLOYEES_PS");
+        //modelBuilder.Entity<ESL_EMPLOYEES_P>(entity =>
+        //{
+        //    entity.ToView("ESL_EMPLOYEES_PS");
 
-            entity.Property(e => e.M_CONFLICT_INTRST).IsFixedLength();
-            entity.Property(e => e.TEMP_FLD).IsFixedLength();
-            entity.Property(e => e.TEMP_FLD2).IsFixedLength();
-            entity.Property(e => e.TEMP_FLD3).IsFixedLength();
-            entity.Property(e => e.TEMP_FLD4).IsFixedLength();
-        });
+        //    entity.Property(e => e.M_CONFLICT_INTRST).IsFixedLength();
+        //    entity.Property(e => e.TEMP_FLD).IsFixedLength();
+        //    entity.Property(e => e.TEMP_FLD2).IsFixedLength();
+        //    entity.Property(e => e.TEMP_FLD3).IsFixedLength();
+        //    entity.Property(e => e.TEMP_FLD4).IsFixedLength();
+        //});
 
-        modelBuilder.Entity<ESL_EMPLOYEES_WSO_P>(entity =>
-        {
-            entity.ToView("ESL_EMPLOYEES_WSO_PS");
+        //modelBuilder.Entity<ESL_EMPLOYEES_WSO_P>(entity =>
+        //{
+        //    entity.ToView("ESL_EMPLOYEES_WSO_PS");
 
-            entity.Property(e => e.COMPANY).IsFixedLength();
-        });
+        //    entity.Property(e => e.COMPANY).IsFixedLength();
+        //});
 
         modelBuilder.Entity<ESL_EO>(entity =>
         {
@@ -231,15 +231,15 @@ public partial class EslDbContext : DbContext
             entity.HasKey(e => new { e.FACILNO, e.LOGTYPENO, e.EVENTID, e.EVENTID_REVNO }).HasName("ESL_GENERAL_PK");
         });
 
-        modelBuilder.Entity<ESL_LOGSTATUS>(entity =>
-        {
-            entity.HasKey(e => e.LOGSTATUSNO).HasName("ESL_LOGSTATUS_PK");
-        });
+        //modelBuilder.Entity<ESL_LOGSTATUS>(entity =>
+        //{
+        //    entity.HasKey(e => e.LOGSTATUSNO).HasName("ESL_LOGSTATUS_PK");
+        //});
 
-        modelBuilder.Entity<ESL_LOGTABLENAME>(entity =>
-        {
-            entity.HasKey(e => e.LOGTYPENO).HasName("ESL_LOGNAMES_PK");
-        });
+        //modelBuilder.Entity<ESL_LOGTABLENAME>(entity =>
+        //{
+        //    entity.HasKey(e => e.LOGTYPENO).HasName("ESL_LOGNAMES_PK");
+        //});
 
         modelBuilder.Entity<ESL_LOGTYPE>(entity =>
         {
@@ -256,10 +256,10 @@ public partial class EslDbContext : DbContext
             entity.HasKey(e => new { e.FACILNO, e.SHIFTNO }).HasName("PLANTSHIFT_PK");
         });
 
-        modelBuilder.Entity<ESL_SCADAROLE>(entity =>
-        {
-            entity.HasKey(e => new { e.FACILNO, e.GRANTEE, e.ROLE }).HasName("ESL_SCADAROLES_TEST_PK");
-        });
+        //modelBuilder.Entity<ESL_SCADAROLE>(entity =>
+        //{
+        //    entity.HasKey(e => new { e.FACILNO, e.GRANTEE, e.ROLE }).HasName("ESL_SCADAROLES_TEST_PK");
+        //});
 
         modelBuilder.Entity<ESL_SCANLOB>(entity =>
         {
@@ -278,17 +278,17 @@ public partial class EslDbContext : DbContext
             entity.HasKey(e => new { e.FACILNO, e.SUBJNO }).HasName("ESL_SUBJECTS_PK");
         });
 
-        modelBuilder.Entity<ESL_USER_INFO_VW>(entity =>
-        {
-            entity.ToView("ESL_USER_INFO_VW");
-        });
+        //modelBuilder.Entity<ESL_USER_INFO_VW>(entity =>
+        //{
+        //    entity.ToView("ESL_USER_INFO_VW");
+        //});
 
-        modelBuilder.Entity<ESL_WEBTRANSACTION>(entity =>
-        {
-            entity.HasKey(e => e.TRANSACTIONID).HasName("ESL_WEBTRANSACTIONS_PK");
+        //modelBuilder.Entity<ESL_WEBTRANSACTION>(entity =>
+        //{
+        //    entity.HasKey(e => e.TRANSACTIONID).HasName("ESL_WEBTRANSACTIONS_PK");
 
-            entity.Property(e => e.UPDATEDATE).HasDefaultValueSql("sysdate ");
-        });
+        //    entity.Property(e => e.UPDATEDATE).HasDefaultValueSql("sysdate ");
+        //});
 
         modelBuilder.Entity<ESL_WORKTOBEPERFORMED>(entity =>
         {
@@ -300,41 +300,41 @@ public partial class EslDbContext : DbContext
             entity.HasKey(e => e.LOGTYPENO).HasName("LOGTYPES_PK");
         });
 
-        modelBuilder.Entity<PLSQL_PROFILER_DATum>(entity =>
-        {
-            entity.HasKey(e => new { e.RUNID, e.UNIT_NUMBER, e.LINE_ }).HasName("SYS_C008041");
+        //modelBuilder.Entity<PLSQL_PROFILER_DATum>(entity =>
+        //{
+        //    entity.HasKey(e => new { e.RUNID, e.UNIT_NUMBER, e.LINE_ }).HasName("SYS_C008041");
 
-            entity.ToTable("PLSQL_PROFILER_DATA", tb => tb.HasComment("Accumulated data from all profiler runs"));
+        //    entity.ToTable("PLSQL_PROFILER_DATA", tb => tb.HasComment("Accumulated data from all profiler runs"));
 
-            entity.HasOne(d => d.PLSQL_PROFILER_UNIT).WithMany(p => p.PLSQL_PROFILER_DATa).HasConstraintName("SYS_C008061");
-        });
+        //    entity.HasOne(d => d.PLSQL_PROFILER_UNIT).WithMany(p => p.PLSQL_PROFILER_DATa).HasConstraintName("SYS_C008061");
+        //});
 
-        modelBuilder.Entity<PLSQL_PROFILER_RUN>(entity =>
-        {
-            entity.HasKey(e => e.RUNID).HasName("SYS_C008042");
+        //modelBuilder.Entity<PLSQL_PROFILER_RUN>(entity =>
+        //{
+        //    entity.HasKey(e => e.RUNID).HasName("SYS_C008042");
 
-            entity.ToTable("PLSQL_PROFILER_RUNS", tb => tb.HasComment("Run-specific information for the PL/SQL profiler"));
-        });
+        //    entity.ToTable("PLSQL_PROFILER_RUNS", tb => tb.HasComment("Run-specific information for the PL/SQL profiler"));
+        //});
 
-        modelBuilder.Entity<PLSQL_PROFILER_UNIT>(entity =>
-        {
-            entity.HasKey(e => new { e.RUNID, e.UNIT_NUMBER }).HasName("SYS_C008043");
+        //modelBuilder.Entity<PLSQL_PROFILER_UNIT>(entity =>
+        //{
+        //    entity.HasKey(e => new { e.RUNID, e.UNIT_NUMBER }).HasName("SYS_C008043");
 
-            entity.ToTable("PLSQL_PROFILER_UNITS", tb => tb.HasComment("Information about each library unit in a run"));
+        //    entity.ToTable("PLSQL_PROFILER_UNITS", tb => tb.HasComment("Information about each library unit in a run"));
 
-            entity.Property(e => e.TOTAL_TIME).HasDefaultValueSql("0 ");
+        //    entity.Property(e => e.TOTAL_TIME).HasDefaultValueSql("0 ");
 
-            entity.HasOne(d => d.RUN).WithMany(p => p.PLSQL_PROFILER_UNITs).HasConstraintName("SYS_C008062");
-        });
+        //    entity.HasOne(d => d.RUN).WithMany(p => p.PLSQL_PROFILER_UNITs).HasConstraintName("SYS_C008062");
+        //});
 
-        modelBuilder.Entity<TEMP_ESL_EMPLOYEES_P>(entity =>
-        {
-            entity.Property(e => e.M_CONFLICT_INTRST).IsFixedLength();
-            entity.Property(e => e.TEMP_FLD).IsFixedLength();
-            entity.Property(e => e.TEMP_FLD2).IsFixedLength();
-            entity.Property(e => e.TEMP_FLD3).IsFixedLength();
-            entity.Property(e => e.TEMP_FLD4).IsFixedLength();
-        });
+        //modelBuilder.Entity<TEMP_ESL_EMPLOYEES_P>(entity =>
+        //{
+        //    entity.Property(e => e.M_CONFLICT_INTRST).IsFixedLength();
+        //    entity.Property(e => e.TEMP_FLD).IsFixedLength();
+        //    entity.Property(e => e.TEMP_FLD2).IsFixedLength();
+        //    entity.Property(e => e.TEMP_FLD3).IsFixedLength();
+        //    entity.Property(e => e.TEMP_FLD4).IsFixedLength();
+        //});
 
         modelBuilder.Entity<VIEW_ALLEVENTS_CURRENT>(entity =>
         {
@@ -460,7 +460,7 @@ public partial class EslDbContext : DbContext
         {
             entity.ToView("VIEW_WORKORDERS");
         });
-        modelBuilder.HasSequence("PLSQL_PROFILER_RUNNUMBER");
+        //modelBuilder.HasSequence("PLSQL_PROFILER_RUNNUMBER");
 
         OnModelCreatingPartial(modelBuilder);
     }

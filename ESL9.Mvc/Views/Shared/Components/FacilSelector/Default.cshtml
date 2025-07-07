@@ -1,12 +1,17 @@
-﻿@model List<PlantSelectViewModel>
+﻿@using Mvc.Models.Enum
+@model List<FacilSelectViewModel>
 
-<div class="plant-selector">
-    <select id="plantDropdown" name="selectedPlant" class="form-select">
-        @foreach (var plant in Model)
+<div class="facil-selector">
+    <select id="FacilDropdown" name="SelectedFacilNo" class="form-select">
+        @* value="@Model.FirstOrDefault(f => f.IsSelected)?.FacilNo" *@
+        <option value="">Pick one</option>
+        @foreach (var facil in Model)
         {
-            <option value="@plant.Id @(plant.IsSelected ? "selected" : "")">
-                @plant.Name
+            <option value="@facil.FacilNo @(facil.IsSelected ? "selected" : "")">
+                @facil.FacilName
             </option>
         }
     </select>
 </div>
+
+@* <input type="hidden" id="SelectedFacilNo" name="SelectedFacilNo" value="@Model.FirstOrDefault(f => f.IsSelected)?.FacilNo" /> *@

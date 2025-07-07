@@ -13,7 +13,7 @@
                     <form method="post" asp-action="SetPlant" asp-controller="Home">
                         <fieldset>
                             <legend>@ViewData["Title"]</legend>
-                        @await Component.InvokeAsync("PlantSelector", new { selectedPlant = ViewBag.SelectedPlant })
+                        @await Component.InvokeAsync("PlantSelector", new { selectedFacilNo = ViewBag.SelectedFacilNo })
                         </fieldset>
                         @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl))
                         {
@@ -38,7 +38,7 @@
         <script>
             document.addEventListener('plantSelected', function (e) {
                 // Optional: Add any additional client-side handling here
-                console.log('Plant selected:', document.getElementById('selectedPlant').value);
+                console.log('Plant selected:', document.getElementById('selectedFacilNo').value);
             });
         </script>
 }

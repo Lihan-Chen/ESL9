@@ -1,4 +1,5 @@
-﻿
+﻿@using Mvc.ViewModels
+@model _LogFilterPartialViewModel
 @{
     ViewData["Title"] = "All Events";
 }
@@ -7,50 +8,74 @@
 
 <header>
 <div class="search-form-container">
-    <form method="get" action="@Url.Action("Search", "AllEvent")" class="row g-3 align-items-end bg-info-subtle">
+    <form action="@Url.Action("Index", "AllEvents")" class="row g-3 align-items-end bg-info-subtle">
         <div class="col-md">
-            <label for="plantId" class="form-label">Facility</label>
-            @await Component.InvokeAsync("FacilSelector", new { selectedPlant = ViewBag.SelectedPlant })
+                <label for="SelectedFacilNo" class="form-label">Facility</label>
+                @await Component.InvokeAsync("FacilSelector", new { selectedFacilNo = @Model.SelectedFacilNo })
         </div>
 
-        <div class="col-md">
+        @* <div class="col-md">
             <label for="logTypeId" class="form-label">Log Type</label>           
             @await Component.InvokeAsync("LogTypeSelector", new { selectedLogType = ViewBag.SelectedLogType })
+        </div> *@
+
+        <div class="col-md">
+            <label label-for="StartDate" class="form-label">Start Date</label>
+            <input asp-for="StartDate" type="date" class="form-control" required>
         </div>
 
         <div class="col-md">
-            <label for="startDate" class="form-label">Start Date</label>
-            <input type="date" class="form-control" id="startDate" name="startDate" required>
-        </div>
-
-        <div class="col-md">
-            <label for="endDate" class="form-label">End Date</label>
-            <input type="date" class="form-control" id="endDate" name="endDate" required>
+            <label label-for="EndDate" class="form-label">End Date</label>
+            <input asp-for="EndDate" type="date" class="form-control" required>
         </div>
         
         <div class="form-check col-md">
-            <input class="form-check-input" type="checkbox" value="true" id="operatorType" name="primary">  @* checked *@
-            <label class="form-check-label" for="operatorType">Primary?</label>
+            <input asp-for="OperatorType" class="form-check-input" type="checkbox" value="true">  @* checked *@
+            <label class="form-check-label" label-for="OperatorType">Primary Operator?</label>
         </div>
 
         <div class="col-md-2">
-            <label for="searchTerm" class="form-label">Search</label>
-            <input type="search" class="form-control" id="searchTerm" name="searchTerm" placeholder="Enter keywords">
+                <label label-for="CurrentFilter" class="form-label">Keyword</label>
+                <input asp-for="CurrentFilter" type="search" class="form-control" placeholder="Enter keywords">
         </div>
 
         <div class="col-md-1">
-            <button type="submit" class="btn btn-primary w-100">Search</button>
+            <button type="submit" class="btn btn-primary w-100">Refresh</button>
         </div>
     </form>
 </div>
 </header>
+
+<div class="d-flex justify-content-between">
+    <div class="float-md-start btn-group">
+        <span style="margin-right: 6px; height:16px;">&#x2795;</span>
+        <button type="button" class="btn btn-primary btn-sm" asp-action="Create" asp-controller="Clearance" title="Issue a new Clearance">Clearance Issue</button>
+        <button type="button" class="btn btn-primary btn-sm" asp-action="Create" asp-controller="EOS" title="Issue a new EOS">EOS</button>
+        <button type="button" class="btn btn-primary btn-sm" asp-action="Create" asp-controller="FlowChange" title="Issue a new FloaChange">FlowChange</button>
+        <button type="button" class="btn btn-primary btn-sm" asp-action="Create" asp-controller="General" title="Issue a new General">General</button>
+        <button type="button" class="btn btn-primary btn-sm" asp-action="Create" asp-controller="SOC" title="Issue a new EOS">SOC</button>
+    </div>
+
+    <div class="float-md-end btn-group">
+        <button type="button" class="btn btn-warning  btn-sm printButton" asp-action="Daily" asp-controller="Report" title="Daily Report - Set Start Date first, then Refresh">Daily</button> @* asp-all-route-data={ "facilNo" : "@Model.SelectedFacilNo", "startDate": "@Model.StartDate", "endDate" : "@Model.EndDate", "searchString" : "@Model.CurrentFilter" } *@
+        <button type="button" class="btn btn-warning  btn-sm printButton" asp-action="Night" asp-controller="Report" title="Night Report - Set Start Date first, then Refresh">Night</button>
+        <button type="button" class="btn btn-warning  btn-sm printButton" asp-action="Day" asp-controller="Report" title="Day Shift Report - Set Start Date and End Date first, then Refresh">Day</button>
+    </div>
+</div>
+
+@* <span class="float-right">@Html.ActionLink("Daily", "Report", new { facilNo = @Model.logFilterPartial.FacilNo, startDate = @Model.logFilterPartial.StartDate, endDate = @Model.logFilterPartial.EndDate, searchString = @Model.logFilterPartial.CurrentFilter }, new { @class = "printButton", title = "Daily Report - Set Start Date first, then Refresh" })</span>
+<span class="float-right">@Html.ActionLink("Night", "Report", new { facilNo = @Model.logFilterPartial.FacilNo, startDate = @Model.logFilterPartial.StartDate, endDate = @Model.logFilterPartial.EndDate, rptOption = "Night" }, new { @class = "night", title = "Night Shift Report - Set Start Date first, then Refresh " })</span>
+<span class="float-right">@Html.ActionLink("Day", "Report", new { facilNo = @Model.logFilterPartial.FacilNo, startDate = @Model.logFilterPartial.StartDate, endDate = @Model.logFilterPartial.EndDate, rptOption = "Day" }, new { @class = "day", title = "Day Shift Report - Set Start Date and End Date first, then Refresh " })</span>
+ *@
+
+
 
 <style>
     .search-form-container {
         background-color: #f8f9fa;
         padding: 1rem;
         border-radius: 0.25rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 0.5rem;
     }
 
     .form-label {

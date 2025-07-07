@@ -1,0 +1,36 @@
+﻿@model AllEventsSearchViewModel
+
+<div id="log-filter-form">
+    @await Component.InvokeAsync("FacilSelector", new { selectedFacilNo = Model.Filter.SelectedFacilNo })
+    @await Component.InvokeAsync("LogTypeSelector", new { selectedLogTypeNo = Model.Filter.SelectedLogTypeNo })
+
+    <form id="filterForm" asp-action="Search" asp-controller="AllEvents" method="post">
+        <input asp-for="Filter.StartDate" type="date" />
+        <input asp-for="Filter.EndDate" type="date" />
+        <input asp-for="Filter.CurrentFilter" placeholder="Keyword" />
+        <button type="submit">Search</button>
+    </form>
+</div>
+
+<div id="search-results">
+    @Html.Partial("_SearchResults", Model.Results)
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $('#filterForm').on('submit', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '@Url.Action("Search", "AllEvents")',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function (data) {
+                        $('#search-results').html(data);
+                    }
+                });
+            });
+        });
+    </script>
+}
+

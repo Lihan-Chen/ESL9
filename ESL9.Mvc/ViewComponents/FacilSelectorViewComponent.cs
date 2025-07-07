@@ -3,18 +3,19 @@ using Mvc.Models.Enum;
 
 public class FacilSelectorViewComponent : ViewComponent
 {
-    public IViewComponentResult Invoke(int? selectedPlantId = null)
+    public async Task<IViewComponentResult> InvokeAsync(int? selectedFacilNo)
     {
-        var plants = Enum.GetValues(typeof(Plant))
-            .Cast<Plant>()
-            .Select(p => new PlantSelectViewModel
+        var facils = Enum.GetValues<Facil>()
+            .Cast<Facil>()
+            .Select(f => new FacilSelectViewModel
             {
-                Id = (int)p,
-                Name = p.ToString(),
-                IsSelected = selectedPlantId.HasValue && (int)p == selectedPlantId.Value
+                FacilNo = (int)f,
+                FacilName = f.ToString(),
+                IsSelected = selectedFacilNo.HasValue && (int)f == selectedFacilNo.Value
             })
             .ToList();
 
-        return View(plants);
+        // Fix: Use Task.FromResult to wrap the View result in a Task  
+        return await Task.FromResult(View(facils));
     }
 }

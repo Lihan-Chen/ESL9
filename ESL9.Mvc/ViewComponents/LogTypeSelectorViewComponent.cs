@@ -11,14 +11,15 @@ public class LogTypeSelectorViewComponent : ViewComponent
     //    _facilityRepository = facilityRepository;
     //}
 
-    public async Task<IViewComponentResult> InvokeAsync(int? selectedLogType = null)
+    public async Task<IViewComponentResult> InvokeAsync(int? selectedLogTypeNo = null)
     {
         var LogTypes = Enum.GetValues<LogType>()
-            .Select(p => new LogTypeSelectViewModel
+            .Cast<LogType>()
+            .Select(l => new LogTypeSelectViewModel
             {
-                Id = (int)p,
-                Name = LogTypeExtensions.GetLogTypeName(p),
-                IsSelected = selectedLogType.HasValue && selectedLogType.Value == (int)p
+                LogTypeNo = (int)l,
+                LogTypeName = LogTypeExtensions.GetLogTypeName(l),
+                IsSelected = selectedLogTypeNo.HasValue && selectedLogTypeNo.Value == (int)l
             })
             .ToList();
 

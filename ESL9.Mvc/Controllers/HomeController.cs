@@ -57,7 +57,7 @@ public class HomeController(// IFacilityRepository facilityRepository,
 
     public IActionResult SelectPlant()
     {
-        ViewData["Title"] = "Select A Plant";
+        ViewData["Title"] = "Please select one facility from the list -";
 
         if (HttpContext.Session.TryGetValue("SelectedPlant", out byte[]? selectedPlantBytes))
         {
@@ -76,19 +76,19 @@ public class HomeController(// IFacilityRepository facilityRepository,
     }
 
     [HttpPost]
-    public Task<IActionResult> SetPlant(int selectedPlant)
+    public Task<IActionResult> SetPlant(int selectedFacilNo)
     {
-        if (!Enum.IsDefined(typeof(Plant), selectedPlant))
+        if (!Enum.IsDefined(typeof(Facil), selectedFacilNo))
         {
-            _logger.LogWarning("Invalid plant selection attempted: {PlantId}", selectedPlant);
+            _logger.LogWarning("Invalid plant selection attempted: {FacilNo}", selectedFacilNo);
             return Task.FromResult<IActionResult>(BadRequest("Invalid plant selection"));
         }
 
         try
         {
             // Store the selected plant in session
-            HttpContext.Session.SetInt32("SelectedPlant", selectedPlant);
-            FacilNo = HttpContext.Session.GetInt32("SelectedPlant") ?? 0; // selectedPlant;
+            HttpContext.Session.SetInt32("SelectedFacilNo", selectedFacilNo);
+            FacilNo = HttpContext.Session.GetInt32("SelectedFacilNo") ?? 0; // selectedPlant;
 
             // Log the plant selection
             _logger.LogInformation("User {UserId} selected plant {PlantId}", UserID, FacilNo);
