@@ -18,7 +18,7 @@ public partial class EslDbContext : DbContext //, IEslDbContext
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
-    public virtual DbSet<CalloutType> CalloutTypes { get; set; }
+    //public virtual DbSet<CalloutType> CalloutTypes { get; set; }
 
     public virtual DbSet<EslClearanceIssue> ClearanceIssueLog { get; set; }
 
@@ -42,7 +42,7 @@ public partial class EslDbContext : DbContext //, IEslDbContext
 
     public virtual DbSet<EslGeneral> GeneralLog { get; set; }
 
-    public virtual DbSet<EslLogStatus> LogStatuses { get; set; }
+    //public virtual DbSet<EslLogStatus> LogStatuses { get; set; }
 
     public virtual DbSet<LogType> LogTypes { get; set; }
 
@@ -230,31 +230,31 @@ public partial class EslDbContext : DbContext //, IEslDbContext
                 .HasColumnName("USERID");
         });
 
-        modelBuilder.Entity<CalloutType>(entity =>
-        {
-            entity.HasKey(e => e.CalloutTypeNo).HasName("ESL_CALLOUTTYPES_PK");
+        //modelBuilder.Entity<CalloutType>(entity =>
+        //{
+        //    entity.HasKey(e => e.CalloutTypeNo).HasName("ESL_CALLOUTTYPES_PK");
 
-            entity.ToTable("ESL_CALLOUTTYPES");
+        //    entity.ToTable("ESL_CALLOUTTYPES");
 
-            entity.Property(e => e.CalloutTypeNo)
-                .HasColumnType("NUMBER(38)")
-                .HasColumnName("CALLOUTTYPENO");
-            entity.Property(e => e.CalloutTypeName)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("CALLOUTTYPENAME");
-            entity.Property(e => e.Notes)
-                .HasMaxLength(300)
-                .IsUnicode(false)
-                .HasColumnName("NOTES");
-            entity.Property(e => e.UpdateDate)
-                .HasColumnType("DATE")
-                .HasColumnName("UPDATEDATE");
-            entity.Property(e => e.UpdatedBy)
-                .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasColumnName("UPDATEDBY");
-        });
+        //    entity.Property(e => e.CalloutTypeNo)
+        //        .HasColumnType("NUMBER(38)")
+        //        .HasColumnName("CALLOUTTYPENO");
+        //    entity.Property(e => e.CalloutTypeName)
+        //        .HasMaxLength(50)
+        //        .IsUnicode(false)
+        //        .HasColumnName("CALLOUTTYPENAME");
+        //    entity.Property(e => e.Notes)
+        //        .HasMaxLength(300)
+        //        .IsUnicode(false)
+        //        .HasColumnName("NOTES");
+        //    entity.Property(e => e.UpdateDate)
+        //        .HasColumnType("DATE")
+        //        .HasColumnName("UPDATEDATE");
+        //    entity.Property(e => e.UpdatedBy)
+        //        .HasMaxLength(20)
+        //        .IsUnicode(false)
+        //        .HasColumnName("UPDATEDBY");
+        //});
 
         modelBuilder.Entity<EslClearanceIssue>(entity =>
         {

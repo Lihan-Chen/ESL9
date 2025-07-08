@@ -8,7 +8,7 @@ namespace ESL9.Mvc.Domain.BusinessEntities;
 
 [PrimaryKey("FACILNO", "LOGTYPENO", "EVENTID", "EVENTID_REVNO")]
 [Table("ESL_EOS")]
-public partial class ESL_EO
+public partial class ESL_EOS
 {
     [Key]
     [Precision(2)]

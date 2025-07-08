@@ -34,7 +34,7 @@ public partial class EslDbContext : DbContext
 
     //public virtual DbSet<ESL_EMPLOYEES_P> ESL_EMPLOYEES_Ps { get; set; }
 
-    public virtual DbSet<ESL_EO> EOSLogs { get; set; }
+    public virtual DbSet<ESL_EOS> EOSLogs { get; set; }
 
     public virtual DbSet<ESL_EQUIPMENTINVOLVED> Equipment { get; set; }
 
@@ -74,7 +74,7 @@ public partial class EslDbContext : DbContext
 
     public virtual DbSet<ESL_UNIT> Units { get; set; }
 
-    public virtual DbSet<ESL_USER> Users { get; set; }
+    //public virtual DbSet<ESL_USER> Users { get; set; }
 
     //public virtual DbSet<ESL_USER_INFO_VW> ESL_USER_INFO_VWs { get; set; }
 
@@ -211,7 +211,7 @@ public partial class EslDbContext : DbContext
         //    entity.Property(e => e.COMPANY).IsFixedLength();
         //});
 
-        modelBuilder.Entity<ESL_EO>(entity =>
+        modelBuilder.Entity<ESL_EOS>(entity =>
         {
             entity.HasKey(e => new { e.FACILNO, e.LOGTYPENO, e.EVENTID, e.EVENTID_REVNO }).HasName("ESL_EOS_PK");
         });
