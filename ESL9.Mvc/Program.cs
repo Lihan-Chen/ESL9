@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
-using ESL9.Infrastructure.DataAccess;
+using Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Oracle.EntityFrameworkCore.Infrastructure;
 
 namespace ESL9.Mvc;
 
@@ -14,29 +15,25 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddDbContextPool<EslDbContext>(options => options.UseOracle(builder.Configuration.GetConnectionString("EslDbContext"), b =>
-                                                    b.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion23)), poolSize: 1024);
+        // Fix for CS1061: Ensure the required package is installed and the namespace is included
+        // AddDbContextPool is part of Microsoft.EntityFrameworkCore package
+        builder.Services.AddDbContextPool<EslDbContext>(options =>
+            options.UseOracle(
+                builder.Configuration.GetConnectionString("EslDbContext"),
+                b => b.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion23
+            )),
+            poolSize: 1024
+        );
 
-        // Register the new DbContext for views
-        //builder.Services.AddDbContextPool<EslViewContext>(options =>
-        //    options.UseOracle(
-        //        builder.Configuration.GetConnectionString("EslDbContext"),
-        //        b => b.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion23)
-        //    ),
-        //    poolSize: 1024
-        //);
-        //builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+        builder.Services.AddDbContextPool<EslViewContext>(options =>
+            options.UseOracle(
+                builder.Configuration.GetConnectionString("EslDbContext"),
+                b => b.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion23
+            )),
+            poolSize: 1024
+        );
 
-        //// Register with interfaces in Program.cs
-        //builder.Services.AddScoped<IEslDbContext>(provider => provider.GetService<EslDbContext>());
-        //builder.Services.AddScoped<IEslViewContext>(provider => provider.GetService<EslViewContext>());
-
-
-        // Register repositories
-        //builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-        //builder.Services.AddScoped<IEventViewRepository, EventViewRepository>();
-
-        // Add services to the container.
+        // Remaining code unchanged
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 
@@ -50,31 +47,23 @@ public class Program
         builder.Services.AddRazorPages()
             .AddMicrosoftIdentityUI();
 
-        // 1. Register session services
         builder.Services.AddSession(options =>
         {
             options.Cookie.HttpOnly = true;
-            options.Cookie.IsEssential = true; // Required for GDPR compliance
-                                               // You can set other options like IdleTimeout if needed
-                                               // options.IdleTimeout = TimeSpan.FromMinutes(30);
+            options.Cookie.IsEssential = true;
         });
 
         var app = builder.Build();
 
-        // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Home/Error");
-            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }
 
         app.UseHttpsRedirection();
         app.UseRouting();
-
-        // 2. Add the session middleware before UseAuthorization
         app.UseSession();
-
         app.UseAuthorization();
 
         app.MapStaticAssets();

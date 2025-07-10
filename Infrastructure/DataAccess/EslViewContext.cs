@@ -20,7 +20,7 @@ public partial class EslViewContext : DbContext //, IEslViewContext
 
     #region Business Views
 
-    public virtual DbSet<ViewAllEventsCurrent> ViewAllEventsCurrents { get; set; }
+    public virtual DbSet<ViewAllEventsCurrent> Current_AllEvents { get; set; }
 
     public virtual DbSet<ViewAllEventsFacilNo> ViewAllEventsFacilNos { get; set; }
 

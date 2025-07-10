@@ -30,7 +30,7 @@ public class HomeController(// IFacilityRepository facilityRepository,
         if (FacilNo is null)
         {
             // user is not an operator, redirect to SelectPlant view as viewonly
-            if (IsUserAnOperator)
+            if (!IsUserAnOperator)
             {
                 // facilName = PlantsDictionary.Plants[1].PlantName; // default to first plant
                 ViewBag.ShowPlantMenu = true;

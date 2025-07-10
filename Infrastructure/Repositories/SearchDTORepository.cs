@@ -1,20 +1,16 @@
-﻿using ESL.Application.Interfaces.IRepositories;
-using ESL.Core.Models.BusinessEntities;
+﻿using Application.Dtos;
+using Application.Interfaces.IRepositories;
+using Infrastructure.DataAccess;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ESL.Infrastructure.DataAccess.Repositories
 {
-    public class SearchDTORepository(EslDbContext context, ILogger<SearchDTORepository> logger) : ISearchDTORepository
+    public class SearchDtoRepository(EslDbContext context, ILogger<SearchDtoRepository> logger) : ISearchDtoRepository
     {
         private readonly EslDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
-        private readonly ILogger<SearchDTORepository> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly ILogger<SearchDtoRepository> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-        public Task<SearchDTO> GetSearchDTO(int facilNo, int logTypeNo, string eventID, int eventID_RevNo)
+        public Task<SearchDto> GetSearchDto(int facilNo, int logTypeNo, string eventID, int eventID_RevNo)
         {
             //SearchDTO _searchDTO = new SearchDTO();
 
@@ -42,7 +38,7 @@ namespace ESL.Infrastructure.DataAccess.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<List<SearchDTO>> GetSearchDTOList(int facilNo, int logTypeNo, string startDate, string endDate, string operatorType, string optionAll, string searchValues)
+        public Task<List<SearchDto>> GetSearchDtoList(int facilNo, int logTypeNo, string startDate, string endDate, string operatorType, string optionAll, string searchValues)
         {
             throw new NotImplementedException();
         }

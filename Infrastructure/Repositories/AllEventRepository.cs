@@ -18,7 +18,7 @@ namespace Infrastructure.DataAccess.Repositories
         protected DbSet<AllEvent> _dbSet = context.AllEvents;
 
         // Current_AllEvent
-        protected DbSet<ViewAllEventsCurrent> _dbSetCurrent = view.ViewAllEventsCurrents;
+        protected DbSet<ViewAllEventsCurrent> _dbSetCurrent = view.Current_AllEvents;
 
         public IQueryable<ViewAllEventsCurrent> GetAllEventsCurrentQuery(int FacilNo)
         {

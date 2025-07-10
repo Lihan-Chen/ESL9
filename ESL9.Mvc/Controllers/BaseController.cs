@@ -9,7 +9,7 @@ namespace Mvc.Controllers
 
         public string? UserName => HttpContext.User.Identity?.Name;
 
-        public static string? UserID = ""; // => HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserID")?.Value;
+        public static string? UserID = "U06337"; // => HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserID")?.Value;
 
         public static bool IsUserAnOperator = !string.IsNullOrEmpty(UserID); 
 
