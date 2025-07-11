@@ -8,7 +8,7 @@ public partial record RptAllEvent
 
     public string? EventID { get; set; }
 
-    public byte? EventID_RevNo { get; set; }
+    public int? EventID_RevNo { get; set; }
 
     public DateTime? EventDate { get; set; }
 

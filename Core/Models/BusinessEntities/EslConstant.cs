@@ -2,19 +2,19 @@
 
 public partial record EslConstant
 {
-    public byte Facilno { get; set; }
+    public int FacilNo { get; set; }
 
-    public DateTime Startdate { get; set; }
+    public DateTime StartDate { get; set; }
 
-    public string Constantname { get; set; } = null!;
+    public string ConstantName { get; set; } = null!;
 
     public decimal? Value { get; set; }
 
-    public DateTime? Enddate { get; set; }
+    public DateTime? EndDate { get; set; }
 
     public string? Notes { get; set; }
 
-    public string? Updatedby { get; set; }
+    public string? UpdatedBy { get; set; }
 
-    public DateTime? Updatedate { get; set; }
+    public DateTime? UpdateDate { get; set; }
 }

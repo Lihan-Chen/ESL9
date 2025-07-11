@@ -3,21 +3,21 @@ using System.Collections.Generic;
 
 namespace Core.Models.BusinessEntities;
 
-public partial class EslMeter
+public partial record EslMeter
 {
-    public byte Facilno { get; set; }
+    public int FacilNo { get; set; }
 
-    public string Meterid { get; set; } = null!;
+    public string MeterID { get; set; } = null!;
 
-    public string? Metertype { get; set; }
+    public string? MeterType { get; set; }
 
-    public byte? Sortno { get; set; }
+    public int? SortNo { get; set; }
 
     public string? Notes { get; set; }
 
     public string? Disable { get; set; }
 
-    public string? Updatedby { get; set; }
+    public string? UpdatedBy { get; set; }
 
-    public DateTime? Updatedate { get; set; }
+    public DateTime? UpdateDate { get; set; }
 }

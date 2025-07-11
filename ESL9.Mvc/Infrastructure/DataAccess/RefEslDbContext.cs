@@ -1,15 +1,19 @@
 ﻿using ESL9.Mvc.Domain.BusinessEntities;
 using Microsoft.EntityFrameworkCore;
 
-namespace ESL9.Infrastructure.DataAccess;
+namespace Mvc.Infrastructure.DataAccess;
 
-public partial class EslDbContext : DbContext
+/// <summary>
+/// This is a reference EslDbContext class for the implemented EslDbContext/EslViewContext in the Infrastructure project.
+/// Key features of this context include: consistent naming conventions, and summary of views and use dependencies
+/// </summary>
+public partial class RefEslDbContext : DbContext
 {
-    public EslDbContext()
+    public RefEslDbContext()
     {
     }
 
-    public EslDbContext(DbContextOptions<EslDbContext> options)
+    public RefEslDbContext(DbContextOptions<RefEslDbContext> options)
         : base(options)
     {
     }
@@ -100,23 +104,44 @@ public partial class EslDbContext : DbContext
 
     public virtual DbSet<VIEW_ALLEVENTS_CURRENT> Current_AllEvents { get; set; }
 
-    //public virtual DbSet<VIEW_ALLEVENTS_FACILNO> VIEW_ALLEVENTS_FACILNOs { get; set; }
+    //public virtual DbSet<VIEW_ALLEVENTS_FACILNO> AllEvents_FacilNos { get; set; }
 
-    //public virtual DbSet<VIEW_ALLEVENTS_LOGTYPE> VIEW_ALLEVENTS_LOGTYPEs { get; set; }
+    //public virtual DbSet<VIEW_ALLEVENTS_LOGTYPE> AllEvents_LogTypes { get; set; }
 
     public virtual DbSet<VIEW_ALLEVENTS_RELATEDTO> Related_AllEvents { get; set; }
 
-    public virtual DbSet<VIEW_ALLEVENTS_SEARCH> Searched_AllEvents { get; set; }
+    /// <summary>
+    /// This view may be used for searching all events (to be verified).
+    /// The Search module uses ELS.ESL_ALLEVENTS_SEARCH_PROC against VIEW_ALLEVENTS_CURRENT view to search all events in the system.
+    /// The other view VIEW_SEARCH_ALLEVENTS is deprecated and should not be used in the application.
+    /// </summary>
+    public virtual DbSet<VIEW_ALLEVENTS_SEARCH> AllEvents_Search { get; set; }
 
-    public virtual DbSet<VIEW_CLEARANCEISSUE> ClearanceIssue_Events { get; set; }
+    /// <summary>
+    /// This view is based on ESL_CLEARANCEISSUE
+    /// </summary>
+    public virtual DbSet<VIEW_CLEARANCEISSUE> All_ClearanceIssues { get; set; }
 
-    public virtual DbSet<VIEW_CLEARANCEISSUES_CURRENT> Current_ClearanceIssuesEvents { get; set; }
+    /// <summary>
+    /// This view is based on ESL_CLEARANCEISSUE
+    /// </summary>
+    public virtual DbSet<VIEW_CLEARANCEISSUES_CURRENT> Current_ClearanceIssues { get; set; }
 
-    //public virtual DbSet<VIEW_CLEARANCETYPE> ClearanceTypes { get; set; }
+    /// <summary>
+    /// This view is based on VIEW_CLEARANCETYPE, represents distinct clearance types in the ClearanceIssues.
+    /// Should have been named ClearanceIssue_Types, but kept as is for backward compatibility.
+    /// </summary>
+    public virtual DbSet<VIEW_CLEARANCETYPE> Clearance_Types { get; set; }
 
+    /// <summary>
+    /// This view is based on AllEvents table
+    /// </summary>
     public virtual DbSet<VIEW_CLEARANCE_ALL> All_Clearances { get; set; }
 
-    public virtual DbSet<VIEW_CLEARANCE_OUTSTANDING> OutStanding_Clearances { get; set; }
+    /// <summary>
+    /// This view is based on View_AllEvents_Current of Clearance type that are not yet completed.
+    /// </summary>
+    public virtual DbSet<VIEW_CLEARANCE_OUTSTANDING> Outstanding_Clearances { get; set; }
 
     public virtual DbSet<VIEW_EOS_ALL> All_EOS { get; set; }
 
@@ -139,7 +164,10 @@ public partial class EslDbContext : DbContext
     // All Prescheduled Flow Changes where event is due within the next 30 minutes
     public virtual DbSet<VIEW_REALTIME> RealTime_FlowChanges { get; set; }
 
-    // 
+    /// <summary>
+    /// Same as AllEvents_Search, check dependencies before removing.
+    /// This view can be removed in future releases, as it is not used in the application.
+    /// </summary>    
     public virtual DbSet<VIEW_SEARCH_ALLEVENT> Search_AllEvents { get; set; }
 
     public virtual DbSet<VIEW_SOC_ALL> All_SOC { get; set; }

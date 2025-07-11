@@ -2,7 +2,7 @@
 
 public partial record ScanLob
 {
-    public decimal ScanSeqNo { get; set; }
+    public int ScanSeqNo { get; set; }
 
     public int FacilNo { get; set; }
 

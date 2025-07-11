@@ -10,7 +10,7 @@ public partial record RptMisc
 
     public string? EventID { get; set; }
 
-    public byte? EventID_RevNo { get; set; }
+    public int? EventID_RevNo { get; set; }
 
     public string? LogTypeSpecific { get; set; }
 }
