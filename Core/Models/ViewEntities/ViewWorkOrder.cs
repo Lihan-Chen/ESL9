@@ -1,5 +1,9 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This view represents the same from ESL_WORKORDERS table.
+/// Can be possibly removed in the future as it may not be needed in the application.
+/// </summary>
 public partial record ViewWorkOrder
 {
     public int FacilNo { get; set; }

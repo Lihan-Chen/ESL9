@@ -1,5 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This view represents the GENERAL event from ESL_GENERAL joint with joined with logtypename, employeename, and scandocno from VIEW_GENERAL_OUTSTANDING (AllEvents).
+/// </summary>
 public partial record ViewGeneralCurrent
 {
     public int FacilNo { get; set; }

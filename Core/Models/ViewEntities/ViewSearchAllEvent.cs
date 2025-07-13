@@ -1,7 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
 /// <summary>
-/// This is the same as ViewAllEventsSearch, consider consolidating them.
+/// This view object represents all events whose ModifyFlag are null or not in ['Deleted','Revised','Rejected']  or LIKE 'Replaced%'
+/// This is the same as ViewAllEventsSearch, consider consolidating them to use only one.
 /// </summary>
 public partial record ViewSearchAllEvent
 {

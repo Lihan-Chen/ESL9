@@ -1,5 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This view represents the ClearanceOutstanding from AllEvents_Current wiht Clearance log type, ModifyFlag is null, and not "Full Release).
+/// </summary>
 public partial record ViewClearanceOutstanding
 {
     public int FacilNo { get; set; }
@@ -28,5 +31,5 @@ public partial record ViewClearanceOutstanding
 
     public string? ClearanceID { get; set; }
 
-    public decimal? ScanDocsNo { get; set; }
+    public int? ScanDocsNo { get; set; }
 }

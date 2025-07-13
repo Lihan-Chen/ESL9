@@ -1,5 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This view represents the ClearanceIssues from ESL_CLEARANCEISSUES joint with joined with logtypename, employeename, and scandocno from VIEW_CLEARANCE_OUTSTANDING (AllEvents).
+/// </summary>
 public partial record ViewClearanceIssuesCurrent
 {
     public int FacilNo { get; set; }

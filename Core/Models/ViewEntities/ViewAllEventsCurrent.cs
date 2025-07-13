@@ -1,7 +1,7 @@
 ﻿namespace Core.Models.BusinessEntities;
 
 /// <summary>
-/// All CURRENT events for all facilities.
+/// A view of AllEvent, representing AllEvent from AllEvents table for all facilities where -
 /// ModifyFlag is null, or not in ["Revised", "Deleted", "Rejected", "Accepte"], or not like "Replaced w/ Rev.%".
 /// </summary>
 public partial record ViewAllEventsCurrent
@@ -40,5 +40,5 @@ public partial record ViewAllEventsCurrent
 
     public string? ClearanceID { get; set; }
 
-    public decimal? ScanDocsNo { get; set; }
+    public int? ScanDocsNo { get; set; }
 }

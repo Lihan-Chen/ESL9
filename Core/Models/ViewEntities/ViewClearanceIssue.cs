@@ -1,5 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This view represents all ClearanceIssues jointed by FacilName, LogTypeName, and OperatorName.
+/// </summary>
 public partial record ViewClearanceIssue
 {
     public int FacilNo { get; set; }

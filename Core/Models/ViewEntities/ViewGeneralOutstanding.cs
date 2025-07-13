@@ -1,5 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This view represents the GENERAL events from the VIEW_AllEvents_CURRENT view where the General log Type has the ModifyFlag is null and the event is not Full Released.
+/// </summary>
 public partial record ViewGeneralOutstanding
 {
     public int FacilNo { get; set; }
@@ -28,5 +31,5 @@ public partial record ViewGeneralOutstanding
 
     public string? OperatorType { get; set; }
 
-    public decimal? ScanDocsNo { get; set; }
+    public int? ScanDocsNo { get; set; }
 }

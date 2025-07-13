@@ -1,5 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This view represents the pre-scheduled changes in the VIEW_ALLEVENTS_CURRENT where the ModifyFlag is null and is not a RealTime.
+/// </summary>
 public partial record ViewFlowChangePresched
 {
     public int FacilNo { get; set; }
@@ -28,5 +31,5 @@ public partial record ViewFlowChangePresched
 
     public string? OperatorType { get; set; }
 
-    public decimal? ScanDocsNo { get; set; }
+    public int? ScanDocsNo { get; set; }
 }

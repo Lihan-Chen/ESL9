@@ -1,5 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This view represents the EOS from ESL_EOS joint with joined with logtypename, employeename, and scandocno from VIEW_EOS_OUTSTANDING (AllEvents).
+/// </summary>
 public partial record ViewEOSCurrent
 {
     public int FacilNo { get; set; }

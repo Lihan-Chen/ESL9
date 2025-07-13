@@ -1,5 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This view represents all clearance events from AllEvents table joined by logtypename,employeename, and scandocno.
+/// </summary>
 public partial record ViewClearanceAll
 {
     public int FacilNo { get; set; }
@@ -28,5 +31,5 @@ public partial record ViewClearanceAll
 
     public string? ClearanceID { get; set; }
 
-    public decimal? ScanDocsNo { get; set; }
+    public int? ScanDocsNo { get; set; }
 }

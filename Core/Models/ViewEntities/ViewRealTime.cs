@@ -1,5 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This view represents ESL.VIEW_FLOWCHANGE_PRESCHED events where the event prescheduled datetime is due within 30 mins (30/1440 of a day) of current time.
+/// </summary>
 public partial record ViewRealTime
 {
     public int FacilNo { get; set; }
@@ -28,5 +31,5 @@ public partial record ViewRealTime
 
     public string? OperatorType { get; set; }
 
-    public decimal? ScanDocsNo { get; set; }
+    public int? ScanDocsNo { get; set; }
 }

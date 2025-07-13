@@ -1,5 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This view represents the SOC from ESL_EOS joint with joined with logtypename, employeename, and scandocno from VIEW_SOC_OUTSTANDING (AllEvents).
+/// </summary>
 public partial class ViewSOCCurrent
 {
     public int FacilNo { get; set; }

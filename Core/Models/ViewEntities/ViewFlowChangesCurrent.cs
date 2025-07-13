@@ -1,5 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// This view represents the FlowChange from ESL_FLOWCHANGES table joint with joined with logtypename, employeename, and scandocno from VIEW_FLOWCHANGE_PRESCHED (AllEvents).
+/// </summary>
 public partial record ViewFlowChangesCurrent
 {
     public int FacilNo { get; set; }

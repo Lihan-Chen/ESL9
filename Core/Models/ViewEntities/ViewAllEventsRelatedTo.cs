@@ -1,7 +1,8 @@
 ﻿namespace Core.Models.BusinessEntities;
 
 /// <summary>
-/// This represents a view of all events related to an event.
+/// This represents a view of all events available to be related to an event through ESL_ALLEVENTS_RELATEDTO_PROC.
+/// Not the list of related events, but the list of all events that can be selected as related to an event.
 /// Needs to check the logic of the view in the database.
 /// ModifyFlag is not in ["Deleted", "Revised", "Rejected"], or like "Replaced...", or null.
 /// </summary>
