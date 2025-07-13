@@ -22,53 +22,54 @@ public partial class EslViewContext : DbContext //, IEslViewContext
 
     public virtual DbSet<ViewAllEventsCurrent> Current_AllEvents { get; set; }
 
-    public virtual DbSet<ViewAllEventsFacilNo> ViewAllEventsFacilNos { get; set; }
+    public virtual DbSet<ViewAllEventsFacilNo> AllEvents_FacilNos { get; set; }
 
-    public virtual DbSet<ViewAllEventsLogType> ViewAllEventsLogTypes { get; set; }
+    public virtual DbSet<ViewAllEventsLogType> AllEvents_LogTypes { get; set; }
 
-    public virtual DbSet<ViewAllEventsRelatedTo> ViewAllEventsRelatedTos { get; set; }
+    public virtual DbSet<ViewAllEventsRelatedTo> Related_AllEvents { get; set; }
 
-    public virtual DbSet<ViewAllEventsSearch> ViewAllEventsSearches { get; set; }
+    public virtual DbSet<ViewAllEventsSearch> AllEvents_Search { get; set; }
 
-    public virtual DbSet<ViewClearanceAll> ViewClearanceAlls { get; set; }
+    public virtual DbSet<ViewClearanceAll> All_Clearances { get; set; }
 
-    public virtual DbSet<ViewClearanceOutstanding> ViewClearanceOutstandings { get; set; }
+    public virtual DbSet<ViewClearanceOutstanding> Outstanding_Clearances { get; set; }
 
-    public virtual DbSet<ViewClearanceIssue> ViewClearanceIssues { get; set; }
+    public virtual DbSet<ViewClearanceIssue> All_ClearanceIssues { get; set; }
 
-    public virtual DbSet<ViewClearanceIssuesCurrent> ViewClearanceIssuesCurrents { get; set; }
+    public virtual DbSet<ViewClearanceIssuesCurrent> Current_ClearanceIssues { get; set; }
 
-    public virtual DbSet<ViewClearanceType> ViewClearanceTypes { get; set; }
+    public virtual DbSet<ViewClearanceType> Clearance_Types { get; set; }
 
-    public virtual DbSet<ViewEOSAll> ViewEOSAlls { get; set; }
+    public virtual DbSet<ViewEOSAll> All_EOS { get; set; }
 
-    public virtual DbSet<ViewEOSCurrent> ViewEOSCurrents { get; set; }
+    public virtual DbSet<ViewEOSCurrent> Current_EOS { get; set; }
 
-    public virtual DbSet<ViewEOSOutstanding> ViewEOSOutstandings { get; set; }
+    public virtual DbSet<ViewEOSOutstanding> Outstanding_EOS { get; set; }
 
-    public virtual DbSet<ViewFlowChangeAll> ViewFlowChangeAlls { get; set; }
+    public virtual DbSet<ViewFlowChangeAll> All_FlowChanges { get; set; }
 
-    public virtual DbSet<ViewFlowChangePresched> ViewFlowChangePrescheds { get; set; }
+    public virtual DbSet<ViewFlowChangePresched> Presched_FlowChanges { get; set; }
 
-    public virtual DbSet<ViewFlowChangesCurrent> ViewFlowChangesCurrents { get; set; }
+    public virtual DbSet<ViewFlowChangesCurrent> Current_FlowChanges { get; set; }
 
-    public virtual DbSet<ViewGeneralAll> ViewGeneralAlls { get; set; }
+    public virtual DbSet<ViewGeneralAll> All_General { get; set; }
 
-    public virtual DbSet<ViewGeneralCurrent> ViewGeneralCurrents { get; set; }
+    public virtual DbSet<ViewGeneralCurrent> Current_General { get; set; }
 
-    public virtual DbSet<ViewGeneralOutstanding> ViewGeneralOutstandings { get; set; }
+    public virtual DbSet<ViewGeneralOutstanding> Outstanding_General { get; set; }
 
-    public virtual DbSet<ViewRealTime> ViewRealTimes { get; set; }
+    public virtual DbSet<ViewRealTime> RealTime_FlowChangess { get; set; }
 
-    public virtual DbSet<ViewSearchAllEvent> ViewSearchAllEvents { get; set; }
+    // Same as AllEvents_Search
+    public virtual DbSet<ViewSearchAllEvent> Search_AllEvents { get; set; }
 
-    public virtual DbSet<ViewSOCAll> ViewSOCAlls { get; set; }
+    public virtual DbSet<ViewSOCAll> All_SOC { get; set; }
 
-    public virtual DbSet<ViewSOCCurrent> ViewSOCCurrents { get; set; }
+    public virtual DbSet<ViewSOCCurrent> Current_SOC { get; set; }
 
-    public virtual DbSet<ViewSOCOutstanding> ViewSOCOutstandings { get; set; }
+    public virtual DbSet<ViewSOCOutstanding> Outstanding_SOC { get; set; }
 
-    public virtual DbSet<ViewWorkOrder> ViewWorkOrders { get; set; }
+    public virtual DbSet<ViewWorkOrder> Work_Orders { get; set; }
 
     #endregion Business Views
 
