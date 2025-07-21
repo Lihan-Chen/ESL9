@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\IRepositories\" />
     <Folder Include="Models\Aggregates\" />
     <Folder Include="Models\ComplexTypes\" />
     <Folder Include="Models\Exceptions\" />

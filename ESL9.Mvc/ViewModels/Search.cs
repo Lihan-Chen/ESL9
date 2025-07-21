@@ -32,7 +32,7 @@ public class SearchViewModel
             query = query.Where(x => x.EventDate <= filter.EndDate.Value);
 
         if (!string.IsNullOrWhiteSpace(filter.CurrentFilter))
-            query = query.Where(x => x.Subject.Contains(filter.CurrentFilter) || x.Details.Contains(filter.CurrentFilter));
+            query = query.Where(x => !string.IsNullOrWhiteSpace(x.Subject) && x.Subject.Contains(filter.CurrentFilter) || !string.IsNullOrWhiteSpace(x.Subject) && x.Details.Contains(filter.CurrentFilter));
 
         return query.ToList();
     }

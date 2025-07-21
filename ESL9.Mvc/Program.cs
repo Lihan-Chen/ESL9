@@ -6,6 +6,10 @@ using Microsoft.Identity.Web.UI;
 using Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Oracle.EntityFrameworkCore.Infrastructure;
+using Application.Interfaces.IServices;
+using Application.Interfaces.IRepositories;
+using Infrastructure.DataAccess.Repositories;
+using ESL.Infrastructure.DataAccess.Repositories;
 
 namespace ESL9.Mvc;
 
@@ -32,6 +36,23 @@ public class Program
             )),
             poolSize: 1024
         );
+
+        builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+        builder.Services.AddScoped<IEmpRoleRepository, EmpRoleRepository>();
+        builder.Services.AddScoped<IFacilityRepository, FacilityRepository>();
+        builder.Services.AddScoped<ILogTypeRepository, LogTypeRepository>();
+
+        //builder.Services.AddScoped<IConstantRepository, ConstantRepository>();
+        //builder.Services.AddScoped<IConstantRepository, ConstantRepository>();
+        //builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
+        //builder.Services.AddScoped<IMeterRepository, MeterRepository>();
+
+        builder.Services.AddScoped<IAllEventRepository, AllEventRepository>();
+        //builder.Services.AddScoped<ISearchDTORepository, SearchDTORepository>();
+
+        // configure services https://github.com/sanckh/YourLibraryApp/blob/main/YourLibrary/Startup.cs
+        builder.Services.AddScoped<ICoreService, Application.Services.CoreService>();
+        builder.Services.AddScoped<IAllEventService, Application.Services.AllEventService>();
 
         // Remaining code unchanged
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)

@@ -6,23 +6,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services
 {
-    public class CoreService : ICoreService
-    {
-        private readonly IEmployeeRepository _employees;
+    public class CoreService(IEmployeeRepository employeeRepository, IEmpRoleRepository empRoleRepository, IFacilityRepository facilityRepository, ILogTypeRepository logTypeRepository) : ICoreService
+    { 
+        private readonly IEmployeeRepository _employees = employeeRepository ?? throw new ArgumentNullException(nameof(employeeRepository));
 
-        private readonly IFacilityRepository _facilities;
+        private readonly IEmpRoleRepository _empRoles = empRoleRepository ?? throw new ArgumentNullException(nameof(empRoleRepository));
 
-        private readonly IEmpRoleRepository _empRoles;
-
-        private readonly ILogTypeRepository _logTypes;
-
-        public CoreService(IEmployeeRepository employeeRepository, IFacilityRepository facilityRepository, IEmpRoleRepository empRoleRepository, ILogTypeRepository logTypeRepository)
-        {
-            _employees = employeeRepository;
-            _facilities = facilityRepository;
-            _empRoles = empRoleRepository;
-            _logTypes = logTypeRepository;
-        }
+        private readonly IFacilityRepository _facilities = facilityRepository ?? throw new ArgumentNullException(nameof(facilityRepository));
+       
+        private readonly ILogTypeRepository _logTypes = logTypeRepository ?? throw new ArgumentNullException(nameof(logTypeRepository));
 
         #region EmployeeService
         // Check first - employeeFullName = lastName,firstName same as User.Identity.Name
@@ -77,7 +69,7 @@ namespace Application.Services
             return $"{_employee?.FirstName} {_employee?.LastName}";
         }
 
-        // Get FullName = lastName,firstName
+        // lastName,firstName => FirstName, LastName
         public Task<string?> GetFullNameByEmployeeFullName(string? employeeFullName)
         {
             if (string.IsNullOrEmpty(employeeFullName) || !employeeFullName.Contains(','))
@@ -119,7 +111,7 @@ namespace Application.Services
                 return null;
             }
 
-            return _employeeNo < 10000 ? $"U{_employeeNo?.ToString("D4")}" : $"U{_employeeNo?.ToString("D5")}";
+            return _employeeNo < 40000 ? $"U{_employeeNo?.ToString("D5")}" : $"U{_employeeNo?.ToString("D5")}";
         }
 
         // Get Employee's FacilityNo              
@@ -144,7 +136,7 @@ namespace Application.Services
 
         public Task<bool> IsInRole(string userID, string role, int? facilNo)
         {
-            switch (role)
+            switch (role.ToUpper())
             {
                 case "ESL_OPERATOR":
                     return Task.FromResult(
@@ -176,14 +168,14 @@ namespace Application.Services
 
         // ConfigureAwait(false) allows the continuation to run on a different thread, which can improve performance and avoid deadlocks in certain scenarios
         // https://github.com/PiranhaCMS/piranha.core/tree/master
-        public Task<IEnumerable<Facility>> GetAllPlants() => (Task<IEnumerable<Facility>>)_facilities.GetAll().AsAsyncEnumerable();
+        public async Task<IEnumerable<Facility>> GetAllPlants() => await _facilities.GetAll().ToListAsync(); //.AsAsyncEnumerable();
 
-        public Task<Facility?> GetFacility(int? facilNo) => _facilities.GetFacility((int)facilNo!).FirstOrDefaultAsync();
+        public async Task<Facility?> GetFacility(int? facilNo) => await _facilities.GetFacility((int)facilNo!).FirstOrDefaultAsync();
 
         // For Selecting a plant (OCC, DOCC, pumping, treatment, DVL)
-        public Task<List<string>> GetFacilTypeList() => _facilities.GetFacilTypeList().ToListAsync();
+        public async Task<List<string>> GetFacilTypeList() => await _facilities.GetFacilTypeList().ToListAsync();
 
-        public Task<List<FacilDto>> GetFaciList() => _facilities.GetFacilList().ToListAsync();
+        public async Task<List<FacilDto>> GetFaciList() => await _facilities.GetFacilList().ToListAsync();
 
         //public async Task<SelectList> GetFacilSelectList(int? facilNo) // => new SelectList(await _facilities.GetFacilList(), "FacilNo", "FacilAbbr", facilNo);
         //{

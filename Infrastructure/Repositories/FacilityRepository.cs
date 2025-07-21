@@ -17,7 +17,7 @@ namespace ESL.Infrastructure.DataAccess.Repositories
 
         public async Task<string?> GetFacilName(int? facilNo)
         {
-            string _facilName = null;
+            string? _facilName = null;
 
             if (facilNo == null || facilNo == 0)
             {
@@ -32,7 +32,7 @@ namespace ESL.Infrastructure.DataAccess.Repositories
 
         public async Task<int?> GetFacilNo(string? facilName)
         {
-            var query = _context.Facilities.AsNoTracking().Where(d => d.Disable == null || d.Disable != "Y");
+            //var query = _context.Facilities.AsNoTracking().Where(d => d.Disable == null || d.Disable != "Y");
 
             if (string.IsNullOrEmpty(facilName))
             {

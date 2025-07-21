@@ -21,25 +21,27 @@ namespace Infrastructure.DataAccess.Repositories
         {
             // Consider using QueryFilter to avoid loading all records into memory
             // https://github.com/dotnet/EntityFramework.Docs/blob/live/samples/core/Querying/QueryFilters/BloggingContext.cs
+
             var query = _context.Employees.AsNoTracking().Where(d => d.Disable == null || d.Disable != "Y");
 
             if (facilNo != null)
             {
                 query = query.Where(e => e.FacilNo == facilNo);
             }
+
             return query.Distinct().OrderBy(o => o.LastName).ThenBy(o => o.FirstName);
         }
 
-
-        // ToDo: Verify logic for external list query
-        // SQL = ESL.ESL_EMPLOYEELIST_EXT_PROC WHERE GROUPNAME LIKE '%WATER SYSTEM OPERATIONS GROUP%' AND LENGTH(EMPLOYEENO) <> 4
+        // Corrected the logic that identifies external users as Company is not MWD and GroupName is null
+        // External employeeNo starts with 9000001
+        // SQL = ESL.ESL_EMPLOYEELIST_EXT_PROC WHERE COMPANY NOT LIKE '%MWD%' AND GROUPNAME IS NULL
         public IOrderedQueryable<Employee> GetListExternalQuery()
         {
             var query = _context.Employees.AsNoTracking().Where(d => d.Disable == null || d.Disable != "Y");
 
-            var keyWord = "%WATER SYSTEM OPERATIONS GROUP%";
+            var keyWord = "%MWD%";
 
-            return query.Where(e => !EF.Functions.Like(e.GroupName, keyWord) && e.EmployeeNo.ToString().Length != 4).OrderBy(o => o.LastName).ThenBy(o => o.FirstName);
+            return query.Where(e => !EF.Functions.Like(e.Company, keyWord) && string.IsNullOrEmpty(e.GroupName)).OrderBy(o => o.LastName).ThenBy(o => o.FirstName);
         }
 
         // SQL = SELECT * FROM ESL.ESL_EMPLOYEES WHERE EMPLOYEENO = 'employeeNo.ToString()'"
@@ -99,6 +101,7 @@ namespace Infrastructure.DataAccess.Repositories
 
         #endregion IQueryable
 
+        // parameter employeeFullName  is {LastName, FirstName}
         public bool EmployeeExists(string employeeFullName)
         {
             if (string.IsNullOrEmpty(employeeFullName) || !employeeFullName.Contains(','))
@@ -132,7 +135,7 @@ namespace Infrastructure.DataAccess.Repositories
 
         public string ConvertToUserID(int employeeNo)
         {
-            return employeeNo.ToString().Length == 4 ? $"U0{employeeNo}" : $"U{employeeNo}";
+            return $"U{employeeNo:D5}";
         }
 
         #region Old Codes

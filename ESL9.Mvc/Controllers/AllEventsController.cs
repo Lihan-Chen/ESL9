@@ -1,20 +1,15 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Application.Interfaces.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using Mvc.ViewModels;
 
 namespace Mvc.Controllers
 {
     [Authorize]
-    public class AllEventsController : BaseController
+    public class AllEventController(IAllEventService allEventService, ICoreService coreService, ILogger<AllEventController> logger) : BaseController<AllEventController>(coreService, logger)
     {
-        //public HomeController(
-        //    IFacilityRepository facilityRepository,
-        //    ILogTypeRepository logTypeRepository)
-        //{
-        //    _facilityRepository = facilityRepository;
-        //    _logTypeRepository = logTypeRepository;
-        //}
+        private readonly IAllEventService _allEventService = allEventService ?? throw new ArgumentNullException(nameof(allEventService));
+        private readonly ILogger<AllEventController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         public IActionResult Index([FromBody] _LogFilterPartialViewModel? logFilterPartial) //, int? facilNo, DateTime? startDate, DateTime? endDate, string searchString, int? page, bool? operatorType) // , string active, string sortOrder, string currentFilter, string searchString, int? page)
         {

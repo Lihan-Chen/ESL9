@@ -4,15 +4,18 @@ using Microsoft.AspNetCore.Mvc;
 using ESL9.Mvc.Models;
 using Mvc.Controllers;
 using Mvc.Models.Enum;
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using Application.Interfaces.IServices;
 
 namespace ESL9.Mvc.Controllers;
 
 [Authorize]
-public class HomeController(// IFacilityRepository facilityRepository, 
-                            ILogger<HomeController> logger) : BaseController
+public class HomeController(ICoreService coreService, 
+                            ILogger<HomeController> logger) : BaseController<HomeController>(coreService, logger)
 {
+    private readonly ICoreService _coreService = coreService ?? throw new ArgumentNullException(nameof(coreService));
     private readonly ILogger<HomeController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    // private readonly IFacilityRepository _facilityRepository = facilityRepository ?? throw new ArgumentNullException(nameof(facilityRepository));
+    
 
     //private int _facilNo;
     private string facilName = string.Empty;

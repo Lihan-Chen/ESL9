@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.IServices;
+﻿using Application.Interfaces.IRepositories;
+using Application.Interfaces.IServices;
 using Core.Models.BusinessEntities;
 using System;
 using System.Collections.Generic;
@@ -8,57 +9,20 @@ using System.Threading.Tasks;
 
 namespace Application.Services
 {
-    public class AllEventService : IAllEventService
+    public class AllEventService(IAllEventRepository allEventRepository) : IAllEventService
     {
-        // Implement the methods and properties of the IAllEventService interface here
-        public Task<Employee?> GetEmployeeByEmployeeID(string employeeID)
-        {
-            throw new NotImplementedException();
-        }
+        private readonly IAllEventRepository _allEventRepository = allEventRepository ?? throw new ArgumentNullException(nameof(allEventRepository));
 
-        public Task<Employee?> GetEmployeeByEmployeeName(string employeeName)
+        public Task<IEnumerable<ViewAllEventsCurrent>> GetAllEvents(int facilNo, DateOnly startDate, DateOnly endDate, string? keyword, bool primaryOperator)
         {
-            throw new NotImplementedException();
-        }
+            var query = _allEventRepository.GetListQuery(facilNo, null, startDate.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd"), keyword, primaryOperator ? "Primary" : "Secondary");
 
-        public Task<Employee?> GetEmployeeByEmployeeNo(int employeeNo)
-        {
-            throw new NotImplementedException();
-        }
+            if (query == null || !query.Any())
+            {
+                return Task.FromResult<IEnumerable<ViewAllEventsCurrent>>(new List<ViewAllEventsCurrent>());
+            }
 
-        public Task<int?> GetEmployeeFacilNobyEmployeeName(string employeeName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<string?> GetEmployeeIDByEmployeeName(string employeeName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int?> GetEmployeeNoByEmployeeName(string employeeName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<string?> GetFullNameByEmployeeID(string EmployeeID)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<string?> GetFullNameByEmployeeNo(int employeeNo)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<string?> GetRole(string userID, int facilNo)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> IsInRole(string userID, string role, int facilNo)
-        {
-            throw new NotImplementedException();
+            return Task.FromResult(query.AsEnumerable());
         }
     }
 }
