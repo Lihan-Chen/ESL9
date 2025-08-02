@@ -30,6 +30,18 @@ namespace Application.Interfaces.IServices
         // Get Employee's FacilityNo              
         public Task<int?> GetEmployeeFacilNobyEmployeeName(string employeeName);
 
+        public Task<Dictionary<string, Dictionary<int, string>>> GetUserRoles();
+
+        public Task<Dictionary<string, List<UserRole>>> GetUserRoleList();
+
+        #region UserDtoService
+
+        public Task<UserDto> GetUserDtoByEmployeeUserID(string? employeeUserID);
+
+        public Task<Dictionary<int, string>> GetUserRolesByEmployeeNo(int? employeeNo);
+
+        #endregion UserDtoService
+
         // Employee Role-related Services
         public Task<string?> GetRole(string userID, int? facilNo);
 

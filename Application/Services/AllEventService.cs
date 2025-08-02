@@ -24,5 +24,15 @@ namespace Application.Services
 
             return Task.FromResult(query.AsEnumerable());
         }
+
+        public Task<IEnumerable<ViewAllEventsCurrent>> GetList(int facilNo, int logTypeNo, string startDate, string endDate, string operatorType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<RptAllEvent>> GetReport(int facilNo, string strStartDate, string strEndDate)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -8,11 +8,6 @@ namespace Application.Dtos
     /// </summary>
     public partial record LogTypeDto : ViewAllEventsLogType
     {
-        ////[Precision(2)]
-        //public int LogTypeNo { get; set; }
 
-        //[StringLength(100)]
-        ////[Unicode(false)]
-        //public string LogTypeName { get; set; } = null!;
     }
 }

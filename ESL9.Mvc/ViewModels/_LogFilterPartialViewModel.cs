@@ -16,12 +16,12 @@ namespace Mvc.ViewModels
         [DataType(DataType.Date)]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
         [Display(Name = "Start Date")]
-        public DateTime? StartDate { get; set; } //= DateTime.Now.AddDays(-1);
+        public DateOnly? StartDate { get; set; } //= DateTime.Now.AddDays(-1);
 
         [DataType(DataType.Date)]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
         [Display(Name = "End Date")]
-        public DateTime? EndDate { get; set; } //= DateTime.Now.AddDays(1);
+        public DateOnly? EndDate { get; set; } //= DateTime.Now.AddDays(1);
 
         [Display(Name = "Primary Operator?")]
         public bool OperatorType { get; set; }

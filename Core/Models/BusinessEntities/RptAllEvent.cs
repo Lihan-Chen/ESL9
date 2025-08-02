@@ -1,5 +1,9 @@
 ﻿namespace Core.Models.BusinessEntities;
 
+/// <summary>
+/// The RptAllEvent class represents an event for a type of log that belongs to a <see cref="AllEvent"> AllEvent</see>.
+/// Corresponds to the Rpt or Report class in mvc4ESL, ESL_RPT_AllEVENTS table in the database.
+/// </summary>
 public partial record RptAllEvent
 {
     public string? FacilName { get; set; }

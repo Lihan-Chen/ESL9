@@ -1,11 +1,10 @@
-using System.Diagnostics;
+using Application.Interfaces.IServices;
+using ESL9.Mvc.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ESL9.Mvc.Models;
 using Mvc.Controllers;
 using Mvc.Models.Enum;
-using Microsoft.AspNetCore.Cors.Infrastructure;
-using Application.Interfaces.IServices;
+using System.Diagnostics;
 
 namespace ESL9.Mvc.Controllers;
 
@@ -16,13 +15,23 @@ public class HomeController(ICoreService coreService,
     private readonly ICoreService _coreService = coreService ?? throw new ArgumentNullException(nameof(coreService));
     private readonly ILogger<HomeController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     
-
     //private int _facilNo;
     private string facilName = string.Empty;
     private bool showAlert;
 
-    public IActionResult Index(string returnUrl, bool showAlert = false)   // this only checks necessary parameters are available before redirecting to AllEvents/
+    public IActionResult Index(string returnUrl, bool showAlert = false)   // this action checks if necessary parameters are available before redirecting to AllEvents/
     {
+        // https://learn.microsoft.com/en-us/dotnet/api/system.security.claims.claimsprincipal?view=net-9.0
+        //if (HttpContext.User is ClaimsPrincipal principal)
+        //{
+        //    foreach (Claim claim in principal.Claims)
+        //    {
+        //        Response.WriteAsync("CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
+        //    }
+        //}
+
+        // note: claims make up claimsIdentity, which then makes up the claimprincipal of identity as an user object
+
         if (ShowAlert)
         {
             ViewBag.ShowAlert = true;

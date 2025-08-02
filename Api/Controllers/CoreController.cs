@@ -195,6 +195,36 @@ namespace Api.Controllers
             }
         }
 
+        // GET: api/Core/Role
+        [HttpGet("Role")]
+        public async Task<ActionResult<Dictionary<string, Dictionary<int, string>>>> GetUserRoles()
+        {
+            try
+            {
+                var userRoles = await _coreService.GetUserRoles();
+                return Ok(userRoles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving user roles: {ex.Message}");
+            }
+        }
+
+        // GET: api/Core/RoleList
+        [HttpGet("RoleList")]
+        public async Task<ActionResult<Dictionary<string, List<UserRole>>>> GetRoleList()
+        {
+            try
+            {
+                var roles = await _coreService.GetUserRoleList();
+                return Ok(roles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving role list: {ex.Message}");
+            }
+        }
+
         // GET: api/Core/Role/{userID}/{facilNo}
         [HttpGet("Role/{userID}/{facilNo}")]
         public async Task<ActionResult<string?>> GetRole(string userID, int? facilNo)

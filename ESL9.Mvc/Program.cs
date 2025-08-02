@@ -57,6 +57,8 @@ public class Program
         // Remaining code unchanged
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+       
+        builder.Services.AddHttpContextAccessor();
 
         builder.Services.AddControllersWithViews(options =>
         {
@@ -65,6 +67,7 @@ public class Program
                 .Build();
             options.Filters.Add(new AuthorizeFilter(policy));
         });
+
         builder.Services.AddRazorPages()
             .AddMicrosoftIdentityUI();
 
@@ -72,7 +75,7 @@ public class Program
         {
             options.Cookie.HttpOnly = true;
             options.Cookie.IsEssential = true;
-        });
+        });       
 
         var app = builder.Build();
 

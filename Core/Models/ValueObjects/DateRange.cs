@@ -1,10 +1,10 @@
 ﻿namespace Core.Models.ValueObjects
 {
+    /// <summary>
+    /// ASP.NET Core in .NET 9.0 Models/model-binding for more complex data types.
+    /// </summary>
     public sealed record DateRange : IEquatable<DateRange>
     {
-        //public DateOnly StartDate { get; }
-        //public DateOnly EndDate { get; }
-
         public DateOnly StartDate { get; private set; } = DateOnly.FromDateTime(DateTime.Now).AddDays(-1);
 
         public DateOnly EndDate { get; private set; } = DateOnly.FromDateTime(DateTime.Now).AddDays(1);
@@ -30,7 +30,7 @@
         {
             if (string.IsNullOrWhiteSpace(value)) return null;
 
-            var dates = value.Split('-', StringSplitOptions.TrimEntries);
+            var dates = value.Split('-', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             if (dates.Length != 2) return null;
 
             if (DateOnly.TryParse(dates[0], out var startDate) &&

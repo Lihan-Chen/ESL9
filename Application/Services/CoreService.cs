@@ -25,8 +25,8 @@ namespace Application.Services
             // LastName,FirstName format
             if (!string.IsNullOrEmpty(employeeFullName))
             {
-                string firstName = employeeFullName.Split(',')[1];
-                string lastName = employeeFullName.Split(',')[0];
+                string firstName = employeeFullName.Split(',')[1].Trim();
+                string lastName = employeeFullName.Split(',')[0].Trim();
 
                 _employee = await _employees.GetItemQuery(firstName, lastName).FirstOrDefaultAsync();
             }
@@ -77,8 +77,8 @@ namespace Application.Services
                 return Task.FromResult<string?>(null);
             }
 
-            string? firstName = employeeFullName.Split(',')[1];
-            string? lastName = employeeFullName.Split(',')[0];
+            string? firstName = employeeFullName.Split(',')[1].Trim();
+            string? lastName = employeeFullName.Split(',')[0].Trim();
 
             return Task.FromResult<string?>($"{firstName} {lastName}");
         }
@@ -127,8 +127,100 @@ namespace Application.Services
         }
         #endregion EmployeeService
 
+        #region UserDtoService
+
+        public async Task<UserDto> GetUserDtoByEmployeeUserID(string? employeeUserID)
+        {
+            if (string.IsNullOrEmpty(employeeUserID))
+            {
+                throw new ArgumentNullException(nameof(employeeUserID), "Employee User ID cannot be null or empty.");
+            }
+
+            var employee = GetEmployeeByEmployeeID(employeeUserID).Result;
+
+            if (employee != null)
+            {
+                return new UserDto
+                {
+                    UserID = employeeUserID,
+                    UserName = $"{employee.LastName}, {employee.FirstName}",
+                    DefaultFacilNo = employee.FacilNo,
+                    UserRoles = await _empRoles.GetRoles(employeeUserID)
+                };
+            }
+
+            throw new InvalidOperationException($"Employee with User ID '{employeeUserID}' not found.");
+        }
+
+        public Task<Dictionary<int, string>> GetUserRolesByEmployeeNo(int? employeeNo)
+        {
+            if (employeeNo == null)
+            {
+                throw new ArgumentNullException(nameof(employeeNo), "Employee number cannot be null.");
+            }
+
+            var employee = GetEmployeeByEmployeeNo(employeeNo.Value).Result;
+
+            if (employee == null)
+            {
+                throw new InvalidOperationException($"Employee with number '{employeeNo}' not found.");
+            }
+
+            return _empRoles.GetRoles(employee.EmployeeID);
+        }
+
+        #endregion UserDtoService
+
         #region RoleService
         // Get Employee's role per Facility
+        public async Task<UserDto?> GetUserByFullName(string? employeeFullName)
+        {
+            if (string.IsNullOrEmpty(employeeFullName))
+            {
+                return null;
+            }
+
+            Employee? employee = await GetEmployeeByEmployeeName(employeeFullName);
+            if (employee == null)
+            {
+                return null;
+            }
+
+            string? userID = GetEmployeeIDByEmployeeName(employeeFullName);
+            if (userID == null)
+            {
+                return null;
+            }
+
+            // not every employee record has a facilNo assigned
+            int? facilNo = employee.FacilNo;
+
+            // string? role = await GetRole(userID, facilNo);
+
+            //Dictionary<string, Dictionary<int, string>> userRoles = await _empRoles.GetUserRoles();
+
+            Dictionary<int, string> userRoles = await _empRoles.GetRoles(userID); // userRoles.ContainsKey(userID) ? userRoles[userID].FirstOrDefault().Value : null;
+
+            return new UserDto
+            {
+                UserID = userID,
+                UserName = employeeFullName, // $"{employee.FirstName} {employee.LastName}",
+                DefaultFacilNo = facilNo,
+                UserRoles = userRoles
+            }; 
+        }
+
+        public async Task<Dictionary<string, Dictionary<int, string>>> GetUserRoles()
+        {
+            return await _empRoles.GetUserRoles();
+        }
+
+        //GetUserRoleList()
+        public async Task<Dictionary<string, List<UserRole>>> GetUserRoleList()
+        {
+            return await _empRoles.GetUserRoleList();
+        }
+
         public async Task<string?> GetRole(string userID, int? facilNo)
         {
             return await _empRoles.GetRole(userID, facilNo);
