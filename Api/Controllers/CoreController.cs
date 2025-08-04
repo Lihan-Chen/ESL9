@@ -197,11 +197,12 @@ namespace Api.Controllers
 
         // GET: api/Core/Role
         [HttpGet("Role")]
-        public async Task<ActionResult<Dictionary<string, Dictionary<int, string>>>> GetUserRoles()
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+        public ActionResult<Dictionary<string, Dictionary<int, string>>> GetUserRoles()
         {
             try
             {
-                var userRoles = await _coreService.GetUserRoles();
+                var userRoles = _coreService.GetUserRoles();
                 return Ok(userRoles);
             }
             catch (Exception ex)
@@ -212,11 +213,11 @@ namespace Api.Controllers
 
         // GET: api/Core/RoleList
         [HttpGet("RoleList")]
-        public async Task<ActionResult<Dictionary<string, List<UserRole>>>> GetRoleList()
+        public ActionResult<Dictionary<string, List<UserRole>>> GetRoleList()
         {
             try
             {
-                var roles = await _coreService.GetUserRoleList();
+                var roles = _coreService.GetUserRoleList();
                 return Ok(roles);
             }
             catch (Exception ex)

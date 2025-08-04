@@ -210,15 +210,15 @@ namespace Application.Services
             }; 
         }
 
-        public async Task<Dictionary<string, Dictionary<int, string>>> GetUserRoles()
+        public Dictionary<string, Dictionary<int, string>> GetUserRoles()
         {
-            return await _empRoles.GetUserRoles();
+            return _empRoles.GetUserRoles();
         }
 
         //GetUserRoleList()
-        public async Task<Dictionary<string, List<UserRole>>> GetUserRoleList()
+        public Dictionary<string, List<UserRole>> GetUserRoleList()
         {
-            return await _empRoles.GetUserRoleList();
+            return _empRoles.GetUserRoleList();
         }
 
         public async Task<string?> GetRole(string userID, int? facilNo)

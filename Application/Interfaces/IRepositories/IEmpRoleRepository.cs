@@ -4,9 +4,9 @@ namespace Application.Interfaces.IRepositories
 {
     public interface IEmpRoleRepository
     {
-        public Task<Dictionary<string, Dictionary<int, string>>> GetUserRoles();
+        public Dictionary<string, Dictionary<int, string>> GetUserRoles();
 
-        public Task<Dictionary<string, List<UserRole>>> GetUserRoleList(); 
+        public Dictionary<string, List<UserRole>> GetUserRoleList(); 
 
         public Task<Dictionary<int, string>> GetRoles(string userID);
 

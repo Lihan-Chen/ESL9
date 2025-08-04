@@ -18,47 +18,28 @@ namespace ESL.Infrastructure.DataAccess.Repositories
 
         // ToDo: fix null content, possibly a LINQ bug
         // Dictionary of userID and keyvalue pair of facilNo and role <userID, (facilNo, role)>
-        public async Task<Dictionary<string, Dictionary<int, string>>> GetUserRoles()
+        public Dictionary<string, Dictionary<int, string>> GetUserRoles()
         {
-            var userRoles = _context.UserRoles.GroupBy(u => u.UserID).ToList();
+            var userRoles = _context.UserRoles.Where(u => u.UserID.StartsWith("U")).OrderBy(o => o.UserID).ToList();
 
-            logger.LogInformation("testing");
+            //logger.LogInformation("testing");
 
-            var result =  _context.UserRoles.OrderBy(u => u.UserID).AsEnumerable().GroupBy(u => u.UserID).ToDictionary(group => group.Key, group => group.ToDictionary(u => (int)u.FacilNo, u => u.Role ?? string.Empty));
+            //return  _context.UserRoles.OrderBy(u => u.UserID).AsEnumerable().GroupBy(u => u.UserID).ToDictionary(group => group.Key, group => group.ToDictionary(u => (int)u.FacilNo, u => u.Role ?? string.Empty));
 
             //var result = await _context.UserRoles.GroupBy(u => u.UserID).ToDictionaryAsync(group => group.Key, group => group.ToDictionary(u=> (int)u.FacilNo, u => u.Role));
 
             // https://stackoverflow.com/questions/6361880/linq-group-by-into-a-dictionary-object
-            //    var userRolesDictionary = await _context.UserRoles
-            //            .GroupBy(u => u.UserID) // Group by UserID
-            //            .ToDictionaryAsync(
-            //                group => group.Key, // Key for the outer dictionary is UserID
-            //                group => group.ToDictionary( // Select(user => new { user.FacilNo, user.Role }
-            //                    u => u.FacilNo, // Key for the inner dictionary is FacilNo
-            //                    u => u.Role ?? String.Empty // Value for the inner dictionary is Role
-            //                )
-            //);
-
-            return result;
-
-
-            // Group by UserID
-            //.ToDictionaryAsync(
-            //    group => group.Key,
-            //    group => group.ToDictionary(
-            //        user => (int)user.FacilNo, // Key for the inner dictionary is FacilNo
-            //        user => user.Role ?? string.Empty // Value for the inner dictionary is Role
-            //    ));
-            // Key for the outer dictionary is UserID
-            //    g => g.ToDictionary(
-            //        u => (int)u.FacilNo, // Key for the inner dictionary is FacilNo
-            //        u => u.Role ?? string.Empty // Value for the inner dictionary is Role
-            //    )
-            //);
-
+            return userRoles
+                        .GroupBy(u => u.UserID) // Group by UserID
+                        .ToDictionary(
+                            group => group.Key, // Key for the outer dictionary is UserID
+                            group => group.ToDictionary( // Select(user => new { user.FacilNo, user.Role }
+                                u => (int)u.FacilNo, // Key for the inner dictionary is FacilNo
+                                u => u.Role ?? String.Empty // Value for the inner dictionary is Role
+                            ));
         }
 
-        public async Task<Dictionary<string, List<UserRole>>> GetUserRoleList()
+        public Dictionary<string, List<UserRole>> GetUserRoleList()
         {
             return (Dictionary<string, List<UserRole>>)_context.UserRoles.OrderBy(u => u.UserID)
                 //.Where(e => e.SomeCondition)
