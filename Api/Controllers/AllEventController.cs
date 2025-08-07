@@ -13,7 +13,7 @@ namespace Api.Controllers
         private readonly ILogger<AllEventController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         [HttpGet("GetAllEvents")]
-        public IActionResult GetAllEvents(int facilNo, DateOnly startDate, DateOnly endDate, string keyword, bool primaryOperator )
+        public IActionResult GetAllEvents(int facilNo, DateOnly startDate, DateOnly endDate, string? keyword, bool primaryOperator )
         {
             try
             {

@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.IServices;
+﻿using Application.Dtos;
+using Application.Interfaces.IServices;
 using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -28,7 +29,29 @@ namespace Mvc.Controllers
                    user.HasClaim(c => c.Type == "ShiftNo") &&
                    user.HasClaim(c => c.Type == "OperatorType");
         }
-        
+
+        public string? GetClaimValue(ClaimsPrincipal principal, string claimType)
+        {
+            var claim = principal.FindFirst(claimType);
+            return claim?.Value; // Returns the claim value or null if not found
+        }
+
+        //public UserSessionDto GetUserSession()
+        //{
+        //    if (HttpContext.Session.TryGetValue("SessionID", out var value) && value.Length > 0)
+        //    {
+        //       // var sessionId = BitConverter.ToString(value).Replace("-", string.Empty);
+
+        //        return System.Text.Json.JsonSerializer.Deserialize<UserSession>(value)!;
+        //    }
+
+        //    // If session data is not available, return a new UserSessionDto
+        //    // or handle the case as needed (e.g., redirect to login)
+        //    logger.LogWarning("Session data not found, returning new UserSessionDto.");
+
+        //    return new UserSessionDto();
+        //}
+
         //public string? FacilName => HttpContext.Session.TryGetValue("FacilName", out var value) && value.Length > 0 ?
         //                        System.Text.Encoding.UTF8.GetString(value) : string.Empty;
 

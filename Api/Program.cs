@@ -39,6 +39,7 @@ namespace Api
             builder.Services.AddScoped<IAllEventRepository, AllEventRepository>();
 
             builder.Services.AddScoped<ICoreService, CoreService>();
+            builder.Services.AddScoped<IAllEventService, AllEventService>();
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -65,6 +66,14 @@ namespace Api
 
             app.UseAuthorization();
 
+            //
+            //app.UseSwagger();
+            //app.UseSwaggerUI();
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    endpoints.MapRazorPages();
+            //    endpoints.MapControllers();
+            //});
 
             app.MapControllers();
 

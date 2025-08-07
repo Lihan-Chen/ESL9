@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Mvc.Controllers;
 using Mvc.Models.Enum;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace ESL9.Mvc.Controllers;
 
@@ -21,14 +22,34 @@ public class HomeController(ICoreService coreService,
 
     public IActionResult Index(string returnUrl, bool showAlert = false)   // this action checks if necessary parameters are available before redirecting to AllEvents/
     {
+        //string? userId = GetClaimValue(HttpContext.User, ClaimTypes.NameIdentifier);
+
+        // Get the FacilNo from claim.Type == "FacilNosession or set it to null if not available
+        int? _facilNo = HttpContext.Session.GetInt32("SelectedFacilNo");
+
+        string? userName = UserName; // GetClaimValue(HttpContext.User, ClaimTypes.Name) ?? string.Empty;
+
+        //string? userId = GetClaimValue(User, ClaimTypes.UserID) ?? UserID ?? string.Empty; // Should check if the User has ClaimTypes.UserID, set userID according to the claim if not null; set to UserID from BaseController if null and update the claim
+
+        var userRole = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+
         // https://learn.microsoft.com/en-us/dotnet/api/system.security.claims.claimsprincipal?view=net-9.0
-        //if (HttpContext.User is ClaimsPrincipal principal)
-        //{
-        //    foreach (Claim claim in principal.Claims)
-        //    {
-        //        Response.WriteAsync("CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
-        //    }
-        //}
+        if (HttpContext.User is ClaimsPrincipal principal)
+        {
+            //User.Claims.TryGetValue(ClaimTypes.Role, out var userRole); 
+            //    ? int.TryParse(facilNoClaim, out var facilNo) ? facilNo : (int?)null 
+            //    : null;
+            // Change this line:
+            //string userName = GetClaimValue(HttpContext.User, ClaimTypes.Name);
+
+            // To this, using null-coalescing operator to ensure non-null assignment:
+            //string userName = GetClaimValue(HttpContext.User, ClaimTypes.Name) ?? string.Empty;
+            //foreach (Claim claim in principal.Claims)
+            //{
+            //    // Response.WriteAsync("CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
+            //}
+        }
 
         // note: claims make up claimsIdentity, which then makes up the claimprincipal of identity as an user object
 
@@ -37,8 +58,10 @@ public class HomeController(ICoreService coreService,
             ViewBag.ShowAlert = true;
             ViewBag.Alert = "You must select a facility first!";
         }
-        
-        // Redirect to select a plant by setting true if facilName is not found
+
+        // ToDo: TryGetValue claim.Type for facilno claim.TryGetValue("FacilNo", out var value) && value.Length > 0)
+        // Redirect to select a plant by setting true if facilITY has not be selected
+
         if (FacilNo is null)
         {
             // user is not an operator, redirect to SelectPlant view as viewonly

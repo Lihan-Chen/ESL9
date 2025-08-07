@@ -1,15 +1,18 @@
-using Microsoft.AspNetCore.Authorization;
+using Application.Interfaces.IRepositories;
+using Application.Interfaces.IServices;
+using ESL.Infrastructure.DataAccess.Repositories;
+using Infrastructure.DataAccess;
+using Infrastructure.DataAccess.Repositories;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
-using Infrastructure.DataAccess;
-using Microsoft.EntityFrameworkCore;
 using Oracle.EntityFrameworkCore.Infrastructure;
-using Application.Interfaces.IServices;
-using Application.Interfaces.IRepositories;
-using Infrastructure.DataAccess.Repositories;
-using ESL.Infrastructure.DataAccess.Repositories;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace ESL9.Mvc;
 
@@ -41,14 +44,13 @@ public class Program
         builder.Services.AddScoped<IEmpRoleRepository, EmpRoleRepository>();
         builder.Services.AddScoped<IFacilityRepository, FacilityRepository>();
         builder.Services.AddScoped<ILogTypeRepository, LogTypeRepository>();
+        builder.Services.AddScoped<IAllEventRepository, AllEventRepository>();
 
+        //builder.Services.AddScoped<ISearchDTORepository, SearchDTORepository>();
         //builder.Services.AddScoped<IConstantRepository, ConstantRepository>();
         //builder.Services.AddScoped<IConstantRepository, ConstantRepository>();
         //builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
         //builder.Services.AddScoped<IMeterRepository, MeterRepository>();
-
-        builder.Services.AddScoped<IAllEventRepository, AllEventRepository>();
-        //builder.Services.AddScoped<ISearchDTORepository, SearchDTORepository>();
 
         // configure services https://github.com/sanckh/YourLibraryApp/blob/main/YourLibrary/Startup.cs
         builder.Services.AddScoped<ICoreService, Application.Services.CoreService>();
@@ -57,14 +59,57 @@ public class Program
         // Remaining code unchanged
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
-       
+
+        // with IClaimsTransformation to be persistent across requests (e.g., using claim for storing user roles)
+        // https://learn.microsoft.com/en-us/aspnet/core/security/authentication/claims?view=aspnetcore-9.0
+        //builder.Services.AddAuthentication(options =>
+        //{
+        //    // options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        //    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+        //})
+        //    .AddCookie()
+        //    .AddOpenIdConnect(options =>
+        //    {
+        //        var oidcConfig = builder.Configuration.GetSection("AzureAD");
+
+        //        options.SignInScheme = "Cookies"; // or, CookieAuthenticationDefaults.AuthenticationScheme;
+        //        options.Authority = oidcConfig["Instance"];  // "- your-identity-provider-";
+        //        options.RequireHttpsMetadata = true;
+        //        options.ClientId = oidcConfig["ClientId"]; // "-your-clientid-";
+        //        // options.ClientSecret = oidcConfig["ClientSecret"]; //"ffb6f0d3 - 96ad - 4d5f - 829c - 094a6719d26f"; // "-your-client-secret-from-user-secrets-or-keyvault";
+
+        //        options.ResponseType = "code"; // or, OpenIdConnectResponseType.Code;
+        //        options.UsePkce = true;
+        //        options.Scope.Add("profile");
+        //        //options.Scope.Add("email");
+        //        //options.Scope.Add("offline_access");
+
+        //        options.ClaimActions.Remove("amr");
+        //        options.ClaimActions.MapUniqueJsonKey("website", "website");
+
+        //        options.GetClaimsFromUserInfoEndpoint = true;
+        //        options.SaveTokens = true;
+        //        // https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-oidc-web-authentication?view=aspnetcore-9.0
+        //        options.GetClaimsFromUserInfoEndpoint = true;
+
+        //        // .NET 9 feature
+        //        options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Require;
+
+
+        //        options.MapInboundClaims = false;
+        //        options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name; //"name"; 
+        //        options.TokenValidationParameters.RoleClaimType = "roles";
+        //    });
+
         builder.Services.AddHttpContextAccessor();
 
+        // to force authorization for the whole app and opt out for unsecure pages
         builder.Services.AddControllersWithViews(options =>
         {
             var policy = new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
                 .Build();
+
             options.Filters.Add(new AuthorizeFilter(policy));
         });
 
@@ -86,8 +131,13 @@ public class Program
         }
 
         app.UseHttpsRedirection();
+        app.UseStaticFiles();
+
         app.UseRouting();
+
         app.UseSession();
+
+        // app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapStaticAssets();

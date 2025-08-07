@@ -51,7 +51,7 @@ namespace Infrastructure.DataAccess.Repositories
 
         // TODO: consider using value objects for start-end daterange to capture business logic
         // ESL.ESL_AllEvents_Active_Proc
-        public IQueryable<ViewAllEventsCurrent> GetListQuery(int? facilNo, int? logTypeNo, string strStartDate, string strEndDate, string strSearch, string strOperatorType)
+        public IQueryable<ViewAllEventsCurrent> GetListQuery(int? facilNo, int? logTypeNo, string strStartDate, string strEndDate, string? strSearch, string strOperatorType)
         {
             DateTime _startDate;
             DateTime _endDate;

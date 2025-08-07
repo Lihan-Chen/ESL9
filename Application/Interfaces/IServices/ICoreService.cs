@@ -72,11 +72,11 @@ namespace Application.Interfaces.IServices
 
         #region Session-related Services
 
-        Task<UserSession> GetUserSession();
+        Task<UserSessionDto> GetUserSession();
 
-        Task<UserSession?> GetPriorUserSessionByUserName(string userName);
+        Task<UserSessionDto?> GetPriorUserSessionByUserName(string userName);
 
-        Task<Guid> SaveUserSession(UserSession userSession);
+        Task<Guid> SaveUserSession(UserSessionDto userSession);
 
         #endregion Session-related Services
 

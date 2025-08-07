@@ -16,17 +16,11 @@ namespace ESL.Infrastructure.DataAccess.Repositories
 
         protected readonly ILogger<EmpRoleRepository> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-        // ToDo: fix null content, possibly a LINQ bug
         // Dictionary of userID and keyvalue pair of facilNo and role <userID, (facilNo, role)>
         public Dictionary<string, Dictionary<int, string>> GetUserRoles()
         {
+            // Materialize query result first (a known EF current workaround)
             var userRoles = _context.UserRoles.Where(u => u.UserID.StartsWith("U")).OrderBy(o => o.UserID).ToList();
-
-            //logger.LogInformation("testing");
-
-            //return  _context.UserRoles.OrderBy(u => u.UserID).AsEnumerable().GroupBy(u => u.UserID).ToDictionary(group => group.Key, group => group.ToDictionary(u => (int)u.FacilNo, u => u.Role ?? string.Empty));
-
-            //var result = await _context.UserRoles.GroupBy(u => u.UserID).ToDictionaryAsync(group => group.Key, group => group.ToDictionary(u=> (int)u.FacilNo, u => u.Role));
 
             // https://stackoverflow.com/questions/6361880/linq-group-by-into-a-dictionary-object
             return userRoles
@@ -41,7 +35,7 @@ namespace ESL.Infrastructure.DataAccess.Repositories
 
         public Dictionary<string, List<UserRole>> GetUserRoleList()
         {
-            return (Dictionary<string, List<UserRole>>)_context.UserRoles.OrderBy(u => u.UserID)
+            return (Dictionary<string, List<UserRole>>)_context.UserRoles.OrderBy(u => u.UserID).ThenBy(u => u.FacilNo)
                 //.Where(e => e.SomeCondition)
                 .AsEnumerable() // Forces client-side evaluation
                 .GroupBy(u => u.UserID)
@@ -53,7 +47,8 @@ namespace ESL.Infrastructure.DataAccess.Repositories
         // output parameter of string rolename if exists or null regardless if facilNo is null or not
         public async Task<string?> GetRole(string userID, int? facilNo)
         {
-            if (facilNo is null)
+            // check if facilNo is in range (1, 13) where 13 is for DVL test only
+            if (facilNo is null || facilNo < 1 || facilNo > 13)
             {
                 return await _context.UserRoles.Where(r => r.UserID == userID).OrderBy(o => o.FacilNo).Select(s => s.Role ?? string.Empty).FirstOrDefaultAsync();
             }

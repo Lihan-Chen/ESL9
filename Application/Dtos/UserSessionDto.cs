@@ -11,9 +11,9 @@ namespace Application.Dtos
     /// <summary>
     /// This represents the user session information.
     /// </summary>
-    public partial record UserSession
+    public partial record UserSessionDto
     {
-        public UserSession() { }
+        public UserSessionDto() { }
 
         [RegularExpression(@"'[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}")]
         public Guid SessionID { get; set; }
@@ -23,21 +23,25 @@ namespace Application.Dtos
         public string? UserID { get; set; }
 
         // used to redirect to log in if not authenticated
-        public bool IsUserAnOperator { get; set; } = false;
+        //public bool IsUserAnOperator { get; set; } = false;
 
         public string[] UserRole { get; set; } = null!;
 
-        public int? UserShiftNo { get; set; } //= System.Web.HttpContext.Current.Session["ShiftNo"].ToString();
+        public Shift OnDutyShift { get; set; } = Shift.Day;
 
-        public string UserShiftName => UserShiftNo == 1 ? Shift.Day.ToString() : UserShiftNo == 2 ? Shift.Night.ToString() : string.Empty;
+        public int? OnDutyShiftNo => (int)OnDutyShift;
 
-        public int? UserOpertorTypeNo { get; set; }
+        public string? OnDutyShiftName => OnDutyShift.ToString();
 
-        public string? UserOperatorType => UserOpertorTypeNo == 1 ? OperatorType.Primary.ToString() : UserOpertorTypeNo == 2 ? OperatorType.Secondary.ToString() : string.Empty;
+        public OperatorType OnDutyOperatorType { get; set; } = OperatorType.Primary;
 
-        public int UserFacilNo { get; set; }
+        public int? OnDutyOpertorTypeNo => (int)OnDutyShift;
 
-        public string FacilName => PlantsDictionary.Plants[UserFacilNo].PlantName; //.GetPlant(FacilNo).PlantName;
+        public string? OnDutyOperatorTypeName => OnDutyShift.ToString();
+
+        public int OnDutyFacilNo { get; set; }
+
+        public string FacilName => PlantsDictionary.Plants[OnDutyFacilNo].PlantName; //.GetPlant(FacilNo).PlantName;
 
         // User is checked in when the authenticated has selected a plant, shift and operatory type
         // updated on the httppost action of HomeController's Login Method

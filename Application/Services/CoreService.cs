@@ -286,14 +286,14 @@ namespace Application.Services
         #endregion LogTypeService
 
 
-        public Task<UserSession?> GetPriorUserSessionByUserName(string userName)
+        public Task<UserSessionDto?> GetPriorUserSessionByUserName(string userName)
         {
             //throw new NotImplementedException();
 
-            return Task.FromResult<UserSession?>(null);
+            return Task.FromResult<UserSessionDto?>(null);
         }
 
-        public Task<UserSession> GetUserSession()
+        public Task<UserSessionDto> GetUserSession()
         {
             throw new NotImplementedException();
 
@@ -306,7 +306,7 @@ namespace Application.Services
             //});
         }
 
-        public async Task<Guid> SaveUserSession(UserSession userSession)
+        public async Task<Guid> SaveUserSession(UserSessionDto userSession)
         {
             // GetPriorUserSessionByUserName() logic might be implemented here in the future.
 
