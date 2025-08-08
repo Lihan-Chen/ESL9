@@ -2,6 +2,8 @@
 using Application.Interfaces.IServices;
 using Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using Mvc.Models.Enum;
+using System.Data;
 using System.Security.Claims;
 
 namespace Mvc.Controllers 
@@ -26,10 +28,26 @@ namespace Mvc.Controllers
         // Depending on role and value of ClaimTypes.Role, the user may not be checked in
         public bool IsUserCheckedIn(ClaimsPrincipal user)
         {
-            return user.Identity?.IsAuthenticated == true &&
-                   user.HasClaim(c => c.Type == "FacilNo") &&
-                   user.HasClaim(c => c.Type == "ShiftNo") &&
-                   user.HasClaim(c => c.Type == "OperatorType");
+            bool viewOnly = user.HasClaim(c => c.Type == "role" && c.Value == "Viewer");
+
+            bool isCheckedIn = !viewOnly && 
+                               user.HasClaim(c => c.Type == "ShiftNo") &&
+                               user.HasClaim(c => c.Type == "OperatorType");
+
+            FacilNo = user.HasClaim(c => c.Type == "facilNo") ? int.Parse(GetClaimValue(user, "facilNo")!) : null;
+
+            // determine the role of the user based on claims or session
+            if (FacilNo is not null)  // user has selected a facility
+            {
+                if (isCheckedIn || viewOnly) return true; // User has selected a facility and is checked in
+            }
+            
+            return false;
+
+            //return user.Identity?.IsAuthenticated == true &&
+            //           user.HasClaim(c => c.Type == "FacilNo") &&
+            //           user.HasClaim(c => c.Type == "ShiftNo") &&
+            //           user.HasClaim(c => c.Type == "OperatorType");
         }
 
         public string? GetClaimValue(ClaimsPrincipal principal, string claimType)

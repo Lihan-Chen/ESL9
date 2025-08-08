@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "identityapp1": {
+      "connectionInfo": "App registration: My ASP.NET App, Tenant: Metropolitan Water District of So Cal (mwdsocal.onmicrosoft.com - Microsoft Entra ID)",
+      "type": "identityapp.default"
+    },
+    "secrets1": {
+      "type": "secrets.user",
+      "dynamicId": null
+    }
+  }
+}
