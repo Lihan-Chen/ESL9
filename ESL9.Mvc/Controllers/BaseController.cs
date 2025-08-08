@@ -22,6 +22,8 @@ namespace Mvc.Controllers
 
         public int? FacilNo; // HttpContext.Session.TryGetValue("FacilNo", out var value) && value.Length > 0 ? BitConverter.ToInt32(value, 0) : null;
 
+        // Check into the logic since FacilNo is set first, and may not be sufficient to indicate that user is checked in
+        // Depending on role and value of ClaimTypes.Role, the user may not be checked in
         public bool IsUserCheckedIn(ClaimsPrincipal user)
         {
             return user.Identity?.IsAuthenticated == true &&
