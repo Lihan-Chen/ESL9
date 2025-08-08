@@ -22,6 +22,15 @@ public class HomeController(ICoreService coreService,
 
     public IActionResult Index(string returnUrl, bool showAlert = false)   // this action checks if necessary parameters are available before redirecting to AllEvents/
     {
+        ISession session = HttpContext.Session;
+
+        ClaimsPrincipal user = HttpContext.User;
+
+        foreach (Claim claim in user.Claims)
+        {
+            _logger.LogInformation("CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
+        }
+
         //string? userId = GetClaimValue(HttpContext.User, ClaimTypes.NameIdentifier);
 
         // Get the FacilNo from claim.Type == "FacilNosession or set it to null if not available
