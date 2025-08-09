@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Prototype.Models;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace Prototype.Controllers
 {
@@ -17,6 +18,29 @@ namespace Prototype.Controllers
 
         public IActionResult Index()
         {
+            //ISession session = HttpContext.Session;
+
+            //ClaimsPrincipal user = HttpContext.User;
+
+            foreach (Claim claim in User.Claims)
+            {
+                _logger.LogInformation("CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
+            }
+
+            var facilNoClaim = User.Claims.FirstOrDefault(c => c.Type == "FacilNo")?.Value;  //claims?. FirstOrDefault(x => x.Type.Equals("UserName", StringComparison.OrdinalIgnoreCase))?.Value.
+
+            if (User.HasClaim(c => c.Type == "FacilNo"))
+            {
+                _logger.LogInformation("FACIL NO CLAIM: " + facilNoClaim);
+            }
+
+            if (User.IsInRole("Viewer"))
+            {
+                _logger.LogInformation("User is Viewer");
+            }
+
+            
+
             return View();
         }
 
