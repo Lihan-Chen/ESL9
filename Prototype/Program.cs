@@ -17,47 +17,7 @@ namespace Prototype
             builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 
-            // with IClaimsTransformation to be persistent across requests (e.g., using claim for storing user roles)
-            // https://learn.microsoft.com/en-us/aspnet/core/security/authentication/claims?view=aspnetcore-9.0
-            //builder.Services.AddAuthentication(options =>
-            //{
-            //    // options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            //    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-            //})
-            //    .AddCookie()
-            //    .AddOpenIdConnect(options =>
-            //    {
-            //        var oidcConfig = builder.Configuration.GetSection("AzureAD");
-
-            //        options.SignInScheme = "Cookies"; // or, CookieAuthenticationDefaults.AuthenticationScheme;
-            //        options.Authority = oidcConfig["Instance"];  // "- your-identity-provider-";
-            //        options.RequireHttpsMetadata = true;
-            //        options.ClientId = oidcConfig["ClientId"]; // "-your-clientid-";
-            //        // options.ClientSecret = oidcConfig["ClientSecret"]; //"ffb6f0d3 - 96ad - 4d5f - 829c - 094a6719d26f"; // "-your-client-secret-from-user-secrets-or-keyvault";
-
-            //        options.ResponseType = "code"; // or, OpenIdConnectResponseType.Code;
-            //        options.UsePkce = true;
-            //        options.Scope.Add("profile");
-            //        //options.Scope.Add("email");
-            //        //options.Scope.Add("offline_access");
-
-            //        options.ClaimActions.Remove("amr");
-            //        options.ClaimActions.MapUniqueJsonKey("website", "website");
-
-            //        options.GetClaimsFromUserInfoEndpoint = true;
-            //        options.SaveTokens = true;
-            //        // https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-oidc-web-authentication?view=aspnetcore-9.0
-            //        options.GetClaimsFromUserInfoEndpoint = true;
-
-            //        // .NET 9 feature
-            //        options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Require;
-
-
-            //        options.MapInboundClaims = false;
-            //        options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name; //"name"; 
-            //        options.TokenValidationParameters.RoleClaimType = "roles";
-            //    });
-
+            builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
 
             //builder.Services.AddHttpContextAccessor();
 
@@ -79,6 +39,7 @@ namespace Prototype
             builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(180); // Set session timeout
+                options.Cookie.Name = ".ESL.Session"; // Make unique Cookie name to avoid "Error unprotecting the session cookie"
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });

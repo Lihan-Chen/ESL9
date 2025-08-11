@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Prototype.Models;
@@ -9,43 +10,90 @@ namespace Prototype.Controllers
     [Authorize]
     public class HomeController : Controller
     {
+        private readonly IClaimsTransformation _claimTransformation;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IClaimsTransformation claimTransformation, ILogger<HomeController> logger)
         {
+            _claimTransformation = claimTransformation;
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            //ISession session = HttpContext.Session;
-
-            //ClaimsPrincipal user = HttpContext.User;
-
             foreach (Claim claim in User.Claims)
             {
                 _logger.LogInformation("CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
             }
 
-            var facilNoClaim = User.Claims.FirstOrDefault(c => c.Type == "FacilNo")?.Value;  //claims?. FirstOrDefault(x => x.Type.Equals("UserName", StringComparison.OrdinalIgnoreCase))?.Value.
+            var facilNoClaim = User.Claims.FirstOrDefault(c => c.Type == "DefaultFacilNo")?.Value;
 
-            if (User.HasClaim(c => c.Type == "FacilNo"))
+            if (facilNoClaim != null)
             {
-                _logger.LogInformation("FACIL NO CLAIM: " + facilNoClaim);
+                _logger.LogInformation("Facility No: " + facilNoClaim);
             }
-
-            if (User.IsInRole("Viewer"))
+            else
             {
-                _logger.LogInformation("User is Viewer");
-            }
+                _logger.LogInformation("Facility claim not found.");
+                var transformedPrincipal = await _claimTransformation.TransformAsync(User);
+            }            
 
+            //if (User.HasClaim(c => c.Type == "userID"))
+            //{
+            //    string userID = "U06337";
+
+            //    // Fix: Use the injected _claimTransformation and await the TransformAsync method
+            //    var transformedPrincipal = await _claimTransformation.TransformAsync(User);
+
+            //    _logger.LogInformation("User ID: " + userID);
+            //}
+
+            //if (User.HasClaim(c => c.Type == "FacilNo"))
+            //{
+            //    int defaultFacilNo = 1;
+
+            //    // Fix: Use the injected _claimTransformation and await the TransformAsync method
+            //    var transformedPrincipal = await _claimTransformation.TransformAsync(User);
+
+            //    _logger.LogInformation("User DefaultFacilNo: " + defaultFacilNo);
+            //}
+
+            //if (User.HasClaim(c => c.Type == "role"))
+            //{
+            //    string userRole = "ESL_OPERATOR";
+
+            //    // Fix: Use the injected _claimTransformation and await the TransformAsync method
             
+
+            //    _logger.LogInformation("User Role: " + userRole);
+            //}
+
+            if (User.IsInRole("ESL_OPERATOR"))
+            {
+                _logger.LogInformation("User is ESL_OPERATOR");
+            }
 
             return View();
         }
 
         public IActionResult Privacy()
         {
+            foreach (Claim claim in User.Claims)
+            {
+                _logger.LogInformation("From PrivacyController - CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
+            }
+
+            return View();
+        }
+
+        public IActionResult Test()
+        {
+            foreach (Claim claim in User.Claims)
+            {
+                
+                _logger.LogInformation("From TestController - CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
+            }
+
             return View();
         }
 

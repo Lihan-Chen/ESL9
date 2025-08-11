@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using Mvc;
 using Oracle.EntityFrameworkCore.Infrastructure;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -59,6 +60,8 @@ public class Program
         // Remaining code unchanged
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+
+        builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
 
         // with IClaimsTransformation to be persistent across requests (e.g., using claim for storing user roles)
         // https://learn.microsoft.com/en-us/aspnet/core/security/authentication/claims?view=aspnetcore-9.0
