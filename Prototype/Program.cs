@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Prototype
 {
@@ -16,8 +17,38 @@ namespace Prototype
             // Add services to the container.
             builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+                //.AddOpenIdConnect(options =>
+                //{
+                //    // ... your other options ...
+                //    options.Events = new OpenIdConnectEvents
+                //    {
+                //        OnTokenValidated = async context =>
+                //        {
+                //            var principal = context.Principal;
+                //            var userName = principal.FindFirst("preferred_username")?.Value; // or whatever claim is available
 
-            builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
+                //            // Fetch user ID from your database/service
+                //            var userId = await GetUserIdFromDatabaseAsync(userName); // implement this method
+
+                //            if (!string.IsNullOrEmpty(userId))
+                //            {
+                //                var identity = (ClaimsIdentity)principal.Identity!;
+                //                identity.AddClaim(new Claim("userid", userId));
+                //            }
+                //        }
+                //    };
+                //});
+            //.EnableTokenAcquisitionToCallDownstreamApi()
+            //.AddInMemoryTokenCaches();
+
+            // to map the claims from the OpenID Connect token to the application claims
+            builder.Services.Configure<MicrosoftIdentityOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
+            {
+                options.TokenValidationParameters.NameClaimType = "userid";
+                options.TokenValidationParameters.RoleClaimType = "role";
+            });
+
+            //builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
 
             //builder.Services.AddHttpContextAccessor();
 
@@ -67,6 +98,19 @@ namespace Prototype
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
+
+            app.MapAreaControllerRoute(
+                name: "Public", // A unique name for your area route
+                areaName: "Public", // The exact name of your area folder
+                pattern: "Public/{controller=Home}/{action=Index}/{id?}"
+            );
+
+            app.MapAreaControllerRoute(
+                name: "Admin", // A unique name for your area route
+                areaName: "Admin", // The exact name of your area folder
+                pattern: "Admin/{controller=Home}/{action=Index}/{id?}"
+            );
+
             app.MapRazorPages()
                .WithStaticAssets();
 

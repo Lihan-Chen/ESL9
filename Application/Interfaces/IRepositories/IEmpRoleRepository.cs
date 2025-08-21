@@ -13,5 +13,7 @@ namespace Application.Interfaces.IRepositories
         public Task<string?> GetRole(string userID, int? facilNo);
 
         public bool IsInRole(string userID, string role, int? facilNo);
+
+        public Task<bool> HasAnyRole(string userID);
     }
 }

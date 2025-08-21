@@ -38,29 +38,29 @@ namespace Prototype.Filters
             context.HttpContext.Session.SetString("UserID", userID);
 
             // Check if the UserID claim exists
-            if (!user.HasClaim(c => c.Type == "UserID"))
+            if (!user.HasClaim(c => c.Type == "userid"))
             {
                 // Create a new ClaimsIdentity to add the new claims.
                 // It's generally recommended to add claims to a new ClaimsIdentity
                 // and then add that identity to the principal.
                 ClaimsIdentity claimsIdentity = new();
 
-                claimsIdentity.AddClaim(new Claim("UserID", userID));
+                claimsIdentity.AddClaim(new Claim("userid", userID));
 
                 user.AddIdentity(claimsIdentity);
             } 
-            else if (user.FindFirst(c => c.Type == "UserID")?.Value != userID)
+            else if (user.FindFirst(c => c.Type == "userid")?.Value != userID)
             {
                 // If the UserID claim exists but does not match the current userID, update it
-                var existingClaim = user.FindFirst(c => c.Type == "UserID");
+                var existingClaim = user.FindFirst(c => c.Type == "userid");
                 if (existingClaim != null)
                 {
                     var claimsIdentity = user.Identity as ClaimsIdentity;
                     claimsIdentity?.RemoveClaim(existingClaim);
-                    claimsIdentity?.AddClaim(new Claim("UserID", userID));
+                    claimsIdentity?.AddClaim(new Claim("userid", userID));
                 }
             }
-            else if (user.HasClaim(c => c.Type == "UserID" && c.Value == userID))
+            else if (user.HasClaim(c => c.Type == "userid" && c.Value == userID))
             {
                 // User exists in claims, proceed with authorization
                 return;
@@ -80,30 +80,30 @@ namespace Prototype.Filters
                 return;
             }
 
-            // User has selected a facility, check and set the DefaultFacilNo claim
-            if (!user.HasClaim(c => c.Type == "DefaultFacilNo"))
+            // User has selected a facility, check and set the defaultfacilno claim
+            if (!user.HasClaim(c => c.Type == "defacilno"))
             {
                 // Create a new ClaimsIdentity to add the new claims.
                 // It's generally recommended to add claims to a new ClaimsIdentity
                 // and then add that identity to the principal.
                 ClaimsIdentity claimsIdentity = new();
 
-                claimsIdentity.AddClaim(new Claim("DefaultFacilNo", facilNo.ToString()!));
+                claimsIdentity.AddClaim(new Claim("defacilno", facilNo.ToString()!));
 
                 user.AddIdentity(claimsIdentity);
             }
-            else if (user.FindFirst(c => c.Type == "DefaultFacilNo")?.Value != facilNo.ToString()!)
+            else if (user.FindFirst(c => c.Type == "defaultfacilno")?.Value != facilNo.ToString()!)
             {
                 // If the UserID claim exists but does not match the current userID, update it
-                var existingClaim = user.FindFirst(c => c.Type == "DefaultFacilNo");
+                var existingClaim = user.FindFirst(c => c.Type == "defacilno");
                 if (existingClaim != null)
                 {
                     var claimsIdentity = user.Identity as ClaimsIdentity;
                     claimsIdentity?.RemoveClaim(existingClaim);
-                    claimsIdentity?.AddClaim(new Claim("DefaultFacilNo", facilNo.ToString()!));
+                    claimsIdentity?.AddClaim(new Claim("defacilno", facilNo.ToString()!));
                 }
             }
-            else if (user.HasClaim(c => c.Type == "DefaultFacilNo" && c.Value == facilNo.ToString()!))
+            else if (user.HasClaim(c => c.Type == "defacilno" && c.Value == facilNo.ToString()!))
             {
                 // User exists in claims, proceed with authorization
                 return;
@@ -123,29 +123,29 @@ namespace Prototype.Filters
             }
 
             // User has a role registered in UserRoles, check and set the Role claim
-            if (!user.HasClaim(c => c.Type == "Role"))
+            if (!user.HasClaim(c => c.Type == "role"))
             {
                 // Create a new ClaimsIdentity to add the new claims.
                 // It's generally recommended to add claims to a new ClaimsIdentity
                 // and then add that identity to the principal.
                 ClaimsIdentity claimsIdentity = new();
 
-                claimsIdentity.AddClaim(new Claim("Role", userRole));
+                claimsIdentity.AddClaim(new Claim("role", userRole));
 
                 user.AddIdentity(claimsIdentity);
             }
-            else if (user.FindFirst(c => c.Type == "Role")?.Value != userRole)
+            else if (user.FindFirst(c => c.Type == "role")?.Value != userRole)
             {
                 // If the UserID claim exists but does not match the current userID, update it
-                var existingClaim = user.FindFirst(c => c.Type == "Role");
+                var existingClaim = user.FindFirst(c => c.Type == "role");
                 if (existingClaim != null)
                 {
                     var claimsIdentity = user.Identity as ClaimsIdentity;
                     claimsIdentity?.RemoveClaim(existingClaim);
-                    claimsIdentity?.AddClaim(new Claim("Role", userRole));
+                    claimsIdentity?.AddClaim(new Claim("role", userRole));
                 }
             }
-            else if (user.HasClaim(c => c.Type == "Role" && c.Value == userRole))
+            else if (user.HasClaim(c => c.Type == "role" && c.Value == userRole))
             {
                 // User exists in claims, proceed with authorization
                 return;

@@ -1,19 +1,13 @@
 using Application.Interfaces.IRepositories;
 using Application.Interfaces.IServices;
-using ESL.Infrastructure.DataAccess.Repositories;
 using Infrastructure.DataAccess;
 using Infrastructure.DataAccess.Repositories;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
-using Mvc;
-using Oracle.EntityFrameworkCore.Infrastructure;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace ESL9.Mvc;
 
@@ -55,13 +49,26 @@ public class Program
 
         // configure services https://github.com/sanckh/YourLibraryApp/blob/main/YourLibrary/Startup.cs
         builder.Services.AddScoped<ICoreService, Application.Services.CoreService>();
-        builder.Services.AddScoped<IAllEventService, Application.Services.AllEventService>();
+        builder.Services.AddScoped<IAllEventService, Application.Services.AllEventService>();  
+
+        //builder.Services.AddHttpContextAccessor();
 
         // Remaining code unchanged
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 
-        builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
+        // to map the claims from the OpenID Connect token to the application claims
+        builder.Services.Configure<MicrosoftIdentityOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
+        {
+
+            //options.GetClaimsFromUserInfoEndpoint = true;
+            //options.MapInboundClaims = false;
+            options.TokenValidationParameters.NameClaimType = "userid";
+            options.TokenValidationParameters.RoleClaimType = "role";
+            //options.TokenValidationParameters.UserNameClaimType = "userid";
+        });
+
+        //builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
 
         // with IClaimsTransformation to be persistent across requests (e.g., using claim for storing user roles)
         // https://learn.microsoft.com/en-us/aspnet/core/security/authentication/claims?view=aspnetcore-9.0
@@ -104,7 +111,9 @@ public class Program
         //        options.TokenValidationParameters.RoleClaimType = "roles";
         //    });
 
-        builder.Services.AddHttpContextAccessor();
+        // builder.Services.AddHttpContextAccessor(); 
+
+        //builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
 
         // to force authorization for the whole app and opt out for unsecure pages
         builder.Services.AddControllersWithViews(options =>
@@ -118,6 +127,7 @@ public class Program
 
         builder.Services.AddRazorPages()
             .AddMicrosoftIdentityUI();
+        // New place for Authentication configuration
 
         // to support AddSession below in a single server setup
         builder.Services.AddDistributedMemoryCache(); // Or another IDistributedCache implementation
@@ -125,6 +135,7 @@ public class Program
         builder.Services.AddSession(options =>
         {
             options.IdleTimeout = TimeSpan.FromMinutes(180); // Set session timeout
+            options.Cookie.Name = ".ESL.Session"; // Make unique Cookie name to avoid "Error unprotecting the session cookie"
             options.Cookie.HttpOnly = true;
             options.Cookie.IsEssential = true;
         });       
@@ -151,10 +162,24 @@ public class Program
         app.UseAuthorization();
 
         app.MapStaticAssets();
+
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}")
             .WithStaticAssets();
+
+        app.MapAreaControllerRoute(
+                name: "Public", // A unique name for your area route
+                areaName: "Public", // The exact name of your area folder
+                pattern: "Public/{controller=Home}/{action=Index}/{id?}"
+            );
+
+        app.MapAreaControllerRoute(
+            name: "Admin", // A unique name for your area route
+            areaName: "Admin", // The exact name of your area folder
+            pattern: "Admin/{controller=Home}/{action=Index}/{id?}"
+        );
+
         app.MapRazorPages()
            .WithStaticAssets();
 

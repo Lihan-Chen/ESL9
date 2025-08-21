@@ -253,6 +253,13 @@ namespace Application.Services
             }
         }
 
+        public Task<bool> HasAnyRoles(string userID)
+        {
+            // Check if the user has any roles assigned
+            return Task.FromResult(_empRoles.GetUserRoles().ContainsKey(userID));
+
+        }
+
         #endregion RoleService
 
         #region FacilityService

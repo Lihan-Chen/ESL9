@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Mvc.Models.Enum
+namespace Mvc.Models.Constants
 {
     public enum Facil
     {        

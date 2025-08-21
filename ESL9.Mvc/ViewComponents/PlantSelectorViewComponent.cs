@@ -1,6 +1,6 @@
 // ESL9.Mvc/ViewComponents/PlantSelectorViewComponent.cs
 using Microsoft.AspNetCore.Mvc;
-using Mvc.Models.Enum;
+using Mvc.Models.Constants;
 
 public class PlantSelectorViewComponent : ViewComponent
 {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Mvc.Models.Enum
+namespace Mvc.Models.Constants
 {
     // This file defines an enumeration for various call-out types used in the application.
     // This replaces the ESL_CallOutType table in the database.

@@ -4,7 +4,7 @@ using Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace ESL.Infrastructure.DataAccess.Repositories
+namespace Infrastructure.DataAccess.Repositories
 {
     public class LogTypeRepository(
             EslDbContext context,

@@ -47,6 +47,8 @@ namespace Application.Interfaces.IServices
 
         public Task<bool> IsInRole(string userID, string role, int? facilNo);
 
+        public Task<bool> HasAnyRoles(string userID);
+
         #endregion Employee-related Services
 
         #region Facility-related Services

@@ -1,7 +1,10 @@
 ﻿using Application.Interfaces.IServices;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Mvc.Models;
 using System.Security.Claims;
 
 namespace Mvc.Filters
@@ -29,7 +32,7 @@ namespace Mvc.Filters
             if (string.IsNullOrEmpty(userID))  // user is not in the ESL.ESL_Employees table but a legitimate user
             {
                 // User ID not found, redirect to read-only home page
-                context.Result = new RedirectToActionResult("ReadOnlyHome", "Home", null);
+                //context.Result = new RedirectToActionResult("ReadOnlyHome", "Home", null);
                 return;
             }
 
@@ -38,33 +41,65 @@ namespace Mvc.Filters
             context.HttpContext.Session.SetString("UserID", userID);
 
             // Check if the UserID claim exists
-            if (!user.HasClaim(c => c.Type == "UserID"))
+            try
             {
-                // Create a new ClaimsIdentity to add the new claims.
-                // It's generally recommended to add claims to a new ClaimsIdentity
-                // and then add that identity to the principal.
-                ClaimsIdentity claimsIdentity = new();
+                var identity = user.Identity as ClaimsIdentity;
 
-                claimsIdentity.AddClaim(new Claim("UserID", userID));
+                var existingClaim = user.FindFirst(c => c.Type == AppConstants.UserIDClaimType);
 
-                user.AddIdentity(claimsIdentity);
-            }
-            else if (user.FindFirst(c => c.Type == "UserID")?.Value != userID)
-            {
-                // If the UserID claim exists but does not match the current userID, update it
-                var existingClaim = user.FindFirst(c => c.Type == "UserID");
                 if (existingClaim != null)
                 {
-                    var claimsIdentity = user.Identity as ClaimsIdentity;
-                    claimsIdentity?.RemoveClaim(existingClaim);
-                    claimsIdentity?.AddClaim(new Claim("UserID", userID));
+                    // If the UserID claim exists, remove it
+                    identity?.RemoveClaim(existingClaim);
                 }
+
+                // Add new claim
+                identity.AddClaim(new Claim(AppConstants.UserIDClaimType, userID));
+
+                // Sign in again to update claims
+                await context.HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(identity));
             }
-            else if (user.HasClaim(c => c.Type == "UserID" && c.Value == userID))
+            catch (Exception ex)
             {
-                // User exists in claims, proceed with authorization
+                // Log the exception (consider using a logging framework)
+                Console.WriteLine($"Error while setting UserID claim: {ex.Message}");
+                // Optionally, you can redirect to an error page or handle it accordingly
+                context.Result = new RedirectToActionResult("Error", "Home", null);
                 return;
             }
+
+            // write to response cookie for the selected plant to be picked up by the ClaimsTransformation
+            context.HttpContext.Response.Cookies.Append("UserID", userID);
+
+            //if (!user.HasClaim(c => c.Type == "UserID"))
+            //{
+            //    // Create a new ClaimsIdentity to add the new claims.
+            //    // It's generally recommended to add claims to a new ClaimsIdentity
+            //    // and then add that identity to the principal.
+            //    ClaimsIdentity claimsIdentity = new();
+
+            //    claimsIdentity.AddClaim(new Claim("userID", userID));
+
+            //    user.AddIdentity(claimsIdentity);
+            //}
+            //else if (user.FindFirst(c => c.Type == "UserID")?.Value != userID)
+            //{
+            //    // If the UserID claim exists but does not match the current userID, update it
+            //    var existingClaim = user.FindFirst(c => c.Type == "UserID");
+            //    if (existingClaim != null)
+            //    {
+            //        var claimsIdentity = user.Identity as ClaimsIdentity;
+            //        claimsIdentity?.RemoveClaim(existingClaim);
+            //        claimsIdentity?.AddClaim(new Claim("UserID", userID));
+            //    }
+            //}
+            //else if (user.HasClaim(c => c.Type == "UserID" && c.Value == userID))
+            //{
+            //    // User exists in claims, proceed with authorization
+            //    return;
+            //}
 
             #endregion UserID and Claims Handling
 

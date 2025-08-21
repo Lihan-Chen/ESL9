@@ -4,6 +4,7 @@ using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Application.Interfaces.IRepositories;
 using Core.Models.BusinessEntities;
+using Application.Dtos;
 
 namespace Infrastructure.DataAccess.Repositories
 {
@@ -44,6 +45,22 @@ namespace Infrastructure.DataAccess.Repositories
             //if (allEvent == null) return null;
 
             //return allEvent;
+        }
+
+        public IQueryable<AllEventDetailsDto> GetAllEventDetails(int FacilNo, int LogTypeNo, string EventID, int EventID_RevNo)
+        {
+            string _CrLf = Environment.NewLine;
+            return _dbSetCurrent
+                .Where(x => x.FacilNo == FacilNo && x.LogTypeNo == LogTypeNo && x.EventID == EventID && x.EventID_RevNo == EventID_RevNo)
+                .Select(x => new AllEventDetailsDto
+                {
+                    FacilNo = x.FacilNo,
+                    LogTypeNo = x.LogTypeNo,
+                    EventID = x.EventID,
+                    EventID_RevNo = x.EventID_RevNo,
+                    EventHighlight = String.IsNullOrEmpty(x.Subject) ? string.Empty : $"{x.Subject}{_CrLf}" + (String.IsNullOrEmpty(x.Details) ? string.Empty : $"{x.Details}{_CrLf}") + $"Updated By: {x.UpdatedBy} on {x.UpdateDate}" //x.EventHighlight, 
+                    //EventTrail = x.EventTrail
+                });
         }
 
         // refer to the Reference region below

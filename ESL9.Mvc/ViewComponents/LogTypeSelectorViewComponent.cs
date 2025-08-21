@@ -1,6 +1,6 @@
 ﻿// ESL9.Mvc/ViewComponents/LogTypeSelectorViewComponent.cs
 using Microsoft.AspNetCore.Mvc;
-using Mvc.Models.Enum;
+using Mvc.Models.Constants;
 
 public class LogTypeSelectorViewComponent : ViewComponent
 {

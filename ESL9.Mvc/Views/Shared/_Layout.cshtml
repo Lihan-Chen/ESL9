@@ -1,6 +1,14 @@
-﻿﻿@{
+﻿@{
+    ViewData["ViewOnly"] = false;
     ViewData["IsAdmin"] = true;
     ViewData["HasNews"] = true;
+
+    string AreaName = (ViewData["ViewOnly"] as bool?) == true ? "Public" : string.Empty;
+
+    // for footer
+    var assembly = typeof(Program).Assembly;
+    var version = assembly.GetName().Version;
+    var releaseDate = System.IO.File.GetCreationTime(assembly.Location).ToShortDateString();
 }
 
 <!DOCTYPE html>
@@ -29,17 +37,17 @@
             background-color: #ddd;
             color: black;
             font-weight: 600;
-            text-decoration: ;
+            text-decoration:;
         }
 
         .dropdown {
-        margin-left: 40rem;
-        margin-right: 40rem;
+            margin-left: 40rem;
+            margin-right: 40rem;
         }
 
-        .dropdown:hover .dropdown-menu {
-            display: block;            
-        }
+            .dropdown:hover .dropdown-menu {
+                display: block;
+            }
 
         .dropdown-item:hover {
             display: block;
@@ -53,19 +61,6 @@
             color: green;
         }
     </style>
-    @* <style>
-        
-
-        .dropdown {
-            margin-left: 40rem;
-            margin-right: 40rem;
-        }
-
-        .name {
-            text-align: center;
-            color: green;
-        }
-    </style> *@
 </head>
 
 @* To create a cookie from _Layout for all pages; *@
@@ -78,7 +73,7 @@
 
     HttpContext.Response.Cookies.Append("ESL.Cookie", "2025mwdh2o.OpsSupportTeam", options);
 } *@
- 
+
 
 <body>
     <header>
@@ -109,55 +104,60 @@
                                 Home
                             </a>
                             <div class="dropdown-menu alert-warning" aria-labelledby="homeDropdownMenu">
-                                @* <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index">Home</a> *@
-                                <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="CheckIn" title="Operator Check In Here.">Check In</a>
-                                <div class="dropdown-divider"></div>
+                                @if ((ViewData["ViewOnly"] as bool?) != true)
+                                {
+                                    <a class="dropdown-item" asp-area=@AreaName asp-controller="Home" asp-action="CheckIn" title="Operator Check In Here.">Check In</a>
+                                    <div class="dropdown-divider"></div>
+                                }
+
                                 <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="SelectPlant" title="Select a plant for quick view Only">Select Plant</a>
                             </div>
                         </li>
 
                         <li class="nav-item active mx-3">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="AllEvents" asp-action="Index" title="All Events">AllEvents</a>
+                            <a class="nav-link text-dark" asp-area=@AreaName asp-controller="AllEvents" asp-action="Index" title="All Events">AllEvents</a>
                         </li>
 
-
-                        <li class="nav-item dropdown mx-3">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="logsDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Outstaning Logs">
-                                Logs
-                            </a>
-                            <div class="dropdown-menu alert-warning" aria-labelledby="logsDropdownMenu">
-                                <a class="dropdown-item" asp-area="" asp-controller="Clearance" asp-action="Index" title="Outstanding Clearances">Clearance</a>
-                                <a class="dropdown-item" asp-area="" asp-controller="SOC" asp-action="Index" title="Outstanding SOC">SOC</a>
-                                <a class="dropdown-item" asp-area="" asp-controller="FlowChange" asp-action="Index" title="Outstanding FlowChanges">FlowChange</a>
-                                <a class="dropdown-item" asp-area="" asp-controller="General" asp-action="Index" title="Outstanding General">General</a>
-                                <a class="dropdown-item" asp-area="" asp-controller="EOS" asp-action="Index" title="Outstanding EOS">EOS</a>
+                        @if (String.IsNullOrEmpty(AreaName))
+                        {
+                            <li class="nav-item dropdown mx-3">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="logsDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Outstaning Logs">
+                                    Logs
+                                </a>
+                                <div class="dropdown-menu alert-warning" aria-labelledby="logsDropdownMenu">
+                                    <a class="dropdown-item" asp-area="" asp-controller="Clearance" asp-action="Index" title="Outstanding Clearances">Clearance</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="SOC" asp-action="Index" title="Outstanding SOC">SOC</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="FlowChange" asp-action="Index" title="Outstanding FlowChanges">FlowChange</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="General" asp-action="Index" title="Outstanding General">General</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="EOS" asp-action="Index" title="Outstanding EOS">EOS</a>
                                     <div class="dropdown-divider"></div>
                                     <div class="dropdown-header">Coming Next...</div>
-                                <a class="dropdown-item text-secondary" asp-area="" asp-controller="HotLine" asp-action="Index" title="Outstanding HotLine Orders">HotLine*</a>
-                            </div>
-                        </li>
+                                    <a class="dropdown-item text-secondary" asp-area="" asp-controller="HotLine" asp-action="Index" title="Outstanding HotLine Orders">HotLine*</a>
+                                </div>
+                            </li>
 
-                        <li class="nav-item dropdown mx-3">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="reportsDropdownMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Reports">
-                                Reports
-                            </a>
-                            <div class="dropdown-menu alert-warning" aria-labelledby="reportsDropdownMenu">
-                                <a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="Index" title="Custom Report">Custom</a>
-                                <a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="DailyReport" title="Daily Report">Daily</a>
-                                <a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="WeeklyReport" title="Weekly Report">Weekly</a>
-                                <a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="MonthlyReport" title="Monthly Report">Monthlyly</a>
-                                <div class="dropdown-divider"></div>
-                                <div class="dropdown-header">Coming Next...</div>
-                                <a class="dropdown-item text-secondary" asp-area="" asp-controller="Report" asp-action="QuarterlyReport" title="Quarterly P&E Report">Quarterly P&A Report*</a>
-                            </div>
-                        </li>
 
+                            <li class="nav-item dropdown mx-3">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="reportsDropdownMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Reports">
+                                    Reports
+                                </a>
+                                <div class="dropdown-menu alert-warning" aria-labelledby="reportsDropdownMenu">
+                                    <a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="Index" title="Custom Report">Custom</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="DailyReport" title="Daily Report">Daily</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="WeeklyReport" title="Weekly Report">Weekly</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="MonthlyReport" title="Monthly Report">Monthlyly</a>
+                                    <div class="dropdown-divider"></div>
+                                    <div class="dropdown-header">Coming Next...</div>
+                                    <a class="dropdown-item text-secondary" asp-area="" asp-controller="Report" asp-action="QuarterlyReport" title="Quarterly P&E Report">Quarterly P&A Report*</a>
+                                </div>
+                            </li>
+                        }
                         <li class="nav-item">
-                            <a class="nav-link btn btn-danger btn-sm text-light" role="button" asp-area="" asp-controller="Search" asp-action="Index" title="Search"><strong>Search</strong></a>
+                            <a class="nav-link btn btn-danger btn-sm text-light" role="button" asp-area=@AreaName asp-controller="Search" asp-action="Index" title="Search"><strong>Search</strong></a>
                         </li>
 
                         @* @if (Session["isAdmin"] != null && (bool)Session["isAdmin"]) *@
-                        @if ((bool)ViewData["IsAdmin"]!)
+                        @if ((bool)ViewData["IsAdmin"]! && String.IsNullOrEmpty(AreaName))
                         {
                             <li class="nav-item dropdown mx-3">
                                 <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdownMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="ESL Administrators Only">
@@ -176,21 +176,9 @@
                                     <a class="dropdown-item" asp-area="Admin" asp-controller="Zone" asp-action="Index" title="Manage Clearance Zones.">Zones</a>
                                 </div>
                             </li>
-                        }
-
-                        @* <li>
-                            <form class="d-flex form-inline mx-2 my-2 my-lg-0" role="search">
-                                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                                <button class="btn btn-primary my-2 my-sm-0" type="submit">Search</button>
-                            </form>
-                        </li> *@
-                    </ul>
-
-                    @* <button class="btn btn-danger navbar-btn">
-                        <a class="nav-link text-dark m-0" asp-area="" asp-controller="Home" asp-action="SelectPlant">Select Plant</a>
-                    </button> *@                  
+                        }                
                 </div>
-                
+
                 <partial name="_LoginPartial" />
             </div>
         </nav>
@@ -203,7 +191,8 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; @DateTime.Today.Year - ESL.Mvc Core - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <p>&copy; @DateTime.Today.Year - ESL.Mvc Core - version @version released on @releaseDate</p>
         </div>
     </footer>
     <environment include="Development">

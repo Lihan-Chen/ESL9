@@ -10,6 +10,7 @@ namespace Prototype.Controllers
     [Authorize]
     public class HomeController : Controller
     {
+        private const string Message = "User is in the ESL_ADMIN role.";
         private readonly IClaimsTransformation _claimTransformation;
         private readonly ILogger<HomeController> _logger;
 
@@ -26,11 +27,11 @@ namespace Prototype.Controllers
                 _logger.LogInformation("CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
             }
 
-            var facilNoClaim = User.Claims.FirstOrDefault(c => c.Type == "DefaultFacilNo")?.Value;
+            var facilNoClaim = User.Claims.FirstOrDefault(c => c.Type == "defaultfacilno")?.Value;
 
             if (facilNoClaim != null)
             {
-                _logger.LogInformation("Facility No: " + facilNoClaim);
+                _logger.LogInformation("Default Facility No: " + facilNoClaim);
             }
             else
             {
@@ -68,12 +69,112 @@ namespace Prototype.Controllers
             //    _logger.LogInformation("User Role: " + userRole);
             //}
 
-            if (User.IsInRole("ESL_OPERATOR"))
+            // not working with IsInRole
+            //if (User.IsInRole("ESL_ADMIN"))
+            //{
+            //    _logger.LogInformation("IS IN ROLE ADMIN");
+            //}
+
+            if (User.HasClaim(c => c.Type == "role"))  
             {
-                _logger.LogInformation("User is ESL_OPERATOR");
+                _logger.LogInformation("User has a custom role claim");
+            }
+
+            string? UserID = User.Identity?.Name;
+
+            _logger.LogInformation($"User is {UserID}");
+
+            if (User.Claims?.FirstOrDefault(c => c.Type == "role")?.Value is not null)
+            {
+                var roleValue = User.Claims?.FirstOrDefault(c => c.Type == "role")?.Value;
             }
 
             return View();
+        }
+
+        public IActionResult CheckIn()
+        {
+            ViewData["Title"] = "Check In";
+
+            return View();
+        }
+
+        [HttpPost]
+        public Task<IActionResult> CheckaIn([FromForm]CheckInViewModel checkInViewModel)
+        {
+            if (checkInViewModel == null)
+            {
+                _logger.LogWarning("CheckInViewModel is null.");
+                return Task.FromResult<IActionResult>(BadRequest("Invalid check-in data."));
+            }
+
+            ViewData["Title"] = "Check Out";
+
+            var returnUrl = TempData["ReturnUrl"] as string ?? Url.Action("Index", "AllEvents") ?? "/";
+
+            return Task.FromResult<IActionResult>(Redirect(returnUrl));
+        }
+
+        public IActionResult SelectPlant()
+        {
+            ViewData["Title"] = "Please select one facility from the list -";
+            
+            int? DefaultFacilNo = null;
+            var defaultFacilNoValue = User.Claims.FirstOrDefault(c => c.Type == "defaultfacilno")?.Value;
+
+            if (int.TryParse(defaultFacilNoValue, out int parsedFacilNo))
+            {
+                DefaultFacilNo = parsedFacilNo;
+            }
+
+            var PriorFacilNo = HttpContext.Session.GetInt32("SelectedFacilNo");
+
+            // Default FacilNo to Session value first if available, otherwise use the default from claims
+            if (PriorFacilNo.HasValue)
+            {
+                ViewBag.SelectedPlant = PriorFacilNo.Value;
+            }
+            else
+            {
+                ViewBag.SelectedPlant = DefaultFacilNo; // Handle the case where no plant is selected
+            }
+
+            ViewBag.ReturnUrl = TempData["ReturnUrl"] as string ?? Url.Action("Index", "AllEvents");
+
+            return View();
+        }
+
+        [HttpPost]
+        public Task<IActionResult> SetPlant(int selectedFacilNo)
+        {
+            //if (!Enum.IsDefined(typeof(Facil), selectedFacilNo))
+            if (selectedFacilNo < 1 || selectedFacilNo > 13) // Assuming valid FacilNo range is 1 to 5
+            {
+                _logger.LogWarning("Invalid plant selection attempted: {FacilNo}", selectedFacilNo);
+                return Task.FromResult<IActionResult>(BadRequest("Invalid plant selection"));
+            }
+
+             //ModelState.ValidationState = ModelState.IsValid ? ModelValidationState.Valid : ModelValidationState.Invalid;
+
+            try
+            {
+                // Store the selected plant in session
+                HttpContext.Session.SetInt32("SelectedFacilNo", selectedFacilNo);
+                //FacilNo = HttpContext.Session.GetInt32("SelectedFacilNo") ?? 0; // selectedPlant;
+
+                // Log the plant selection
+                _logger.LogInformation("User {UserId} selected plant {PlantId}", User.Claims.First(c => c.Type == "userid"), selectedFacilNo);
+
+                // Get return URL from TempData, fallback to default route
+                var returnUrl = TempData["ReturnUrl"] as string ?? Url.Action("Index", "AllEvents") ?? "/";
+
+                return Task.FromResult<IActionResult>(Redirect(returnUrl));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error setting plant selection for user {UserId}", User.Claims.First(c => c.Type == "userid"));
+                return Task.FromResult<IActionResult>(RedirectToAction(nameof(Error)));
+            }
         }
 
         public IActionResult Privacy()

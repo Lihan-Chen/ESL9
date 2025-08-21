@@ -3,7 +3,7 @@ using Application.Interfaces.IRepositories;
 using Infrastructure.DataAccess;
 using Microsoft.Extensions.Logging;
 
-namespace ESL.Infrastructure.DataAccess.Repositories
+namespace Infrastructure.DataAccess.Repositories
 {
     public class SearchDtoRepository(EslDbContext context, ILogger<SearchDtoRepository> logger) : ISearchDtoRepository
     {

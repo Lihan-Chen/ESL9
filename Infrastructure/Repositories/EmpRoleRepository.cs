@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 
-namespace ESL.Infrastructure.DataAccess.Repositories
+namespace Infrastructure.DataAccess.Repositories
 {
     public class EmpRoleRepository(EslDbContext context,
                 ILogger<EmpRoleRepository> logger
@@ -89,6 +89,16 @@ namespace ESL.Infrastructure.DataAccess.Repositories
             //        }
             //        return new Dictionary<int, string>();
             //    });
+        }
+
+        public async Task<bool> HasAnyRole(string userID)
+        {
+            if (string.IsNullOrEmpty(userID))
+            {
+                throw new ArgumentNullException(nameof(userID), "User ID cannot be null or empty.");
+            }
+            // Check if the user has any roles
+            return await _context.UserRoles.AnyAsync(r => r.UserID.ToUpper() == userID.ToUpper());
         }
     }
 }
