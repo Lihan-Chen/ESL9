@@ -19,9 +19,9 @@ namespace Mvc.Controllers
 
         public string? UserName => IsAuthenticated ? User.FindFirst(c => c.Type == AppConstants.NameClaimType)?.Value! : string.Empty;
 
-        public string? UserID => User.HasClaim(c => c.Type == AppConstants.UserIDClaimType)
-            ? GetClaimValue(User, AppConstants.UserIDClaimType) ?? _coreService.GetEmployeeIDByEmployeeName(UserName!) ?? string.Empty
-            : string.Empty;
+        public string? UserID => !User.HasClaim(c => c.Type == AppConstants.UserIDClaimType)
+            ? _coreService.GetEmployeeIDByEmployeeName(UserName!) ?? string.Empty
+            : GetClaimValue(User, AppConstants.UserIDClaimType) ?? string.Empty;
 
             //!string.IsNullOrEmpty(UserName) ? _coreService.GetEmployeeIDByEmployeeName(UserName) : null;
 

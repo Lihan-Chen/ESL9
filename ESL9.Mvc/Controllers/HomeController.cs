@@ -9,6 +9,7 @@ using Mvc;
 using Mvc.Controllers;
 using Mvc.Models;
 using Mvc.Models.Constants;
+using Mvc.Models.Enum;
 using System.Diagnostics;
 using System.Security.Claims;
 
@@ -33,9 +34,7 @@ public class HomeController(ICoreService coreService,
 
         string? userName = UserName;
 
-        string? userID = _coreService.GetEmployeeIDByEmployeeName(userName!);
-
-        string userMode = _coreService.HasAnyRoles(userID!).Result ?  "OperatorMode" : "ViewerMode"; // Default to Viewer if role is not found
+        string? userID = UserID; // _coreService.GetEmployeeIDByEmployeeName(userName!);
 
         // Fix: Await the SetClaim method and handle possible null return
         var updatedUserTask = SetClaim(user, AppConstants.UserIDClaimType, userID);
@@ -45,6 +44,21 @@ public class HomeController(ICoreService coreService,
             if (updatedUser != null)
             {
                 user = updatedUser;
+            }
+        }
+
+        string userMode = _coreService.HasAnyRoles(userID!).Result ?  "Operational" : "Public"; // Default to Public if role is not found
+        
+        if (userMode == "Public")
+        {
+            var updatedUserModeTask = SetClaim(User, AppConstants.UserModeClaimType, userMode);
+            if (updatedUserModeTask != null)
+            {
+                var updatedUserMode = updatedUserModeTask.Result;
+                if (updatedUserMode != null)
+                {
+                    user = updatedUserMode;
+                }
             }
         }
 
@@ -70,9 +84,9 @@ public class HomeController(ICoreService coreService,
 
             ViewBag.ShowPlantMenu = _facilNo == null;
             ViewBag.Message = "Please select one facility from the list - ";
-            ViewBag.ReturnUrl = returnUrl; // this.Url;
+            ViewBag.ReturnUrl = returnUrl ?? Url.Action("Index", "AllEvents");
 
-            return View("SelectPlant");
+            return View("SelectPlant", "Home");
         }
 
         return RedirectToAction("Index", "AllEvents");
@@ -85,28 +99,30 @@ public class HomeController(ICoreService coreService,
         return View();
     }
 
-    public IActionResult SelectPlant()
+    public IActionResult SelectPlant(string returnUrl)
     {
         ViewData["Title"] = "Please select one facility from the list -";
 
-        if (HttpContext.Session.TryGetValue("SelectedPlant", out byte[]? selectedPlantBytes))
+        if (HttpContext.Session.TryGetValue("SelectedFacilNo", out byte[]? selectedFacilNoBytes))
         {
             // Convert the byte array to an integer
-            int selectedPlant = BitConverter.ToInt32(selectedPlantBytes, 0);
-            ViewBag.SelectedPlant = selectedPlant;
+            int selectedFacilNo = BitConverter.ToInt32(selectedFacilNoBytes, 0);
+            ViewBag.SelectedFacilNo = selectedFacilNo;
         }
         else
         {
-            ViewBag.SelectedPlant = null; // Handle the case where no plant is selected
+            ViewBag.SelectedFacilNo = null; // Handle the case where no plant is selected
         }
 
         ViewBag.ReturnUrl = TempData["ReturnUrl"] as string ?? Url.Action("Index", "AllEvents");
 
-        return View();
+        var facils = _coreService.GetFaciList().Result.AsQueryable().Where(f => f.FacilNo <= 13).ToList();
+
+        return View(facils);
     }
 
     [HttpPost]
-    public async Task<IActionResult> SetPlant(int selectedFacilNo, bool rememberMe = false)
+    public async Task<IActionResult> SetPlant(int selectedFacilNo, bool rememberMe = false, string? returnUrl = "~/AllEvents")
     {
         if (!Enum.IsDefined(typeof(Facil), selectedFacilNo))
         {
@@ -114,7 +130,25 @@ public class HomeController(ICoreService coreService,
             return await Task.FromResult<IActionResult>(BadRequest("Invalid plant selection"));
         }
 
-        try
+        if (FacilNo == selectedFacilNo)
+        {
+            _logger.LogInformation("User {UserId} already has plant {PlantId} selected", UserID, selectedFacilNo);
+            return await Task.FromResult<IActionResult>(Redirect(returnUrl));
+        }
+        else if (FacilNo != 0 && FacilNo != selectedFacilNo)
+        {
+            ////string[] _roles = Roles.GetRolesForUser(UserID);
+            ////Roles.RemoveUserFromRoles(UserID, _roles);
+            //IsSuperAdmin = false;
+            //IsAdmin = false;
+            //IsOperator = false;
+        }
+
+        //FacilNo = selectedFacilNo; // Set the selected facility number in the base controller
+
+        showAlert = false; // Reset showAlert to false
+
+            try
         {
             // Handle claim
             var identity = (ClaimsIdentity)User.Identity!;
@@ -152,7 +186,6 @@ public class HomeController(ICoreService coreService,
                 authProperties
             );
 
-
             // Store the selected plant in session
             HttpContext.Session.SetInt32("SelectedFacilNo", selectedFacilNo);
 
@@ -165,10 +198,10 @@ public class HomeController(ICoreService coreService,
             _logger.LogInformation("User {UserId} selected plant {PlantId}", UserID, FacilNo);
 
             // Get return URL from TempData, fallback to default route
-            var returnUrl = TempData["ReturnUrl"] as string ?? Url.Action("Index", "AllEvents");
+            var resolvedReturnUrl = TempData["returnUrl"] as string ?? Url.Action("Index", "AllEvents");
 
-            return await Task.FromResult<IActionResult>(Redirect(returnUrl!));
-            
+            return await Task.FromResult<IActionResult>(Redirect(resolvedReturnUrl!));
+
             // Redirect or return as needed
             //return RedirectToPage("/Index");
         }

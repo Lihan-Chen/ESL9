@@ -5,6 +5,7 @@
         #region Custom Claim Types used in the application
         public const string NameClaimType = "name";
         public const string UserIDClaimType = "userid";
+        public const string UserModeClaimType = "usermode";
         public const string DefaultFacilNoClaimType = "defaultfacilno";
         public const string RoleClaimType = "role";
         public const string ShiftNoClaimType = "shiftno";

@@ -1,0 +1,39 @@
+﻿@model List<FacilSelectViewModel>
+
+<form asp-controller="Home" asp-action="SetPlant" method="post" id="plantForm">
+    <div class="plant-selector">
+        @foreach (var plant in Model)
+        {
+            <div class="plant-button @(plant.IsSelected ? "selected" : "")"
+                 data-plant-id="@plant.FacilNo"
+                 role="button"
+                 tabindex="0"
+                 onclick="selectPlant(@plant.FacilNo, this)">
+                <span class="plant-name">@plant.FacilName</span>
+            </div>
+        }
+    </div>
+    <input type="hidden" id="selectedPlant" name="selectedFacilNo" value="@Model.FirstOrDefault(p => p.IsSelected)?.FacilNo" />
+
+    <div class="form-check mt-3">
+        <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe" value="true" />
+        <label class="form-check-label" for="rememberMe">Remember Me</label>
+    </div>
+
+    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+    <button type="submit">Confirm</button>
+
+    @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl))
+    {
+        <a href="@ViewBag.ReturnUrl" class="btn btn-secondary ml-2">Cancel</a>
+    }
+</form>
+
+<script>
+    function selectPlant(plantId, element) {
+        document.getElementById('selectedPlant').value = plantId;
+        document.querySelectorAll('.plant-button').forEach(btn => btn.classList.remove('selected'));
+        element.classList.add('selected');
+    }
+</script>

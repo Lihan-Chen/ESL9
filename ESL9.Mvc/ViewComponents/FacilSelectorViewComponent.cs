@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Mvc.Models.Constants;
+using Mvc.Models.Enum;
 
 public class FacilSelectorViewComponent : ViewComponent
 {

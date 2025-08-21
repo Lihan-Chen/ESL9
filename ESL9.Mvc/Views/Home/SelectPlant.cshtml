@@ -15,6 +15,12 @@
                             <legend>@ViewData["Title"]</legend>
                         @await Component.InvokeAsync("PlantSelector", new { selectedFacilNo = ViewBag.SelectedFacilNo })
                         </fieldset>
+
+                        <div class="form-check form-switch mt-3">
+                            <input type="checkbox" class="form-check-input" role="switch" id="rememberMe" name="rememberMe" value="true" />
+                            <label class="form-check-label" for="rememberMe">Remember Me</label>
+                        </div>
+
                         @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl))
                         {
                                 <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
@@ -22,6 +28,7 @@
 
                         <div class="text-center mt-4">
                             <button type="submit" class="btn btn-primary">Confirm Selection</button>
+                            
                             @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl))
                             {
                                     <a href="@ViewBag.ReturnUrl" class="btn btn-secondary ml-2">Cancel</a>

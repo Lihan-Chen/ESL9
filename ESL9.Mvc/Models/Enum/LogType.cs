@@ -1,4 +1,4 @@
-﻿namespace Mvc.Models.Constants
+﻿namespace Mvc.Models.Enum
 {
     public enum LogType
     {

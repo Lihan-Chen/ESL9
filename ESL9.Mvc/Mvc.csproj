@@ -35,4 +35,16 @@
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Areas\Admin\Controllers\" />
+    <Folder Include="Areas\Admin\Data\" />
+    <Folder Include="Areas\Admin\Models\" />
+    <Folder Include="Areas\Admin\ViewModels\" />
+    <Folder Include="Areas\Admin\Views\" />
+    <Folder Include="Areas\Public\Data\" />
+    <Folder Include="Areas\Public\Models\" />
+    <Folder Include="Areas\Public\ViewModels\" />
+    <Folder Include="Areas\Public\Views\" />
+  </ItemGroup>
+
 </Project>
