@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using System.Security.Claims;
 
 namespace ESL9.Mvc;
 
@@ -55,14 +56,39 @@ public class Program
 
         // Remaining code unchanged
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-            .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+            .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
+            .EnableTokenAcquisitionToCallDownstreamApi()
+            .AddInMemoryTokenCaches();
+
+        // Add OpenIdConnect options separately, after AddMicrosoftIdentityWebApp
+        builder.Services.PostConfigure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, static options =>
+        {
+            // ... your other options ...
+            options.Events = new OpenIdConnectEvents
+            {
+                OnTokenValidated = static async context =>
+                {
+                    var principal = context.Principal;
+                    var userName = principal!.FindFirst("name")?.Value; // or whatever claim is available
+
+                    // Fetch user ID from your database/service
+                    var userId = "U01234"; // await GetUserIdFromDatabaseAsync(userName!); // implement this method
+
+                    if (!string.IsNullOrEmpty(userId))
+                    {
+                        var identity = (ClaimsIdentity)principal.Identity!;
+                        identity.AddClaim(new Claim("userid", userId));
+                    }
+                }
+            };
+        });
 
         // to map the claims from the OpenID Connect token to the application claims
         builder.Services.Configure<MicrosoftIdentityOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
         {
 
-            //options.GetClaimsFromUserInfoEndpoint = true;
-            //options.MapInboundClaims = false;
+            options.GetClaimsFromUserInfoEndpoint = true;
+            options.MapInboundClaims = false;
             options.TokenValidationParameters.NameClaimType = "userid";
             options.TokenValidationParameters.RoleClaimType = "role";
             //options.TokenValidationParameters.UserNameClaimType = "userid";
@@ -158,7 +184,8 @@ public class Program
 
         app.UseSession();
 
-        // app.UseAuthentication();
+        app.UseAuthentication();
+
         app.UseAuthorization();
 
         app.MapStaticAssets();
@@ -184,5 +211,12 @@ public class Program
            .WithStaticAssets();
 
         app.Run();
+    }
+
+    // You must implement this method somewhere in your codebase
+    private static Task<string> GetUserIdFromDatabaseAsync(string userName)
+    {
+        // Dummy implementation for compilation
+        return Task.FromResult("dummyUserId");
     }
 }

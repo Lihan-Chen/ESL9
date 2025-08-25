@@ -195,7 +195,40 @@ namespace Api.Controllers
             }
         }
 
+        // Replace the following method in CoreController
+
         // GET: api/Core/Role
+        [HttpGet("GetUserDomainByUserID{userID}")]
+        public async Task<ActionResult<string>> GetUserDomain(string userID)
+        {
+            if (string.IsNullOrWhiteSpace(userID))
+            {
+                return BadRequest("User ID cannot be null or empty.");
+            }
+            try
+            {
+                var hasAnyRoles = await _coreService.HasAnyRoles(userID.ToUpperInvariant());
+                if (!hasAnyRoles)
+                {
+                    return Ok("Public"); // User has no roles, return "Public"
+                    //return NotFound($"No roles found for user ID '{userID}'.");
+                }
+
+                //var userDomain = _coreService.GetUserRoles();
+                //if (userDomain == null || !userDomain.ContainsKey(userID.ToUpperInvariant()))
+                //{
+                //    return NotFound($"User domain for user ID '{userID}' not found.");
+                //}
+                //return Ok(userDomain[userID.ToUpperInvariant()]);
+
+                return Ok("Private"); // Roles exist, but not returning specific domain here because role should be matched by facility and userID. (value object)
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving user domain: {ex.Message}");
+            }
+        }
+
         [HttpGet("Role")]
         [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public ActionResult<Dictionary<string, Dictionary<int, string>>> GetUserRoles()

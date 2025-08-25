@@ -1,0 +1,86 @@
+﻿@using Core.Models.Enums
+@model Mvc.Models.CheckInModel
+@{
+    ViewData["Title"] = "Register / Check In";
+}
+
+<h2 class="mb-3">Check In</h2>
+
+<form asp-action="CheckIn" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">User ID</label>
+        <div class="form-control-plaintext fw-semibold">User.FindFirst(c => c.Type == "name")?.Value! (@Model.UserID)</div>
+        <input type="hidden" asp-for="UserID" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Facility</label>
+        <div class="d-flex flex-wrap gap-2 plant-selector" id="facilityButtons">
+            @foreach (var f in Model.FacilOptions)
+            {
+                <button type="button"
+                        class="btn btn-sm @(f.IsSelected ? "btn-primary" : "btn-outline-primary") facility-btn"
+                        data-facil="@f.FacilNo"
+                        aria-pressed="@(f.IsSelected.ToString().ToLower())">
+                    @f.FacilName
+                </button>
+            }
+        </div>
+        <input type="hidden" asp-for="FacilNo" id="FacilNo" />
+    </div>
+
+    <div class="mb-3 form-check form-switch">
+        <input asp-for="IsPrimaryOperator" class="form-check-input" />
+        <label asp-for="IsPrimaryOperator" class="form-check-label"></label>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label d-block">Shift</label>
+        <div class="btn-group" role="group" aria-label="Shift selection">
+            <input type="radio" class="btn-check" name="Shft" id="shiftDay" value="1" @(Model.Shft == Shift.Day ? "checked" : "")>
+            <label class="btn btn-outline-secondary" for="shiftDay">Day</label>
+
+            <input type="radio" class="btn-check" name="Shft" id="shiftNight" value="2" @(Model.Shft == Shift.Night ? "checked" : "")>
+            <label class="btn btn-outline-secondary" for="shiftNight">Night</label>
+        </div>
+    </div>
+
+    <div class="mb-4 form-check form-switch">
+        <input asp-for="RememberMe" class="form-check-input" />
+        <label asp-for="RememberMe" class="form-check-label"></label>
+    </div>
+
+    <button type="submit" class="btn btn-success">Complete Check In</button>
+</form>
+
+@section Scripts {
+    <script>
+        (function () {
+            const hiddenFacil = document.getElementById('FacilNo');
+            // Initialize hidden value if empty (default selected button)
+            if (!hiddenFacil.value) {
+                const initiallySelected = document.querySelector('.facility-btn[aria-pressed="true"]');
+                if (initiallySelected) hiddenFacil.value = initiallySelected.getAttribute('data-facil');
+            }
+
+            document.querySelectorAll('.facility-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // update hidden
+                    hiddenFacil.value = btn.getAttribute('data-facil');
+
+                    // toggle styles
+                    document.querySelectorAll('.facility-btn').forEach(b => {
+                        b.classList.remove('btn-primary');
+                        b.classList.add('btn-outline-primary');
+                        b.setAttribute('aria-pressed', 'false');
+                    });
+                    btn.classList.remove('btn-outline-primary');
+                    btn.classList.add('btn-primary');
+                    btn.setAttribute('aria-pressed', 'true');
+                });
+            });
+        })();
+    </script>
+}

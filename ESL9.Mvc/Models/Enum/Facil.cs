@@ -76,6 +76,7 @@ namespace Mvc.Models.Enum
             return (int)facil;
         }
 
+
         //public static string GetFacilName(Facil facil, bool isAbbreviation)
         //{
         //    return isAbbreviation ? GetFacilName(Facil).Substring(0, 3) : GetFacilName(Facil);

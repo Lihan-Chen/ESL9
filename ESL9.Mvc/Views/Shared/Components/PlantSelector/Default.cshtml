@@ -1,19 +1,64 @@
-﻿@* ESL9.Mvc/Views/Shared/Components/PlantSelector/Default.cshtml *@
-@model List<FacilSelectViewModel>
+﻿@model List<FacilSelectViewModel>
 
-<div class="plant-selector">
-    @foreach (var plant in Model)
-    {
-        <div class="plant-button @(plant.IsSelected ? "selected" : "")"
-             data-plant-id="@plant.FacilNo"
-             role="button"
-             tabindex="0">
-            <span class="plant-name">@plant.FacilName</span>
+ <div class="card-body">
+    <form method="post" asp-action="SetPlant" asp-controller="Home">
+        <fieldset>
+            <legend>@ViewData["Title"]</legend>
+
+            <div class="plant-selector">
+                @foreach (var plant in Model)
+                {
+                    <div class="plant-button @(plant.IsSelected ? "selected" : "")"
+                            data-plant-id="@plant.FacilNo"
+                            data-plant-name="@plant.FacilName"
+                            role="button"
+                            tabindex="0">
+                        <span class="plant-name">@plant.FacilName</span>
+                    </div>
+                }
+            </div>
+
+            <!-- Hidden field actually posted -->
+            <input type="hidden" id="selectedPlant" name="selectedFacilNo"
+                    value="@Model.FirstOrDefault(p => p.IsSelected)?.FacilNo" />
+
+            <!-- Readonly textbox showing current selection -->
+            <div class="mt-3">
+                <label for="selectedPlantDisplay" class="form-label">Selected Facility</label>
+                <input type="text"
+                        id="selectedPlantDisplay"
+                        class="form-control"
+                        value="@(Model.FirstOrDefault(p => p.IsSelected)?.FacilName ?? "None")"
+                        readonly />
+            </div>
+
+        </fieldset>
+
+        <div class="form-check form-switch mt-3 text-center">
+            <input type="checkbox"
+                   class="form-check-input"
+                   role="switch"
+                   id="rememberMe"
+                   name="rememberMe"
+                   value="true" />
+            <label class="form-check-label" for="rememberMe">Remember Me</label>
         </div>
-    }
-</div>
 
-<input type="hidden" id="selectedPlant" name="selectedFacilNo" value="@Model.FirstOrDefault(p => p.IsSelected)?.FacilNo" />
+        @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl))
+        {
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+        }
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary" id="confirm">Confirm </button>
+
+            @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl))
+            {
+                <a href="@ViewBag.ReturnUrl" class="btn btn-secondary ml-2">Cancel</a>
+            }
+        </div>
+    </form>
+</div>
 
 <style>
     .plant-selector {
@@ -92,6 +137,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         const plantButtons = document.querySelectorAll('.plant-button');
         const hiddenInput = document.getElementById('selectedPlant');
+        const confirmButton = document.getElementById('confirm');
 
         plantButtons.forEach(button => {
             button.addEventListener('click', function() {
@@ -101,7 +147,9 @@
                 // Add selected class to clicked button
                 this.classList.add('selected');
 
-                // Update hidden input value
+                confirm.content += this.content;
+
+                // Update hidden input value(hiddenInput = selectedPlant)
                 hiddenInput.value = this.dataset.plantId;
 
                 // Trigger change event for form handling

@@ -1,0 +1,27 @@
+﻿@using Prototype.ViewModels;
+@model FacilMenuViewModel
+
+<form asp-controller="AllEvents" asp-action="Index" method="get" id="FacilForm">    
+
+<input type="hidden" id="SelectedFacilNo" name="SelectedFacilNo" value="@Model.FacilOptions.FirstOrDefault(f => f.Selected)?.Value" />
+
+    <label for="UserID" class="form-label">Select Facility</label>
+
+<div class="mb-3">
+        <label for="FacilDropdown" class="form-label">Facility</label>
+</div>
+
+<div class="facil-selector">
+    <select id="FacilDropdown" name="SelectedFacilNo" class="form-select">
+        <option value="">Pick one</option>
+        @foreach (var facil in Model.FacilOptions)
+        {
+            <option value="@facil.Value" selected="@(facil.Selected ? "selected" : null)">
+                @facil.Text
+            </option>
+        }
+    </select>
+</div>
+    @* <select asp-for="SelectedFacilNo" asp-items="Model.FacilOptions"></select> *@
+    <button type="submit">Confirm Plant</button>
+</form>

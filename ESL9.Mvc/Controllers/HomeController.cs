@@ -1,10 +1,12 @@
 using Application.Dtos;
 using Application.Interfaces.IServices;
+using Core.Models.Enums;
 using ESL9.Mvc.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Mvc;
 using Mvc.Controllers;
 using Mvc.Models;
@@ -86,15 +88,182 @@ public class HomeController(ICoreService coreService,
             ViewBag.Message = "Please select one facility from the list - ";
             ViewBag.ReturnUrl = returnUrl ?? Url.Action("Index", "AllEvents");
 
-            return View("SelectPlant", "Home");
+            return View("SelectPlant");
         }
 
         return RedirectToAction("Index", "AllEvents");
     }
 
-    public IActionResult CheckIn()
+    [HttpGet]
+    public IActionResult Register()
+    {
+        // Build the model with defaults
+        var userId = UserID ?? User?.Identity?.Name ?? string.Empty;
+        var defaultFacil = Facil.OCC;
+        var model = new CheckInModel
+        {
+            UserID = userId,
+            FacilNo = defaultFacil,
+            IsPrimaryOperator = false,
+            Shft = Shift.Day,
+            RememberMe = false,
+            FacilOptions = System.Enum.GetValues(typeof(Facil))
+                .Cast<Facil>()
+                .Select(f => new FacilSelectViewModel
+                {
+                    FacilNo = (int)f,
+                    FacilName = FacilExtensions.GetFacilName(f),
+                    IsSelected = f == defaultFacil
+                })
+                .ToList()
+        };
+
+        return View("Register", model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CheckIn(CheckInModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            // Rebuild facility buttons selection
+            model.FacilOptions = System.Enum.GetValues(typeof(Facil))
+                .Cast<Facil>()
+                .Select(f => new FacilSelectViewModel
+                {
+                    FacilNo = (int)f,
+                    FacilName = FacilExtensions.GetFacilName(f),
+                    IsSelected = f == model.FacilNo
+                })
+                .ToList();
+
+            return View("Register", model);
+        }
+
+        // Persist in session
+        HttpContext.Session.SetString("UserID", model.UserID);
+        HttpContext.Session.SetInt32("DefaultFacilNo", (int)model.FacilNo);
+        HttpContext.Session.SetString("IsPrimaryOperator", model.IsPrimaryOperator.ToString());
+        HttpContext.Session.SetInt32("ShiftNo", (int)model.Shft);
+
+        // Update / add claims (remove existing first if present)
+        var identity = User.Identity as ClaimsIdentity;
+        if (identity != null)
+        {
+            void ReplaceClaim(string type, string value)
+            {
+                var existing = identity.FindFirst(type);
+                if (existing != null) identity.RemoveClaim(existing);
+                identity.AddClaim(new Claim(type, value));
+            }
+
+            ReplaceClaim(AppConstants.UserIDClaimType, model.UserID);
+            ReplaceClaim("DefaultFacilNo", ((int)model.FacilNo).ToString());
+            ReplaceClaim("IsPrimaryOperator", model.IsPrimaryOperator.ToString());
+            ReplaceClaim("ShiftNo", ((int)model.Shft).ToString());
+        }
+
+        // Re-issue auth cookie (optionally persistent if RememberMe)
+        var authProps = new AuthenticationProperties
+        {
+            IsPersistent = model.RememberMe,
+            ExpiresUtc = model.RememberMe
+                ? DateTimeOffset.UtcNow.AddDays(14)
+                : DateTimeOffset.UtcNow.AddHours(2)
+        };
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(identity!),
+            authProps);
+
+        // Optional: persistent cookies for facility preference
+        if (model.RememberMe)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddDays(14),
+                HttpOnly = true,
+                IsEssential = true,
+                Secure = true
+            };
+            Response.Cookies.Append("DefaultFacilNo", ((int)model.FacilNo).ToString(), cookieOptions);
+            Response.Cookies.Append("IsPrimaryOperator", model.IsPrimaryOperator.ToString(), cookieOptions);
+            Response.Cookies.Append("ShiftNo", ((int)model.Shft).ToString(), cookieOptions);
+        }
+
+        return RedirectToAction("Index", "AllEvents");
+    }
+
+    // existing actions (Index, SelectPlant, SetPlant, etc.) remain unchanged
+
+
+    public IActionResult CheckIn(string? returnUrl)
     {
         ViewData["Title"] = "Check In";
+
+        if (HttpContext.Session.TryGetValue("SelectedFacilNo", out byte[]? selectedFacilNoBytes))
+        {
+            // Convert the byte array to an integer
+            int selectedFacilNo = BitConverter.ToInt32(selectedFacilNoBytes, 0);
+            ViewBag.SelectedFacilNo = selectedFacilNo;
+        }
+        else
+        {
+            ViewBag.SelectedFacilNo = null; // Handle the case where no plant is selected
+        }
+
+        var myOpTypeList = Enum.GetValues(typeof(OperatorType))
+                .Cast<OperatorType>()
+                .Select(s => new { ID = s, Name = s.ToString() });
+        var myShiftList = Enum.GetValues(typeof(Shift))
+            .Cast<Shift>()
+            .Select(s => new { ID = s, Name = s.ToString() });
+
+        Shift _shift;
+        String shiftStartText = "06:00:00";
+        String shiftEndText = "18:30:00";
+        DateTime shiftStartTime = Convert.ToDateTime(shiftStartText); // Converts only the time
+        DateTime shiftEndTime = Convert.ToDateTime(shiftEndText);
+        DateTime now = DateTime.Now;
+
+        if (now >= shiftStartTime && now < shiftEndTime)
+        {
+            _shift = Shift.Day;
+        }
+        else
+        {
+            _shift = Shift.Night;
+        }
+
+        ViewBag.Shift = _shift;
+
+        var model = new CheckInModel
+        {
+            UserID = UserID,
+            Shft = _shift,
+            FacilNo = Facil.OCC, // Default facility
+            IsPrimaryOperator = false,
+            RememberMe = false,
+            FacilOptions = System.Enum.GetValues(typeof(Facil))
+                .Cast<Facil>()
+                .Select(f => new FacilSelectViewModel
+                {
+                    FacilNo = (int)f,
+                    FacilName = FacilExtensions.GetFacilName(f),
+                    IsSelected = f == Facil.OCC // Default selection
+                })
+                .ToList(),
+
+
+            //optionOpType = new SelectList(myOpTypeList, "ID", "Name"),
+            //optionShift = new SelectList(myShiftList, "ID", "Name", _shift)
+        };
+
+        ViewBag.ReturnUrl = returnUrl;
+
+        return View(model);
 
         return View();
     }
@@ -122,7 +291,7 @@ public class HomeController(ICoreService coreService,
     }
 
     [HttpPost]
-    public async Task<IActionResult> SetPlant(int selectedFacilNo, bool rememberMe = false, string? returnUrl = "~/AllEvents")
+    public async Task<IActionResult> SetPlant(int selectedFacilNo, bool rememberMe = false, string? returnUrl = "Home/Register")
     {
         if (!Enum.IsDefined(typeof(Facil), selectedFacilNo))
         {
@@ -154,12 +323,12 @@ public class HomeController(ICoreService coreService,
             var identity = (ClaimsIdentity)User.Identity!;
 
             // Remove old claims if exists
-            var oldClaim = identity.FindFirst("defaultno");
+            var oldClaim = identity.FindFirst(AppConstants.DefaultFacilNoClaimType);
             if (oldClaim != null)
                 identity.RemoveClaim(oldClaim);
 
             // Add new claim
-            identity.AddClaim(new Claim("defaultfacilno", selectedFacilNo.ToString()));
+            identity.AddClaim(new Claim(AppConstants.DefaultFacilNoClaimType, selectedFacilNo.ToString()));
 
             var userID = UserID; // GetClaimValue(HttpContext.User, ClaimTypes.UserID) ?? UserID ?? string.Empty;
 

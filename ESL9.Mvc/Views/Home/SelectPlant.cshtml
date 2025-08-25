@@ -9,14 +9,14 @@
                 <div class="card-header">
                     <h2 class="text-center">@ViewBag.Message</h2>
                 </div>
-                <div class="card-body">
+                @* <div class="card-body">
                     <form method="post" asp-action="SetPlant" asp-controller="Home">
                         <fieldset>
-                            <legend>@ViewData["Title"]</legend>
+                            <legend>@ViewData["Title"]</legend> *@ 
                         @await Component.InvokeAsync("PlantSelector", new { selectedFacilNo = ViewBag.SelectedFacilNo })
-                        </fieldset>
+                        @*</fieldset>
 
-                        <div class="form-check form-switch mt-3">
+                        <div class="form-check form-switch mt-3 justify-content-center">
                             <input type="checkbox" class="form-check-input" role="switch" id="rememberMe" name="rememberMe" value="true" />
                             <label class="form-check-label" for="rememberMe">Remember Me</label>
                         </div>
@@ -35,7 +35,7 @@
                             }
                         </div>
                     </form>
-                </div>
+                </div> *@
             </div>
         </div>
     </div>

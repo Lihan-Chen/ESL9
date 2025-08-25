@@ -7,11 +7,11 @@ using Mvc.ViewModels;
 namespace Mvc.Controllers
 {
     [Authorize]
-    public class AllEventController(IAllEventService allEventService, ICoreService coreService, IHttpContextAccessor httpContextAccessor, ILogger < AllEventController> logger) : BaseController<AllEventController>(coreService, logger)
+    public class AllEventController(IAllEventService allEventService, ICoreService coreService, /*IHttpContextAccessor httpContextAccessor,*/ ILogger < AllEventController> logger) : BaseController<AllEventController>(coreService, logger)
     {
         private readonly IAllEventService _allEventService = allEventService ?? throw new ArgumentNullException(nameof(allEventService));
         private readonly ICoreService _coreService = coreService ?? throw new ArgumentNullException(nameof(coreService));
-        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        //private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         private readonly ILogger<AllEventController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         // GET: /AllEvents/
@@ -32,13 +32,13 @@ namespace Mvc.Controllers
 
         public IActionResult Index([FromBody] _LogFilterPartialViewModel? logFilterPartial, int? facilNo, DateOnly? startDate, DateOnly? endDate, string? searchString, int? page, bool? operatorType)
         {
-            HttpContext? httpContext = _httpContextAccessor.HttpContext;
+            //HttpContext? httpContext = _httpContextAccessor.HttpContext;
 
             //if (httpContext != null && httpContext.User != null && httpContext.User.Identity.IsAuthenticated)
 
-            ISession session = httpContext!.Session;
+            ISession session = HttpContext!.Session;
 
-            _facilNo = facilNo ?? logFilterPartial?.SelectedFacilNo ?? FacilNo;
+            _facilNo = logFilterPartial?.SelectedFacilNo ?? facilNo ?? FacilNo;
 
             var facility = _coreService.GetFacility(_facilNo).Result;
             
@@ -53,19 +53,19 @@ namespace Mvc.Controllers
                  //  == "Day" ? 1 : 2;
 
             // Set up default values
-            DateOnly _enDt = logFilterPartial.EndDate ?? endDate ?? tomorrow; // now.Date; 
-            DateOnly? _stDt = logFilterPartial.StartDate ?? startDate ?? _enDt.AddDays(_daysOffSet); //initialStartDate; 
+            DateOnly _enDt = logFilterPartial?.EndDate ?? endDate ?? tomorrow; // now.Date; 
+            DateOnly? _stDt = logFilterPartial?.StartDate ?? startDate ?? _enDt.AddDays(_daysOffSet); //initialStartDate; 
 
-            httpContext.Session.SetString("startDate", _stDt.ToString());
+            session.SetString("startDate", _stDt.ToString() ?? string.Empty);
 
             if (_stDt.HasValue)
             {
-                httpContext.Session.SetString("endDate", _enDt.ToString());
+                session.SetString("endDate", _enDt.ToString());
             }
 
-            searchString = !String.IsNullOrEmpty(logFilterPartial.CurrentFilter) ? logFilterPartial.CurrentFilter : searchString;
+            searchString = !String.IsNullOrEmpty(logFilterPartial?.CurrentFilter) ? logFilterPartial.CurrentFilter : searchString;
 
-            _opType = operatorType.HasValue ? true : logFilterPartial.OperatorType;
+            _opType = operatorType.HasValue || logFilterPartial.OperatorType;
 
             // _shiftNo = System.Web.HttpContext.Current.Session["ShiftNo"].ToString() == "Day" ? 1 : 2;
 
