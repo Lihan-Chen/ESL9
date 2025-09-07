@@ -134,6 +134,9 @@ namespace Application.Dtos
 
         //        return _EventTrail;
         //    }
+        public string _CrLf = Environment.NewLine;
+
+        public virtual AllEvent AllEvent { get; set; } = null!;
     }
     
 }

@@ -1,21 +1,16 @@
-using Application.Dtos;
 using Application.Interfaces.IServices;
 using Core.Models.Enums;
-using ESL9.Mvc.Models;
+using Mvc.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Mvc;
-using Mvc.Controllers;
-using Mvc.Models;
-using Mvc.Models.Constants;
 using Mvc.Models.Enum;
 using System.Diagnostics;
 using System.Security.Claims;
+using Mvc.ViewModels;
 
-namespace ESL9.Mvc.Controllers;
+namespace Mvc.Controllers;
 
 [Authorize]
 public class HomeController(ICoreService coreService, 
@@ -28,7 +23,14 @@ public class HomeController(ICoreService coreService,
     private string facilName = string.Empty;
     private bool showAlert;
 
-    // Fix for CS0029 and CS8600 in Index method
+    private bool rememberMe = true;
+
+    // Define shift start and end times locally to avoid access issues
+    //DateTime shiftStartTime = DateTime.Today.Add(TimeSpan.Parse(AppConstants.DayShiftStartText));
+    //DateTime shiftEndTime = DateTime.Today.Add(TimeSpan.Parse(AppConstants.DayShiftEndText));
+    //DateTime now = DateTime.Now;
+
+    [Authorize]
     [HttpGet(Name = "Index")]
     public IActionResult Index(string returnUrl, bool showAlert = false)
     {
@@ -36,170 +38,224 @@ public class HomeController(ICoreService coreService,
 
         string? userName = UserName;
 
-        string? userID = UserID; // _coreService.GetEmployeeIDByEmployeeName(userName!);
+        //bool _isNewSession = IsNewSession;
 
-        // Fix: Await the SetClaim method and handle possible null return
-        var updatedUserTask = SetClaim(user, AppConstants.UserIDClaimType, userID);
-        if (updatedUserTask != null)
+        if (IsNewSession) // where UserID Claim is not present
         {
-            var updatedUser = updatedUserTask.Result;
-            if (updatedUser != null)
+            _logger.LogInformation("New session detected for user {UserName}", userName);
+
+            //string? userID = UserID;
+
+            if (UserID == null)
             {
-                user = updatedUser;
+                _logger.LogWarning("UserID claim not found in new session for user {UserName}", userName);
+                return RedirectToAction("Error", "Home");
             }
-        }
 
-        string userMode = _coreService.HasAnyRoles(userID!).Result ?  "Operational" : "Public"; // Default to Public if role is not found
-        
-        if (userMode == "Public")
-        {
-            var updatedUserModeTask = SetClaim(User, AppConstants.UserModeClaimType, userMode);
-            if (updatedUserModeTask != null)
+            // Set UserID claim if not present with the value from UserID property and rememberMe = true
+            var updatedUserTask = SetClaim(User, AppConstants.UserIDClaimType, UserID, rememberMe: true);
+
+            if (updatedUserTask != null)
             {
-                var updatedUserMode = updatedUserModeTask.Result;
-                if (updatedUserMode != null)
+                var updatedUser = updatedUserTask.Result;
+                if (updatedUser != null)
                 {
-                    user = updatedUserMode;
+                    user = updatedUser;
                 }
             }
-        }
 
-        foreach (Claim claim in user.Claims)
-        {
-            _logger.LogInformation("CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
-        }
-
-        if (!showAlert.Equals(true))
-        {
-            showAlert = false;
-        }
-
-        int? _facilNo = DefaultFacilNo ?? FacilNo ?? null;
-
-        if (_facilNo is null)
-        {
-            if (showAlert)
+            foreach (Claim claim in user.Claims)
             {
-                ViewBag.ShowAlert = true;
-                ViewBag.Alert = "You must select a facility first!";
+                _logger.LogInformation("CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
             }
 
-            ViewBag.ShowPlantMenu = _facilNo == null;
-            ViewBag.Message = "Please select one facility from the list - ";
-            ViewBag.ReturnUrl = returnUrl ?? Url.Action("Index", "AllEvents");
 
-            return View("SelectPlant");
+            // UserMode is stored in session for quick access
+            string UserMode = _coreService.HasAnyRoles(UserID!).Result ? "Internal" : "Public"; // Default to Public if role is not found
+
+            SessionExtensions.SetString(HttpContext.Session, AppConstants.UserModeSessionKey, UserMode);
+
+            if (UserMode == "Public")
+            {
+                return RedirectToAction("Index", "Home", new { area = "Public" });
+
+            }
+
+            if (!showAlert.Equals(true))
+            {
+                showAlert = false;
+            }
+
+            if (FacilNo == null || FacilNo == 0)
+            {
+
+                if (showAlert)
+                {
+                    ViewBag.ShowAlert = true;
+                    ViewBag.Alert = "You must select a facility and check in first!";
+                }
+
+                ViewBag.ShowPlantMenu = true;
+                ViewBag.Message = "Please select one facility from the list - ";
+                ViewBag.ReturnUrl = this.Url;
+
+                return RedirectToAction("CheckIn"); // View("CheckIn");
+            }
         }
 
         return RedirectToAction("Index", "AllEvents");
     }
 
     [HttpGet]
-    public IActionResult Register()
+    public IActionResult CheckIn(string returnUrl)
     {
-        // Build the model with defaults
-        var userId = UserID ?? User?.Identity?.Name ?? string.Empty;
-        var defaultFacil = Facil.OCC;
+        // Get selectedFacilNo from user claim
+        int? selectedFacilNo = HttpContext.Session.GetInt32(AppConstants.AssignedFacilNoSessionKey) ?? DefaultFacilNo ?? (int)Facil.OCC;
+
+        ViewData["Title"] = "Check In";
+
+        ViewBag.SelectedFacilNo = selectedFacilNo;
+
+        // var _shift = DefaultShift; // Now >= ShiftStartTime && Now < ShiftEndTime ? Shift.Day : Shift.Night;
+
         var model = new CheckInModel
         {
-            UserID = userId,
-            FacilNo = defaultFacil,
-            IsPrimaryOperator = false,
-            Shft = Shift.Day,
-            RememberMe = false,
-            FacilOptions = System.Enum.GetValues(typeof(Facil))
+            UserID = UserID!,
+            // With this safer version:
+            SelectedFacilNo = (Facil)selectedFacilNo,
+            OperatorType = OperatorType.Primary,
+            Shift = DefaultShift,
+            RememberMe = rememberMe,
+            FacilOptions = Enum.GetValues(typeof(Facil))
                 .Cast<Facil>()
                 .Select(f => new FacilSelectViewModel
                 {
                     FacilNo = (int)f,
                     FacilName = FacilExtensions.GetFacilName(f),
-                    IsSelected = f == defaultFacil
+                    IsSelected = f == (Facil)selectedFacilNo
                 })
                 .ToList()
         };
 
-        return View("Register", model);
+        return View("CheckIn", model);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CheckIn(CheckInModel model)
+    public async Task<IActionResult> CheckIn(CheckInModel model) // await LoadFacilitiesAsync(); // repopulate for redisplay
     {
-        if (!ModelState.IsValid)
-        {
-            // Rebuild facility buttons selection
-            model.FacilOptions = System.Enum.GetValues(typeof(Facil))
+        model.FacilOptions = Enum.GetValues(typeof(Facil))
                 .Cast<Facil>()
                 .Select(f => new FacilSelectViewModel
                 {
                     FacilNo = (int)f,
                     FacilName = FacilExtensions.GetFacilName(f),
-                    IsSelected = f == model.FacilNo
+                    IsSelected = f == (Facil)model.SelectedFacilNo
                 })
-                .ToList();
+                .ToList(); 
 
-            return View("Register", model);
+        if (!ModelState.IsValid)
+        {
+            return View(model);
         }
 
-        // Persist in session
-        HttpContext.Session.SetString("UserID", model.UserID);
-        HttpContext.Session.SetInt32("DefaultFacilNo", (int)model.FacilNo);
-        HttpContext.Session.SetString("IsPrimaryOperator", model.IsPrimaryOperator.ToString());
-        HttpContext.Session.SetInt32("ShiftNo", (int)model.Shft);
+        _logger.LogInformation("CheckIn: User={User} Shift={Shift} OperatorType={OperatorType} FacilityId={SelectedFacilNo}",
+            model.UserID, model.Shift, model.OperatorType, model.SelectedFacilNo);
 
-        // Update / add claims (remove existing first if present)
-        var identity = User.Identity as ClaimsIdentity;
-        if (identity != null)
+        try
         {
-            void ReplaceClaim(string type, string value)
+            // Get Role
+            var role = await _coreService.GetRole(model.UserID!, (int)model.SelectedFacilNo);
+
+            SetSessionValue(AppConstants.AssignedShiftNoSessionKey, model.Shift);
+
+            SetSessionValue(AppConstants.AssingedOperatorTypeSessionKey, model.OperatorType);
+
+            SetSessionValue(AppConstants.AssignedFacilNoSessionKey, model.SelectedFacilNo);
+
+            SetSessionValue(AppConstants.AssignedRoleSessionKey, role);
+
+            if (DefaultFacilNo is null)
             {
-                var existing = identity.FindFirst(type);
-                if (existing != null) identity.RemoveClaim(existing);
-                identity.AddClaim(new Claim(type, value));
+                string _facilNoClaim = FacilHelper.GetFacilNumber(model.SelectedFacilNo).ToString();
+
+                IEnumerable<KeyValuePair<string, string>> claims = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>(AppConstants.DefaultFacilNoClaimType, _facilNoClaim),
+                    new KeyValuePair<string, string>(AppConstants.DefaultRoleClaimType, role ?? string.Empty)
+                };
+
+                // Set claims and sign in again for DefaultFacilNo and DefaultRole
+                await SetClaim(User, claims, rememberMe);
             }
 
-            ReplaceClaim(AppConstants.UserIDClaimType, model.UserID);
-            ReplaceClaim("DefaultFacilNo", ((int)model.FacilNo).ToString());
-            ReplaceClaim("IsPrimaryOperator", model.IsPrimaryOperator.ToString());
-            ReplaceClaim("ShiftNo", ((int)model.Shft).ToString());
+                var resolvedReturnUrl = TempData["returnUrl"] as string ?? Url.Action("Index", "AllEvents");
+
+                return await Task.FromResult<IActionResult>(Redirect(resolvedReturnUrl!));
+
+                // Redirect or return as needed
+                //return RedirectToPage("/Index");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error setting plant selection for user {UserId}", UserID);
+            return await Task.FromResult<IActionResult>(RedirectToAction(nameof(Error)));
         }
 
-        // Re-issue auth cookie (optionally persistent if RememberMe)
-        var authProps = new AuthenticationProperties
+
+        TempData["CheckInSuccess"] = "Check-in recorded.";
+
+        return RedirectToAction(nameof(Confirmed));
+    }
+
+    [HttpGet]
+    public IActionResult Confirmed()
+    {
+        if (TempData["CheckInSuccess"] is null)
+            return RedirectToAction(nameof(Index));
+
+        return View();
+    }
+
+    [HttpGet]
+    public IActionResult CheckInm(string returnUrl)
+    {
+        int? selectedFacilNo = HttpContext.Session.GetInt32(AppConstants.AssignedFacilNoSessionKey) ?? DefaultFacilNo ?? (int)Facil.OCC;
+
+        ViewData["Title"] = "Check In";
+
+        ViewBag.SelectedFacilNo = selectedFacilNo;
+
+        var _shift = DefaultShift; //now >= shiftStartTime && now < shiftEndTime ? Shift.Day : Shift.Night;
+
+        // Build the model with defaults
+        var model = new CheckInModel
         {
-            IsPersistent = model.RememberMe,
-            ExpiresUtc = model.RememberMe
-                ? DateTimeOffset.UtcNow.AddDays(14)
-                : DateTimeOffset.UtcNow.AddHours(2)
+            UserID = UserID!,
+            SelectedFacilNo = (Facil)selectedFacilNo,
+            OperatorType = OperatorType.Primary,
+            Shift = Shift.Day,
+            RememberMe = rememberMe,
+            FacilOptions = Enum.GetValues(typeof(Facil))
+                .Cast<Facil>()
+                .Select(f => new FacilSelectViewModel
+                {
+                    FacilNo = (int)f,
+                    FacilName = FacilExtensions.GetFacilName(f),
+                    IsSelected = f == (Facil)selectedFacilNo
+                })
+                .ToList()
         };
 
-        await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            new ClaimsPrincipal(identity!),
-            authProps);
-
-        // Optional: persistent cookies for facility preference
-        if (model.RememberMe)
-        {
-            var cookieOptions = new CookieOptions
-            {
-                Expires = DateTimeOffset.UtcNow.AddDays(14),
-                HttpOnly = true,
-                IsEssential = true,
-                Secure = true
-            };
-            Response.Cookies.Append("DefaultFacilNo", ((int)model.FacilNo).ToString(), cookieOptions);
-            Response.Cookies.Append("IsPrimaryOperator", model.IsPrimaryOperator.ToString(), cookieOptions);
-            Response.Cookies.Append("ShiftNo", ((int)model.Shft).ToString(), cookieOptions);
-        }
-
-        return RedirectToAction("Index", "AllEvents");
+        return View("CheckIn", model);
     }
+
+    
 
     // existing actions (Index, SelectPlant, SetPlant, etc.) remain unchanged
 
 
-    public IActionResult CheckIn(string? returnUrl)
+    public IActionResult CheckInn(string? returnUrl)
     {
         ViewData["Title"] = "Check In";
 
@@ -222,8 +278,8 @@ public class HomeController(ICoreService coreService,
             .Select(s => new { ID = s, Name = s.ToString() });
 
         Shift _shift;
-        String shiftStartText = "06:00:00";
-        String shiftEndText = "18:30:00";
+        string shiftStartText = "06:00:00";
+        string shiftEndText = "18:30:00";
         DateTime shiftStartTime = Convert.ToDateTime(shiftStartText); // Converts only the time
         DateTime shiftEndTime = Convert.ToDateTime(shiftEndText);
         DateTime now = DateTime.Now;
@@ -242,11 +298,11 @@ public class HomeController(ICoreService coreService,
         var model = new CheckInModel
         {
             UserID = UserID,
-            Shft = _shift,
-            FacilNo = Facil.OCC, // Default facility
-            IsPrimaryOperator = false,
+            Shift = _shift,
+            SelectedFacilNo = Facil.OCC, // Default facility
+            OperatorType = OperatorType.Primary,
             RememberMe = false,
-            FacilOptions = System.Enum.GetValues(typeof(Facil))
+            FacilOptions = Enum.GetValues(typeof(Facil))
                 .Cast<Facil>()
                 .Select(f => new FacilSelectViewModel
                 {
@@ -334,12 +390,12 @@ public class HomeController(ICoreService coreService,
 
             var facilNo = selectedFacilNo; // GetClaimValue(HttpContext.User, "defaultfacilno") ?? FacilNo.ToString() ?? string.Empty;
 
-            var roleClaimValue = _coreService.GetRole(userID!, facilNo).Result ?? string.Empty; // role is dependent on userID and facilNo (role only exists for a facility)
+            var role = _coreService.GetRole(userID!, facilNo).Result ?? string.Empty; // role is dependent on userID and facilNo (role only exists for a facility)
 
-            if (!string.IsNullOrEmpty(roleClaimValue) && !User.HasClaim(c => c.Type == AppConstants.RoleClaimType && c.Value == roleClaimValue))
-            {
-                identity.AddClaim(new Claim(AppConstants.RoleClaimType, roleClaimValue));
-            }
+            //if (!string.IsNullOrEmpty(role) && !User.HasClaim(c => c.Type == AppConstants.RoleClaimType && c.Value == role))
+            //{
+            //    identity.AddClaim(new Claim(AppConstants.RoleClaimType, roleClaimValue));
+            //}
 
             // Set authentication properties
             var authProperties = new AuthenticationProperties
@@ -391,6 +447,25 @@ public class HomeController(ICoreService coreService,
     }
 
     //#region Helpers
+
+
+    //Not Done Yet
+    //private async Task<List<Facil>> LoadFacilitiesAsync()
+    //{
+    //    try
+    //    {
+    //        var plants = await _coreService.GetAllPlants();
+    //        return plants
+    //            .Select(f => f.FacilNo, f => f.FacilName)
+    //            .OrderBy(f => f.Name)
+    //            .ToList();
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex, "Failed to load facilities, using fallback.");
+    //        return [new Facil(1, "Fallback A"), new FacilityOption(2, "Fallback B")];
+    //    }
+    //}
 
     //private new string? GetClaimValue(ClaimsPrincipal user, string claimType)
     //{

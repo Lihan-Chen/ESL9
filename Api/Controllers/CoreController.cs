@@ -207,19 +207,13 @@ namespace Api.Controllers
             }
             try
             {
-                var hasAnyRoles = await _coreService.HasAnyRoles(userID.ToUpperInvariant());
+                // Use Task.Run to make the method truly asynchronous and resolve CS1998 if using GetUserRoles dictionary with Key = userID.ToUpper()
+                var hasAnyRoles = await _coreService.HasAnyRoles(userID.ToUpperInvariant()); // await Task.Run(() => _coreService.GetUserRoles().ContainsKey(userID.ToUpper()));
+                
                 if (!hasAnyRoles)
                 {
                     return Ok("Public"); // User has no roles, return "Public"
-                    //return NotFound($"No roles found for user ID '{userID}'.");
                 }
-
-                //var userDomain = _coreService.GetUserRoles();
-                //if (userDomain == null || !userDomain.ContainsKey(userID.ToUpperInvariant()))
-                //{
-                //    return NotFound($"User domain for user ID '{userID}' not found.");
-                //}
-                //return Ok(userDomain[userID.ToUpperInvariant()]);
 
                 return Ok("Private"); // Roles exist, but not returning specific domain here because role should be matched by facility and userID. (value object)
             }

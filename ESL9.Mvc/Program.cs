@@ -10,7 +10,7 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using System.Security.Claims;
 
-namespace ESL9.Mvc;
+namespace Mvc;
 
 public class Program
 {
@@ -61,38 +61,38 @@ public class Program
             .AddInMemoryTokenCaches();
 
         // Add OpenIdConnect options separately, after AddMicrosoftIdentityWebApp
-        builder.Services.PostConfigure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, static options =>
-        {
-            // ... your other options ...
-            options.Events = new OpenIdConnectEvents
-            {
-                OnTokenValidated = static async context =>
-                {
-                    var principal = context.Principal;
-                    var userName = principal!.FindFirst("name")?.Value; // or whatever claim is available
+        //builder.Services.PostConfigure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, static options =>
+        //{
+        //    // ... your other options ...
+        //    options.Events = new OpenIdConnectEvents
+        //    {
+        //        OnTokenValidated = static async context =>
+        //        {
+        //            var principal = context.Principal;
+        //            var userName = principal!.FindFirst("name")?.Value; // or whatever claim is available
 
-                    // Fetch user ID from your database/service
-                    var userId = "U01234"; // await GetUserIdFromDatabaseAsync(userName!); // implement this method
+        //            // Fetch user ID from your database/service
+        //            var userId = await GetUserIdFromDatabaseAsync(userName!); // // principal!.FindFirst("employeeid")?.Value;
 
-                    if (!string.IsNullOrEmpty(userId))
-                    {
-                        var identity = (ClaimsIdentity)principal.Identity!;
-                        identity.AddClaim(new Claim("userid", userId));
-                    }
-                }
-            };
-        });
+        //            if (!string.IsNullOrEmpty(userId))
+        //            {
+        //                var identity = (ClaimsIdentity)principal.Identity!;
+        //                identity.AddClaim(new Claim("userid", userId));
+        //            }
+        //        }
+        //    };
+        //});
 
         // to map the claims from the OpenID Connect token to the application claims
-        builder.Services.Configure<MicrosoftIdentityOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
-        {
+        //builder.Services.Configure<MicrosoftIdentityOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
+        //{
 
-            options.GetClaimsFromUserInfoEndpoint = true;
-            options.MapInboundClaims = false;
-            options.TokenValidationParameters.NameClaimType = "userid";
-            options.TokenValidationParameters.RoleClaimType = "role";
-            //options.TokenValidationParameters.UserNameClaimType = "userid";
-        });
+        //    options.GetClaimsFromUserInfoEndpoint = true;
+        //    options.MapInboundClaims = false;
+        //    options.TokenValidationParameters.NameClaimType = "userid";
+        //    options.TokenValidationParameters.RoleClaimType = "role";
+        //    //options.TokenValidationParameters.UserNameClaimType = "userid";
+        //});
 
         //builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
 
@@ -217,6 +217,6 @@ public class Program
     private static Task<string> GetUserIdFromDatabaseAsync(string userName)
     {
         // Dummy implementation for compilation
-        return Task.FromResult("dummyUserId");
+        return Task.FromResult("U06337");
     }
 }

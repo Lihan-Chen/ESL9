@@ -1,0 +1,7 @@
+﻿@{
+    ViewData["Title"] = "Check-In Confirmed";
+}
+<div class="alert alert-success mt-4">
+    <strong>@(TempData["CheckInSuccess"] ?? "Success")</strong>
+</div>
+<p><a asp-action="Index" class="btn btn-outline-primary">New Check-In</a></p>

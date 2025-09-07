@@ -1,4 +1,5 @@
-﻿using Core.Models.BusinessEntities;
+﻿using Application.Dtos;
+using Core.Models.BusinessEntities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,11 @@ namespace Application.Interfaces.IRepositories
 {
     public interface IAllEventRepository // : IEventRepository<AllEvent>
     {
-        public IQueryable<AllEvent> GetDefaultAllEventsByFacil(int FacilNo, DateTime startDate, DateTime endDate);
+        public IQueryable<ViewAllEventsCurrent> GetDefaultAllEventsByFacil(int FacilNo, DateTime startDate, DateTime endDate);
 
-        public IQueryable<AllEvent> GetByEvent(int FacilNo, int LogTypeNo, string EventID, int EventID_RevNo);
+        public IQueryable<ViewAllEventsCurrent> GetByEvent(int FacilNo, int LogTypeNo, string EventID, int EventID_RevNo);
+
+        public IQueryable<AllEventDetailsDto> GetAllEventDetails(int FacilNo, int LogTypeNo, string EventID, int EventID_RevNo);
 
         public IQueryable<AllEvent> FindEvents(Expression<Func<AllEvent, bool>> predicate);
 
@@ -22,7 +25,7 @@ namespace Application.Interfaces.IRepositories
         public IQueryable<ViewAllEventsCurrent> GetAllEventsCurrentQuery(int FacilNo);
 
         // _sql = "ESL.ESL_ALLEVENTS_ACTIVE_PROC";
-        public IQueryable<ViewAllEventsCurrent> GetListQuery(int? facilNo, int? logTypeNo, string strStartDate, string strEndDate, string strSearch, string strOperatorType);
+        public IQueryable<ViewAllEventsCurrent> GetListQuery(int? facilNo, int? logTypeNo, DateTime startDate, DateTime endDate, string strSearch, string strOperatorType);
 
         public IQueryable<ViewAllEventsCurrent> GetItemQuery(int? facilNo, int? logTypeNo, string eventID, int? eventID_RevNo);
 

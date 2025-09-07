@@ -33,14 +33,17 @@ namespace Infrastructure.DataAccess.Repositories
             //return allEvents;
         }
 
-        public IQueryable<AllEvent> GetDefaultAllEventsByFacil(int FacilNo, DateTime startDate, DateTime endDate)
+        public IQueryable<ViewAllEventsCurrent> GetDefaultAllEventsByFacil(int FacilNo, DateTime startDate, DateTime endDate)
         {
-            return _dbSet.Where(x => x.FacilNo == FacilNo & x.EventDate >= startDate & x.EventDate <= endDate).AsNoTracking();
+            // need to convert DateTime to string
+            // consider using stored procedures
+            
+            return _dbSetCurrent.Where(x => x.FacilNo == FacilNo & x.EventDate >= startDate & x.EventDate <= endDate).AsNoTracking();
         }
 
-        public IQueryable<AllEvent> GetByEvent(int FacilNo, int LogTypeNo, string EventID, int EventID_RevNo) //, AllEvent? allEvent
+        public IQueryable<ViewAllEventsCurrent> GetByEvent(int FacilNo, int LogTypeNo, string EventID, int EventID_RevNo) //, AllEvent? allEvent
         {
-            return _dbSet.Where(x => x.FacilNo == FacilNo & x.LogTypeNo == LogTypeNo & x.EventID == EventID & x.EventID_RevNo == EventID_RevNo);
+            return _dbSetCurrent.Where(x => x.FacilNo == FacilNo & x.LogTypeNo == LogTypeNo & x.EventID == EventID & x.EventID_RevNo == EventID_RevNo);
 
             //if (allEvent == null) return null;
 
@@ -58,7 +61,9 @@ namespace Infrastructure.DataAccess.Repositories
                     LogTypeNo = x.LogTypeNo,
                     EventID = x.EventID,
                     EventID_RevNo = x.EventID_RevNo,
-                    EventHighlight = String.IsNullOrEmpty(x.Subject) ? string.Empty : $"{x.Subject}{_CrLf}" + (String.IsNullOrEmpty(x.Details) ? string.Empty : $"{x.Details}{_CrLf}") + $"Updated By: {x.UpdatedBy} on {x.UpdateDate}" //x.EventHighlight, 
+                    EventHighlight = $"{x.Subject}{_CrLf}" +
+                                     $"{x.Details}{_CrLf}" +
+                                     $"Updated By: {x.UpdatedBy} on {x.UpdateDate})", 
                     //EventTrail = x.EventTrail
                 });
         }
@@ -68,34 +73,41 @@ namespace Infrastructure.DataAccess.Repositories
 
         // TODO: consider using value objects for start-end daterange to capture business logic
         // ESL.ESL_AllEvents_Active_Proc
-        public IQueryable<ViewAllEventsCurrent> GetListQuery(int? facilNo, int? logTypeNo, string strStartDate, string strEndDate, string? strSearch, string strOperatorType)
+        public IQueryable<ViewAllEventsCurrent> GetListQuery(int? facilNo, int? logTypeNo, DateTime startDate, DateTime endDate, string? strSearch, string strOperatorType)
         {
-            DateTime _startDate;
-            DateTime _endDate;
-            string _dateFormat = "MM/dd/yyyy";
-            CultureInfo provider = CultureInfo.InvariantCulture;
-
-            var query = _dbSetCurrent
-                   .AsNoTracking()
-                   .TagWith("GetListQuery");
-
-            bool isValidStartDate = DateTime.TryParseExact(strStartDate, _dateFormat, provider, DateTimeStyles.None, out _startDate);
-            bool isValidEndDate = DateTime.TryParseExact(strEndDate, _dateFormat, provider, DateTimeStyles.None, out _endDate);
-
-            if (isValidStartDate && isValidEndDate && _endDate >= _startDate)
+            //DateTime _startDate;
+            //DateTime _endDate;
+            //string _dateFormat = "yyyy-MM-dd";
+            //CultureInfo provider = CultureInfo.InvariantCulture;
+            if (endDate < startDate)
             {
-                query = query.Where(a => a.EventDate >= _startDate && a.EventDate <= _endDate);
+                // return null; // "End Date must not be earlier than Start Date");
             }
 
-            query = query.Where(a => (!facilNo.HasValue || a.FacilNo == facilNo) &&
-                               (!logTypeNo.HasValue || a.LogTypeNo == logTypeNo) &&
-                               (string.IsNullOrWhiteSpace(strOperatorType) || a.OperatorType == strOperatorType));
+            var query = GetDefaultAllEventsByFacil((int)facilNo!, startDate, endDate).Where(a => a.OperatorType == strOperatorType)
+                   .TagWith("GetListQuery");
 
-            query = query.Where(a => string.IsNullOrWhiteSpace(strSearch) ||
-                               (a.Subject != null && a.Subject.Contains(strSearch, StringComparison.CurrentCultureIgnoreCase)) ||
-                               (a.Details != null && a.Details.Contains(strSearch, StringComparison.CurrentCultureIgnoreCase)) ||
-                               (a.EventID != null && a.EventID.Contains(strSearch, StringComparison.CurrentCultureIgnoreCase)) ||
-                               (a.Notes != null && a.Notes.Contains(strSearch, StringComparison.CurrentCultureIgnoreCase)));
+            if (logTypeNo != null)
+            {
+                query = query.Where(a => a.LogTypeNo == logTypeNo);
+            }
+
+            if (strSearch != null)
+            {
+                string searchUpper = strSearch.ToUpperInvariant();
+                query = query.Where(e =>
+                    e.EventID!.Contains(strSearch, StringComparison.OrdinalIgnoreCase) ||
+                    e.Subject!.Contains(strSearch, StringComparison.OrdinalIgnoreCase) ||
+                    e.Details!.Contains(strSearch, StringComparison.OrdinalIgnoreCase) ||
+                    e.UpdatedBy!.Contains(strSearch, StringComparison.OrdinalIgnoreCase) ||
+                    e.Notes!.Contains(strSearch, StringComparison.OrdinalIgnoreCase) ||
+                    //e.ClearanceID!.Contains(strSearch, StringComparison.OrdinalIgnoreCase) ||
+                    e.FacilAbbr.Contains(strSearch, StringComparison.OrdinalIgnoreCase) ||
+                    e.UpdateDate!.Contains(strSearch, StringComparison.OrdinalIgnoreCase)
+                    //(DateTime.TryParse(e.UpdateDate, out var updateDate) &&
+                    //    updateDate.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture).Contains(strSearch, StringComparison.OrdinalIgnoreCase))
+                );
+            }
 
             return query.OrderByDescending(e => e.EventDate).ThenByDescending(u => u.UpdateDate);
         }
@@ -145,43 +157,14 @@ namespace Infrastructure.DataAccess.Repositories
             return _date;
         }
 
+        IQueryable<ViewAllEventsCurrent> IAllEventRepository.GetByEvent(int facilNo, int logTypeNo, string eventID, int eventID_RevNo)
+        {
+            if (string.IsNullOrEmpty(eventID)) return Enumerable.Empty<ViewAllEventsCurrent>().AsQueryable();
+
+            return _dbSetCurrent.Where(x => x.FacilNo == facilNo & x.LogTypeNo == logTypeNo & x.EventID == eventID & x.EventID_RevNo == eventID_RevNo);
+        }
+
         #endregion
-
-        //public async AllEvent? GetAllEvent(int FacilNo, int LogTypeNo, string EventID, int EventID_RevNo)
-        //{
-        //    return await dbSet.FirstOrDefaultAsync(x => x.FacilNo == FacilNo & x.LogTypeNo == LogTypeNo & x.EventID == EventID & x.EventID_RevNo == EventID_RevNo);
-        //}
-
-        //public async Task<bool> AddAsync(AllEvent entity)
-        //{
-        //    await dbSet.AddAsync(entity); 
-        //    return true;
-        //}
-
-        //public new Task<bool> DeleteAsync(int id)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public new Task<IEnumerable<AllEvent>> FindAsync(Expression<Func<AllEvent, bool>> predicate)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public Task<IEnumerable<AllEvent>> GetAllAsync()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public Task<AllEvent> GetByIdAsync(int id)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public Task<bool> UpsertAsync(AllEvent entity)
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         #region Reference
 

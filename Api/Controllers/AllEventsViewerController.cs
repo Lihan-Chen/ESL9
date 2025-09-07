@@ -11,11 +11,17 @@ namespace Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AllEventController(IAllEventService allEventService, ICoreService coreService, ILogger<AllEventController> logger) : ControllerBase
+    public class AllEventsViewerController(IAllEventService allEventService, ICoreService coreService, ILogger<AllEventController> logger) : ControllerBase
     {
         private readonly IAllEventService _allEventService = allEventService ?? throw new ArgumentNullException(nameof(allEventService));
         private readonly ICoreService _coreService = coreService ?? throw new ArgumentNullException(nameof(coreService));
         private readonly ILogger<AllEventController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+        int _facilNo;
+        string _operatorType;
+        const int _pageSize = 50;
+        const int _daysOffset = -7;
+
 
         #region ESLCore
 
@@ -66,7 +72,7 @@ namespace Api.Controllers
 
         // not used, revisit if necessary (EF Core version is better)
         [HttpGet("AllEventsByFacilityProcedure/{facilNo}")]
-        public async Task<ActionResult<List<ViewAlleventsCurrent>>> GetAlleventListProcedure(
+        public async Task<ActionResult<List<ViewAllEventsCurrent>>> GetAlleventListProcedure(
             int facilNo, int? logTypeNo, DateOnly? startDate, DateOnly? endDate, string? searchString, string? alert, int? page, bool? operatorType = false)
         {
             _facilNo = facilNo;
@@ -116,87 +122,5 @@ namespace Api.Controllers
         }
 
         #endregion ESLCore
-
-
-
-
-
-        [HttpGet("GetAllEvents")]
-        public IActionResult GetAllEvents(int facilNo, DateOnly startDate, DateOnly endDate, string? keyword, bool primaryOperator)
-        {
-            try
-            {
-                var events = _allEventService.GetAllEvents(facilNo, startDate, endDate, keyword, primaryOperator);
-
-                return Ok(events);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving all events");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving events.");
-            }
-        }
-
-        [HttpGet("GetAllEventDetails")]
-        public IActionResult GetAllEventDetails(int? facilNo, int? logTypeNo, string eventID, int? eventID_RevNo)
-        {
-            try
-            {
-                var eventDetails = _allEventService.GetAllEventDetails(facilNo, logTypeNo, eventID, eventID_RevNo);
-                return Ok(eventDetails);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving this event details");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving event details.");
-            }
-        }
-
-        [HttpGet("GetAllEventsByFacilNo")]
-        public async Task<IActionResult> GetAllEventByFacilNo(int facilNo, int? logTypeNo)
-        {
-            try
-            {
-                var events = await _allEventService.GetAllEvents(facilNo, logTypeNo);
-                return Ok(events);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving events by facility number");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving events.");
-            }
-        }
-
-        // GetDefaultAllEventsByFacil(int FacilNo, DateTime startDate, DateTime endDate)
-        [HttpGet("GetAllCurrentEventsByFacilNo")]
-        public async Task<IActionResult> GetAllEventByFacilNo(int facilNo, int? logTypeNo, DateTime startDate, DateTime endDate)
-        {
-            try
-            {
-                var events = await _allEventService.GetDefaultAllEventsByFacil(facilNo, startDate, endDate);
-                return Ok(events);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving events by facility number");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving events.");
-            }
-        }
-
-        // GetItemQuery(int? facilNo, int? logTypeNo, string eventID, int? eventID_RevNo)
-        [HttpGet("GetEvent")]
-        public async Task<IActionResult> GetEvent(int facilNo, int logTypeNo, string eventID, int eventID_RevNo)
-        {
-            try
-            {
-                var eventItem = await _allEventService.GetEvent(facilNo, logTypeNo, eventID, eventID_RevNo);
-                return Ok(eventItem);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving event");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the event.");
-            }
-        }
     }
 }

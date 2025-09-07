@@ -16,6 +16,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "WebApi\WebApi.csproj", "{74F9D51B-332C-4AF1-BF2B-57B59DBB8B4F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prototype", "Prototype\Prototype.csproj", "{DEF32A31-9CBA-43B0-B387-DE290F9DD00C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{345C0098-7B65-457F-8AA4-8CA3CBD6D876} = {345C0098-7B65-457F-8AA4-8CA3CBD6D876}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

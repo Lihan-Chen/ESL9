@@ -16,15 +16,15 @@ namespace Mvc.Models
         //public string Password { get; set; }
 
         [Display(Name = "Facility")]
-        public required Facil FacilNo { get; set; }
+        public required Facil SelectedFacilNo { get; set; }
 
-        [Display(Name = "Primary Operator?")]
-        public required bool IsPrimaryOperator { get; set; }
+        [Display(Name = "Operator Type")]
+        public required OperatorType OperatorType { get; set; }
 
         [Display(Name = "Shift: Day/Night")]
-        public required Shift Shft { get; set; }
+        public required Shift Shift { get; set; } // = DateTime.Now > DateTime.Parse(DateTimAppConstants.DayShiftStartText), 
 
-        [Display(Name = "Remember me?")]
+        //[Display(Name = "Remember me?")]
         public bool RememberMe { get; set; }
 
         // Fix CS0234: Use System.Enum.GetValues instead of Enum.facil.GetValues

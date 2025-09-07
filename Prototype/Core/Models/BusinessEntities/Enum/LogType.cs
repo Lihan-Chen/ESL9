@@ -1,4 +1,4 @@
-﻿namespace Prototype.Models.Enum
+﻿namespace Prototype.Core.Models.BusinessEntities.Enum
 {
     public enum LogType
     {

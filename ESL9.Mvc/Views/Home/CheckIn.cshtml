@@ -1,13 +1,87 @@
-﻿
+﻿@using Core.Models.Enums
+@using Mvc.Models.Enum;
+@model Mvc.Models.CheckInModel
 @{
+    string _userName = User.FindFirst(c => c.Type == "name")?.Value!;
+    string _firstName = _userName.Split(",")[1];
+    string _lastName = _userName.Split(",")[0];
     ViewData["Title"] = "Check In";
 }
-@*
-    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-*@
 
+<h4>Checking In @_firstName @_lastName</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="CheckIn" method="post" class="needs-validation" novalidate>
+            @Html.AntiForgeryToken()
+            <fieldset class="border rounded-3 p-3 mb-4">
+            <legend class="float-none w-auto px-2 fw-semibold">@_firstName @_lastName</legend>
+            <input type="hidden" asp-for="UserID" />
+            <input type="hidden" asp-for="RememberMe" />
 
+            <!-- Shift -->
+            <div class="mb-3">
+                <label class="form-label d-block fw-semibold">Shift</label>
+                <div class="btn-group" role="group" aria-label="Shift selection">
+                    @foreach (var shift in Enum.GetValues(typeof(Shift)).Cast<Shift>())
+                    {
+                        var id = $"shift_{shift}";
+                        <input type="radio"
+                               class="btn-check"
+                               name="Shift"
+                               id="@id"
+                               value="@shift"
+                               @(Model.Shift.Equals(shift) ? "checked" : "") required />
+                        <label class="btn btn-outline-primary" for="@id">@shift</label>
+                    }
+                </div>
+                <div class="form-text text-danger">@Html.ValidationMessageFor(m => m.Shift)</div>
+            </div>
 
-<p>This is a partial view for checking in as a registered operator.  A user, who must be an operator, must identify his/her session as an Day or Night shift Primary or Secondary operator for a selected plant (with plant from session cookie as a default option).</p>
-<blockquote>
+            <!-- Assignment -->
+            <div class="mb-3">
+                <label class="form-label d-block fw-semibold">Operator Type</label>
+                <div class="btn-group" role="group" aria-label="Assignment selection">
+                    @foreach (var operatorType in Enum.GetValues(typeof(OperatorType)).Cast<OperatorType>())
+                    {
+                        var id = $"operatorType_{operatorType}";
+                        <input type="radio"
+                               class="btn-check"
+                               name="OperatorType"
+                               id="@id"
+                               value="@operatorType"
+                               @(Model.OperatorType.Equals(operatorType) ? "checked" : "") required />
+                        <label class="btn btn-outline-secondary" for="@id">@operatorType</label>
+                    }
+                </div>
+                <div class="form-text text-danger">@Html.ValidationMessageFor(m => m.OperatorType)</div>
+            </div>
 
+            <!-- Facilities -->
+            <div class="mb-4">
+                <label class="form-label d-block fw-semibold">Facility</label>
+                <div class="d-flex flex-wrap gap-2" role="group" aria-label="Facil selection">
+                    @foreach (var facil in Model.FacilOptions)
+                    {
+                        var id = $"Facil_{facil.FacilNo}";
+                        <input type="radio"
+                               class="btn-check"
+                               name="SelectedFacilNo"
+                               id="@id"
+                               value="@facil.FacilNo"
+                        @(((int)Model.SelectedFacilNo) == facil.FacilNo ? "checked" : "") required />
+                        <label class="btn btn-outline-success" for="@id">@facil.FacilName</label>
+                    }
+                </div>
+                <div class="form-text text-danger">@Html.ValidationMessageFor(m => m.SelectedFacilNo)</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-check2-circle me-1"></i>Check In
+            </button>
+            </fieldset>
+        </form>
+
+@section Scripts {
+            <partial name="_ValidationScriptsPartial" />
+}

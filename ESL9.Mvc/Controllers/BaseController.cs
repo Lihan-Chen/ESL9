@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.IServices;
+using Core.Models.Enums;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -13,31 +14,62 @@ namespace Mvc.Controllers
 
         ILogger<T> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
+        #region Basic DateTime
+
+        protected DateTime ShiftStartTime = DateTime.Today.Add(TimeSpan.Parse(AppConstants.DayShiftStartText));
+        protected DateTime ShiftEndTime = DateTime.Today.Add(TimeSpan.Parse(AppConstants.DayShiftEndText));
+        //protected DateTime Now = DateTime.Now;
+        protected static DateTime Now = DateTime.Now;
+        //DateTime shiftStartTime = Convert.ToDateTime(AppConstants.DayShiftStartText); // Converts only the time
+        //DateTime shiftEndTime = Convert.ToDateTime(AppConstants.DayShiftEndText);
+        protected static DateOnly Today = DateOnly.FromDateTime(DateTime.Now);
+        protected static DateOnly Tomorrow = Today.AddDays(+1);
+        // ToDo: check if this format is correct
+        protected string YesterdayDate = Today.AddDays(-1).ToString("MM/dd/yyyy");
+        protected string TodayDate = Today.ToString("yyyyMMdd");
+        protected string TomorrowDate = Tomorrow.ToString("yyyyMMdd");
+        protected int DaysOffSet = -2;
+
+        // TimeSpan for two and half hours
+        protected TimeSpan TimeSpan = new(2, 30, 0); // = new TimeSpan(2, 30, 0); 
+
+        protected bool OkToProceed = false;
+
+        protected int _pageSize = 40;
+
+
+        #endregion
+
         #region Public Properties for User Session
 
         public bool IsAuthenticated => HttpContext.User.Identity?.IsAuthenticated ?? false;
 
         public string? UserName => IsAuthenticated ? User.FindFirst(c => c.Type == AppConstants.NameClaimType)?.Value! : string.Empty;
 
-        public string? UserID => !User.HasClaim(c => c.Type == AppConstants.UserIDClaimType)
-            ? _coreService.GetEmployeeIDByEmployeeName(UserName!) ?? string.Empty
-            : GetClaimValue(User, AppConstants.UserIDClaimType) ?? string.Empty;
+        // The first thing for the user to do is to get authenticated and have a UserID claim
+        // If UserID claim is not present, it indicates a new session
+        public bool IsNewSession => !User.HasClaim(c => c.Type == AppConstants.UserIDClaimType);
 
-            //!string.IsNullOrEmpty(UserName) ? _coreService.GetEmployeeIDByEmployeeName(UserName) : null;
+        public string? UserID => User.HasClaim(c => c.Type == AppConstants.UserIDClaimType)
+            ? GetClaimValue(User, AppConstants.UserIDClaimType) ?? string.Empty :
+              _coreService.GetEmployeeIDByEmployeeName(UserName!) ?? string.Empty;
+
+        // User is checked in and ready to go only if DefaultFacilNo claim is present, Public user does not have this claim
+        public bool IsUserCheckedIn => !User.HasClaim(c => c.Type == AppConstants.DefaultFacilNoClaimType);
+
 
         // Update DefaultFacilNo property to parse the claim value to int? instead of returning string
-
         public int? DefaultFacilNo =>
             User.HasClaim(c => c.Type == AppConstants.DefaultFacilNoClaimType)
                 ? int.TryParse(GetClaimValue(User, AppConstants.DefaultFacilNoClaimType), out var result) ? result : (int?)null
                 : null;
 
         // Role is valid only if associated with a FacilNo (ValueObject)
-        public string? Role => User.HasClaim(c => c.Type == AppConstants.RoleClaimType) ? GetClaimValue(User, AppConstants.RoleClaimType) : null; // User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+        //public string? Role => User.HasClaim(c => c.Type == AppConstants.RoleClaimType) ? GetClaimValue(User, AppConstants.RoleClaimType) : null; // User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
-        public int? ShiftNo => User.HasClaim(c => c.Type == AppConstants.ShiftNoClaimType) ? int.Parse(GetClaimValue(User, AppConstants.ShiftNoClaimType)!) : null;
+        //public int? ShiftNo => User.HasClaim(c => c.Type == AppConstants.ShiftNoClaimType) ? int.Parse(GetClaimValue(User, AppConstants.ShiftNoClaimType)!) : null;
 
-        public bool? IsPrimaryOperator => User.HasClaim(c => c.Type == AppConstants.IsPrimaryOperatorClaimType) && GetClaimValue(User, AppConstants.IsPrimaryOperatorClaimType) == "true";
+        //public bool? IsPrimaryOperator => User.HasClaim(c => c.Type == AppConstants.IsPrimaryOperatorClaimType) && GetClaimValue(User, AppConstants.IsPrimaryOperatorClaimType) == "true";
 
         #endregion Public Properties for User Session
 
@@ -46,13 +78,13 @@ namespace Mvc.Controllers
             get
             {
                 // From current parameter
-                if (UserSelectedFacilNo is not null)
+                if (UserAssignedFacilNo is not null)
                 {
-                    return UserSelectedFacilNo;
+                    return UserAssignedFacilNo;
                 }
 
-                // From session
-                if (HttpContext.Session.TryGetValue(AppConstants.SelectedFacilNoSessionKey, out var value) && value.Length > 0)
+                // From sessionkey AssignedFacilNo
+                if (HttpContext.Session.TryGetValue(AppConstants.AssignedFacilNoSessionKey, out var value) && value.Length > 0)
                 {
                     return BitConverter.ToInt32(value, 0);
                 }
@@ -65,65 +97,70 @@ namespace Mvc.Controllers
             {
                 if (value is not null)
                 {
-                    UserSelectedFacilNo = value;
-                    HttpContext.Session.SetInt32(AppConstants.SelectedFacilNoSessionKey, value.Value);
+                    UserAssignedFacilNo = value;
+                    HttpContext.Session.SetInt32(AppConstants.AssignedFacilNoSessionKey, value.Value);
                 }
             }
         }
 
-        public bool IsUserAnOperator => !string.IsNullOrEmpty(UserID) && _coreService.IsInRole(UserID, "ESL_OPERATOR", FacilNo).Result;
+        public bool IsUserAnOperator => FacilNo != null ? !string.IsNullOrEmpty(UserID) && _coreService.IsInRole(UserID, "ESL_OPERATOR", FacilNo).Result : false;
 
         public bool ShowAlert => HttpContext.Session.TryGetValue("ShowAlert", out var value) && value.Length > 0 && BitConverter.ToBoolean(value, 0);
         // Remove the problematic field initializer for userRole
         // Instead, implement userRole as a property that accesses _coreService and UserID at runtime
 
-        public string UserRole
+        internal string UserRole
         {
             get
             {
                 // If UserID is null, return "Viewer"
                 if (string.IsNullOrEmpty(UserID))
-                    return "Viewer";
+                    return "Public";
 
                 // GetRole returns a Task<string?>, so we need to await or use .Result
-                var roleTask = _coreService.GetRole(UserID, null);
-                var role = roleTask?.Result;
-                return role ?? "Viewer";
+                var roleTask = _coreService.HasAnyRoles(UserID); //GetRole(UserID, null);
+                bool? role = roleTask?.Result;
+                return role.HasValue && role.Value ? "Internal" : "Public";
             }
         }
 
-        public int? UserSelectedFacilNo; // HttpContext.Session.TryGetValue("FacilNo", out var value) && value.Length > 0 ? BitConverter.ToInt32(value, 0) : null;
+        // This is a temporary storage for the selected FacilNo during the current request
+        public int? UserAssignedFacilNo;  // => GetSessionValue<int>(AppConstants.AssignedFacilNoSessionKey);
+
+        public Shift DefaultShift =>  Now >= ShiftStartTime && Now < ShiftEndTime ? Shift.Day : Shift.Night;
+
+        // HttpContext.Session.TryGetValue("FacilNo", out var value) && value.Length > 0 ? BitConverter.ToInt32(value, 0) : null;
 
         // Check into the logic since FacilNo is set first, and may not be sufficient to indicate that user is checked in
         // Depending on role and value of ClaimTypes.Role, the user may not be checked in
-        internal bool IsUserCheckedIn(ClaimsPrincipal user)
-        {
-            bool isFacilNoSet = user.HasClaim(c => c.Type == AppConstants.DefaultFacilNoClaimType);
+        //internal bool IsUserCheckedIn(ClaimsPrincipal user)
+        //{
+        //    bool isFacilNoSet = user.HasClaim(c => c.Type == AppConstants.DefaultFacilNoClaimType);
 
-            //FacilNo = user.HasClaim(c => c.Type == "facilNo") ? int.Parse(GetClaimValue(user, "facilNo")!) : null;
+        //    //FacilNo = user.HasClaim(c => c.Type == "facilNo") ? int.Parse(GetClaimValue(user, "facilNo")!) : null;
 
-            bool isViewOnly =  isFacilNoSet && user.HasClaim(c => c.Type == AppConstants.RoleClaimType && c.Value == "Viewer");
+        //    bool isViewOnly =  isFacilNoSet && user.HasClaim(c => c.Type == AppConstants.RoleClaimType && c.Value == "Viewer");
 
-            bool isOperator = isFacilNoSet && 
-                               user.HasClaim(c => c.Type == "role" && c.Value != "Viewer") && 
-                               user.HasClaim(c => c.Type == "ShiftNo") &&
-                               user.HasClaim(c => c.Type == "OperatorType");
+        //    bool isOperator = isFacilNoSet && 
+        //                       user.HasClaim(c => c.Type == "role" && c.Value != "Viewer") && 
+        //                       user.HasClaim(c => c.Type == "ShiftNo") &&
+        //                       user.HasClaim(c => c.Type == "OperatorType");
 
-            
 
-            // determine the role of the user based on claims or session
-            if (FacilNo is not null)  // user has selected a facility
-            {
-                if (isViewOnly || isOperator) return true; // User has selected a facility and is checked in
-            }
-            
-            return false;
 
-            //return user.Identity?.IsAuthenticated == true &&
-            //           user.HasClaim(c => c.Type == "FacilNo") &&
-            //           user.HasClaim(c => c.Type == "ShiftNo") &&
-            //           user.HasClaim(c => c.Type == "OperatorType");
-        }
+        //    // determine the role of the user based on claims or session
+        //    if (FacilNo is not null)  // user has selected a facility
+        //    {
+        //        if (isViewOnly || isOperator) return true; // User has selected a facility and is checked in
+        //    }
+
+        //    return false;
+
+        //return user.Identity?.IsAuthenticated == true &&
+        //           user.HasClaim(c => c.Type == "FacilNo") &&
+        //           user.HasClaim(c => c.Type == "ShiftNo") &&
+        //           user.HasClaim(c => c.Type == "OperatorType");
+        //}
 
         //public string? GetClaimValue(ClaimsPrincipal principal, string claimType)
         //{
@@ -148,7 +185,7 @@ namespace Mvc.Controllers
             return user.Claims.FirstOrDefault(c => c.Type == claimType);
         }
 
-        internal Task<ClaimsPrincipal>? SetClaim(ClaimsPrincipal user, string? claimType, string? claimValue)
+        internal Task<ClaimsPrincipal>? SetClaim(ClaimsPrincipal user, string? claimType, string? claimValue, bool rememberMe)
         {
             if (string.IsNullOrEmpty(claimType) || string.IsNullOrEmpty(claimValue))
             {
@@ -168,10 +205,18 @@ namespace Mvc.Controllers
             var newClaim = new Claim(claimType, claimValue);
             identity.AddClaim(newClaim);
 
-            // Sign in again to update claims
+            // Set authentication properties
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = rememberMe, // <-- This enables "Remember Me"
+                ExpiresUtc = rememberMe ? DateTimeOffset.UtcNow.AddDays(14) : DateTimeOffset.UtcNow.AddHours(1)
+            };
+
+            // Sign in again to update claims and persist the changes
             HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(identity)
+                new ClaimsPrincipal(identity),
+                authProperties
             ).Wait(); // Wait for the sign-in to complete
 
             return Task.FromResult(new ClaimsPrincipal(identity));
@@ -180,6 +225,8 @@ namespace Mvc.Controllers
         // Fix the method signature to use IEnumerable<KeyValuePair<string, string>> instead of IEnumerable<string, string>
         internal Task<ClaimsPrincipal> SetClaim(ClaimsPrincipal user, IEnumerable<KeyValuePair<string, string>> claims, bool rememberMe)
         {
+            var identity = (ClaimsIdentity)user.Identity!;
+            
             foreach (var c in claims)
             {
                 if (string.IsNullOrEmpty(c.Key) || string.IsNullOrEmpty(c.Value))
@@ -187,11 +234,15 @@ namespace Mvc.Controllers
                     continue; // Skip empty claims
                 }
 
-                Claim claim = new Claim(c.Key, c.Value);
-                user = SetClaim(user, c.Key, c.Value).Result;
-            }
+                var oldClaim = identity.FindFirst(c.Key);
+                if (oldClaim != null)
+                {
+                    identity.RemoveClaim(oldClaim);
+                }
 
-            var identity = (ClaimsIdentity)user.Identity!;
+                Claim claim = new Claim(c.Key, c.Value);
+                identity.AddClaim(claim);
+            }
 
             // Set authentication properties
             var authProperties = new AuthenticationProperties

@@ -50,10 +50,10 @@ namespace Infrastructure.DataAccess.Repositories
             // check if facilNo is in range (1, 13) where 13 is for DVL test only
             if (facilNo is null || facilNo < 1 || facilNo > 13)
             {
-                return await _context.UserRoles.Where(r => r.UserID == userID).OrderBy(o => o.FacilNo).Select(s => s.Role ?? string.Empty).FirstOrDefaultAsync();
+                return await _context.UserRoles.TagWith($"GetRole with {userID}").Where(r => r.UserID == userID).OrderBy(o => o.FacilNo).Select(s => s.Role ?? string.Empty).FirstOrDefaultAsync();
             }
 
-            return await _context.UserRoles.Where(r => r.UserID.ToUpper() == userID.ToUpper() && r.FacilNo == facilNo).Select(s => s.Role ?? string.Empty).FirstOrDefaultAsync();
+            return await _context.UserRoles.TagWith($"GetRole with {userID}, {facilNo}").Where(r => r.UserID.ToUpper() == userID.ToUpper() && r.FacilNo == facilNo).Select(s => s.Role ?? string.Empty).FirstOrDefaultAsync();
         }
 
         public bool IsInRole(string userID, string role, int? facilNo)
@@ -98,7 +98,7 @@ namespace Infrastructure.DataAccess.Repositories
                 throw new ArgumentNullException(nameof(userID), "User ID cannot be null or empty.");
             }
             // Check if the user has any roles
-            return await _context.UserRoles.AnyAsync(r => r.UserID.ToUpper() == userID.ToUpper());
+            return await _context.UserRoles.Where(r => r.UserID.ToUpper() == userID.ToUpper()).CountAsync() > 0;
         }
     }
 }

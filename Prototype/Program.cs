@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -21,35 +21,34 @@ namespace Prototype
                 .EnableTokenAcquisitionToCallDownstreamApi()
                 .AddInMemoryTokenCaches();
 
+
             // Add OpenIdConnect options separately, after AddMicrosoftIdentityWebApp
-            builder.Services.PostConfigure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, static options =>
-            {
-                // ... your other options ...
-                options.Events = new OpenIdConnectEvents
-                {
-                    OnTokenValidated = static async context =>
-                    {
-                        var principal = context.Principal;
-                        var userName = principal!.FindFirst("name")?.Value; // or whatever claim is available
+            //builder.Services.PostConfigure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, static options =>
+            //{
+            //    // ... your other options ...
+            //    options.Events = new OpenIdConnectEvents
+            //    {
+            //        OnTokenValidated = static async context =>
+            //        {
+            //            var principal = context.Principal;
+            //            var userName = principal!.FindFirst("name")?.Value; // or whatever claim is available
 
-                        // Fetch user ID from your database/service
-                        var userId = await GetUserIdFromDatabaseAsync(userName!); // implement this method
-                        var userDomain = await GetUserDomainFromDataseAsync(userId);
+            //            // Fetch user ID from your database/service
+            //            var userId = await GetUserIdFromDatabaseAsync(userName!); // implement this method
 
-                        if (!string.IsNullOrEmpty(userId))
-                        {
-                            var identity = (ClaimsIdentity)principal.Identity!;
-                            identity.AddClaim(new Claim("userid", userId));
-                            identity.AddClaim(new Claim("userdomain", userDomain));
-                        }
-                    }
-                };
-            });
+            //            if (!string.IsNullOrEmpty(userId))
+            //            {
+            //                var identity = (ClaimsIdentity)principal.Identity!;
+            //                identity.AddClaim(new Claim("userid", userId));
+            //            }
+            //        }
+            //    };
+            //});
 
             // to map the claims from the OpenID Connect token to the application claims
             builder.Services.Configure<MicrosoftIdentityOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
             {
-                options.TokenValidationParameters.NameClaimType = "employee_id";
+                options.TokenValidationParameters.NameClaimType = "userid";
                 options.TokenValidationParameters.RoleClaimType = "role";
             });
 
@@ -95,6 +94,8 @@ namespace Prototype
 
             app.UseSession();
 
+            app.UseAuthentication();
+
             app.UseAuthorization();
 
             app.MapStaticAssets();
@@ -122,19 +123,11 @@ namespace Prototype
             app.Run();
         }
 
-        // Must implement this method somewhere in your codebase or web api
-        private static Task<string> GetUserIdFromDatabaseAsync(string userName)
-        {
-            // Dummy implementation for compilation
-            // return Task.FromResult("dummyUserId");
-            return Task.FromResult("U06337");
-        }
-
-        private static Task<string> GetUserDomainFromDataseAsync(string userId)
-        {
-            // Dummy implementation for compilation
-            // return Task.FromResult("dummyUserId");
-            return Task.FromResult("Public");
-        }
+        // You must implement this method somewhere in your codebase
+        //private static Task<string> GetUserIdFromDatabaseAsync(string userName)
+        //{
+        //    // Dummy implementation for compilation
+        //    return Task.FromResult("U06337");
+        //}
     }
 }

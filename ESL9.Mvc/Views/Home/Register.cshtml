@@ -28,21 +28,21 @@
                 </button>
             }
         </div>
-        <input type="hidden" asp-for="FacilNo" id="FacilNo" />
+        <input type="hidden" asp-for="SelectedFacilNo" id="FacilNo" />
     </div>
 
     <div class="mb-3 form-check form-switch">
-        <input asp-for="IsPrimaryOperator" class="form-check-input" />
-        <label asp-for="IsPrimaryOperator" class="form-check-label"></label>
+        <input asp-for="OperatorType" class="form-check-input" />
+        <label asp-for="OperatorType" class="form-check-label"></label>
     </div>
 
     <div class="mb-3">
         <label class="form-label d-block">Shift</label>
         <div class="btn-group" role="group" aria-label="Shift selection">
-            <input type="radio" class="btn-check" name="Shft" id="shiftDay" value="1" @(Model.Shft == Shift.Day ? "checked" : "")>
+            <input type="radio" class="btn-check" name="Shft" id="shiftDay" value="1" @(Model.Shift == Shift.Day ? "checked" : "")>
             <label class="btn btn-outline-secondary" for="shiftDay">Day</label>
 
-            <input type="radio" class="btn-check" name="Shft" id="shiftNight" value="2" @(Model.Shft == Shift.Night ? "checked" : "")>
+            <input type="radio" class="btn-check" name="Shft" id="shiftNight" value="2" @(Model.Shift == Shift.Night ? "checked" : "")>
             <label class="btn btn-outline-secondary" for="shiftNight">Night</label>
         </div>
     </div>

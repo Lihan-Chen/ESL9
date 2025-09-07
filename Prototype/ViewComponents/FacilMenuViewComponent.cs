@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Prototype.Models.Enum;
+using Prototype.Core.Models.BusinessEntities.Enum;
 using Prototype.ViewModels;
 
 namespace Prototype.ViewComponents
