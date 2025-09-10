@@ -19,89 +19,76 @@ namespace Api.Controllers
 
         int _facilNo;
         string _operatorType;
-        const int _pageSize = 50;
-        const int _daysOffset = -7;
+        const int _pageSize = 20;
+        const int _daysOffset = -2;
 
 
         #region ESLCore
 
         // GET: api/ViewAlleventsCurrents/5
         [HttpGet("AllEventsByFacility/{facilNo}")]
-        //[Route("AllEvents")]
-        public async Task<ActionResult<List<ViewAllEventsCurrent>>> GetAlleventList(int facilNo, int? logTypeNo, DateOnly? startDate, DateOnly? endDate, string? searchString, string? alert, int? page, bool? operatorType = false) // , string active, string sortOrder, string currentFilter, string searchString, int? page)
+        public async Task<ActionResult<List<ViewAllEventsCurrent>>> GetAlleventList(int facilNo, int? logTypeNo, DateOnly? startDate, DateOnly? endDate, string? searchString, string? alert, int? pageNo = 1, int? pageSize = _pageSize, bool operatorType = false)
         {
             _facilNo = facilNo;
 
-            _operatorType = (bool)operatorType ? "Primary" : "Secondary";
-
-            // _shiftNo = DateTime.Now
-
-            DateOnly _enDt = endDate ?? DateOnly.FromDateTime(DateTime.Now).AddDays(1);
-
-            DateOnly _stDt = startDate ?? _enDt.AddDays(_daysOffset); // for DateTime .AddTicks(-1);
-
-            // Fix for CS0019: Convert DateOnly to DateTime for comparison with DateTime? type
-            var query = _context.ViewAlleventsCurrents.AsNoTracking()
-                .TagWith("ESL.ESL_ALLEVENTS_ACTIVE_PROC")
-                .Where(a => a.FacilNo == facilNo
-                            && a.EventDate >= _stDt.ToDateTime(TimeOnly.MinValue)
-                            && a.EventDate <= _enDt.ToDateTime(TimeOnly.MaxValue)
-                            && a.OperatorType == _operatorType);
-
-            if (logTypeNo != null)
-
-                query = query.Where(e => e.LogTypeNo == logTypeNo);
-
-            if (searchString != null)
+            if (endDate != null && startDate != null && endDate < startDate)
             {
-                query = query.Where(e => EF.Functions.Like(e.EventID.ToUpper(), searchString.ToUpper())
-                                      || EF.Functions.Like(e.Subject!.ToUpper(), searchString.ToUpper())
-                                      || EF.Functions.Like(e.Details!.ToUpper(), searchString.ToUpper()));
+                return BadRequest("End Date must be greater than or equal to Start Date.");
             }
 
-            var currentAllEvents = await query.OrderByDescending(o => o.EventDate).ThenByDescending(o => o.EventTime).Take(_pageSize).Skip(0).ToListAsync();
+            DateOnly _enDt = endDate ?? DateOnly.FromDateTime(DateTime.Now).AddDays(1);
+            DateOnly _stDt = startDate ?? _enDt.AddDays(_daysOffset);
 
+            var currentAllEventsEnumerable = await _allEventService.GetAllEventsAsync(facilNo, _stDt, _enDt, searchString, operatorType, pageNo, pageSize);
 
-            if (currentAllEvents == null)
+            if (currentAllEventsEnumerable == null)
             {
                 return NotFound(alert);
             }
+
+            var currentAllEvents = currentAllEventsEnumerable.ToList();
 
             return currentAllEvents;
         }
 
         // not used, revisit if necessary (EF Core version is better)
         [HttpGet("AllEventsByFacilityProcedure/{facilNo}")]
-        public async Task<ActionResult<List<ViewAllEventsCurrent>>> GetAlleventListProcedure(
+        public async Task<ActionResult<IEnumerable<ViewAllEventsCurrent>>> GetAlleventListProcedure(
             int facilNo, int? logTypeNo, DateOnly? startDate, DateOnly? endDate, string? searchString, string? alert, int? page, bool? operatorType = false)
         {
-            _facilNo = facilNo;
+            //_facilNo = facilNo;
 
-            _operatorType = operatorType == true ? "Primary" : "Secondary";
+            //_operatorType = operatorType == true ? "Primary" : "Secondary";
 
-            int _page = page ?? 0;
+            int _page = page ?? 1;
 
-            DateOnly today = DateOnly.FromDateTime(DateTime.Now).AddDays(1);
+            int pageSize = 20;
 
-            DateOnly _enDt = endDate ?? DateOnly.FromDateTime(DateTime.Now).AddDays(1);
-            DateOnly _stDt = startDate ?? _enDt.AddDays(_daysOffset); // for DateTime add .AddTicks(-1);
+            //DateOnly today = DateOnly.FromDateTime(DateTime.Now).AddDays(1);
 
-            // Must match the format of the input Date format
-            string _stDtStr = _stDt.ToString("MM/dd/yyyy");
-            string _enDtStr = _enDt.ToString("MM/dd/yyyy");
+            //DateOnly _enDt = endDate ?? DateOnly.FromDateTime(DateTime.Now).AddDays(1);
+            //DateOnly _stDt = startDate ?? _enDt.AddDays(_daysOffset); // for DateTime add .AddTicks(-1);
 
-            var p_allEvents = new OracleParameter("allEventActiveCur", OracleDbType.RefCursor, ParameterDirection.Output);
-            var p_facilNo = new OracleParameter("inFacilNo", OracleDbType.Int32, 2, facilNo, ParameterDirection.Input);
-            var p_logTypeNo = new OracleParameter("inLogTypeNo", OracleDbType.Int32, 2, logTypeNo, ParameterDirection.Input);
-            var p_startDate = new OracleParameter("inStartDate", OracleDbType.Varchar2, _stDtStr, ParameterDirection.Input);
-            var p_endDate = new OracleParameter("inEndDate", OracleDbType.Varchar2, _enDtStr, ParameterDirection.Input);
-            var p_operatorType = new OracleParameter("inOperatorType", OracleDbType.Varchar2, _operatorType, ParameterDirection.Input);
+            //// Must match the format of the input Date format
+            //string _stDtStr = _stDt.ToString("MM/dd/yyyy");
+            //string _enDtStr = _enDt.ToString("MM/dd/yyyy");
 
-            //var sql = "BEGIN ESL.ESL_ALLEVENTS_ACTIVE_PROC(?, ?, ?, ?, ?, ?); END;"; Based on positional parameters as suggested by GitHub Copilot Chat - not working
-            var sql = "BEGIN ESL.ESL_ALLEVENTS_ACTIVE_PROC(:inFacilNo, :inLogTypeNo, :inStartDate, :inEndDate, :inOperatorType, :allEventActiveCur); END;";
+            //var p_allEvents = new OracleParameter("allEventActiveCur", OracleDbType.RefCursor, ParameterDirection.Output);
+            //var p_facilNo = new OracleParameter("inFacilNo", OracleDbType.Int32, 2, facilNo, ParameterDirection.Input);
+            //var p_logTypeNo = new OracleParameter("inLogTypeNo", OracleDbType.Int32, 2, logTypeNo, ParameterDirection.Input);
+            //var p_startDate = new OracleParameter("inStartDate", OracleDbType.Varchar2, _stDtStr, ParameterDirection.Input);
+            //var p_endDate = new OracleParameter("inEndDate", OracleDbType.Varchar2, _enDtStr, ParameterDirection.Input);
+            //var p_operatorType = new OracleParameter("inOperatorType", OracleDbType.Varchar2, _operatorType, ParameterDirection.Input);
 
-            var result = await _context.ViewAlleventsCurrents.FromSqlRaw(sql, p_facilNo, p_logTypeNo, p_startDate, p_endDate, p_operatorType, p_allEvents).TagWith("ESL_ALLEVENTS_ACTIVE_PROC")
-                            .ToListAsync();
+            ////var sql = "BEGIN ESL.ESL_ALLEVENTS_ACTIVE_PROC(?, ?, ?, ?, ?, ?); END;"; Based on positional parameters as suggested by GitHub Copilot Chat - not working
+            //var sql = "BEGIN ESL.ESL_ALLEVENTS_ACTIVE_PROC(:inFacilNo, :inLogTypeNo, :inStartDate, :inEndDate, :inOperatorType, :allEventActiveCur); END;";
+
+            ////var result = await _context.ViewAlleventsCurrents.FromSqlRaw(sql, p_facilNo, p_logTypeNo, p_startDate, p_endDate, p_operatorType, p_allEvents).TagWith("ESL_ALLEVENTS_ACTIVE_PROC")
+            //                .ToListAsync();
+
+            var result = await _allEventService.GetAlleventListProcedureAsync(facilNo, logTypeNo, startDate, endDate, searchString, alert, page, pageSize, operatorType);
+
+
 
             //var result = await _context.ViewAlleventsCurrents.FromSqlRaw(sql, p_facilNo, p_logTypeNo, p_startDate, p_endDate, p_operatorType, p_allEvents).ToListAsync();
             // Stored procedure name must be all caps as shown.            
@@ -118,7 +105,7 @@ namespace Api.Controllers
                 return NotFound(alert);
             }
 
-            return result;
+            return Ok(result);
         }
 
         #endregion ESLCore

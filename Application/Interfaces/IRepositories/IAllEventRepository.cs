@@ -11,32 +11,45 @@ namespace Application.Interfaces.IRepositories
 {
     public interface IAllEventRepository // : IEventRepository<AllEvent>
     {
-        public IQueryable<ViewAllEventsCurrent> GetDefaultAllEventsByFacil(int FacilNo, DateTime startDate, DateTime endDate);
+        public IQueryable<ViewAllEventsCurrent> GetAllEventsCurrentQuery(int facilNo);
 
-        public IQueryable<ViewAllEventsCurrent> GetByEvent(int FacilNo, int LogTypeNo, string EventID, int EventID_RevNo);
+        public IQueryable<ViewAllEventsCurrent>? GetDefaultAllEventsCurrentByFacil(int facilNo, int? logTypeNo, DateTime startDate, DateTime endDate);
+
+        // EF version of "ESL.ESL_ALLEVENTS_ACTIVE_PROC";
+        public IQueryable<ViewAllEventsCurrent> GetListQuery(int facilNo, int? logTypeNo, DateTime startDate, DateTime endDate, string strSearch, string strOperatorType);
+
+        // EF version of "ESL.ESL_ALLEVENTS_ACTIVE_PROC";
+        public IOrderedQueryable<ViewAllEventsCurrent> GetOrderedListQuery(int facilNo, int? logTypeNo, DateTime startDate, DateTime endDate, string strSearch, string strOperatorType, int? pageNo, int? pageSize);
+
+        public IQueryable<ViewAllEventsCurrent> GetItemQuery(int facilNo, int logTypeNo, string eventID, int? eventID_RevNo);
+
+        //public IQueryable<ViewAllEventsCurrent> GetByEvent(int FacilNo, int LogTypeNo, string EventID, int EventID_RevNo);
+
+        #region Stored Procedure Names
+
+        // _sql = ESL.ESL_AllEvents_Active_Proc
+        public Task<IEnumerable<ViewAllEventsCurrent>> GetAlleventListProcedureAsync(
+            int facilNo, int? logTypeNo, DateOnly? startDate, DateOnly? endDate, string? searchString, string? alert, int? pageNo = 1, int pageSize = 20, bool? operatorType = false);
+
+
+        // _sql = "ESL.ESL_RPT_ALLEVENTS_PROC"; 
+        public IQueryable<AllEvent> GetReportQuery(int? facilNo, int? logTypeNo, string strStartDate, string strEndDate);
+
+        // _sql = "ESL.ESL_ALLEVENTS_RELATEDTO_PROC";
+        public IQueryable<ViewAllEventsRelatedTo> GetSearch_RelatedToListQuery(int FacilNo, int LogTypeNo, string strStartDate, string strEndDate, string strOperatorType, string optionAll, string searchValues);
+
+        #endregion Stored Procedure Names
 
         public IQueryable<AllEventDetailsDto> GetAllEventDetails(int FacilNo, int LogTypeNo, string EventID, int EventID_RevNo);
 
         public IQueryable<AllEvent> FindEvents(Expression<Func<AllEvent, bool>> predicate);
 
-        // _sql = "ESL.ESL_RPT_ALLEVENTS_PROC"; 
-        public IQueryable<AllEvent> GetReportQuery(int? facilNo, int? logTypeNo, string strStartDate, string strEndDate);
+        
+        //// _sql = "ESL.ESL_DETAILSLIST_PROC";
+        //public IQueryable<EslDetail> GetDetailsListQuery(int facilNo);
 
-        public IQueryable<ViewAllEventsCurrent> GetAllEventsCurrentQuery(int FacilNo);
-
-        // _sql = "ESL.ESL_ALLEVENTS_ACTIVE_PROC";
-        public IQueryable<ViewAllEventsCurrent> GetListQuery(int? facilNo, int? logTypeNo, DateTime startDate, DateTime endDate, string strSearch, string strOperatorType);
-
-        public IQueryable<ViewAllEventsCurrent> GetItemQuery(int? facilNo, int? logTypeNo, string eventID, int? eventID_RevNo);
-
-        // _sql = "ESL.ESL_ALLEVENTS_RELATEDTO_PROC";
-        public IQueryable<ViewAllEventsRelatedTo> GetSearch_RelatedToListQuery(int FacilNo, int LogTypeNo, string strStartDate, string strEndDate, string strOperatorType, string optionAll, string searchValues);
-
-        // _sql = "ESL.ESL_DETAILSLIST_PROC";
-        public IQueryable<EslDetail> GetDetailsListQuery(int facilNo);
-
-        // string _sql = "ESL.ESL_SUBJECTLIST_PROC";
-        public IQueryable<EslSubject> GetSubjectListQuery(int facilNo);
+        //// string _sql = "ESL.ESL_SUBJECTLIST_PROC";
+        //public IQueryable<EslSubject> GetSubjectListQuery(int facilNo);
 
         //Task<bool> AddEvent(AllEvent allEvent);
 

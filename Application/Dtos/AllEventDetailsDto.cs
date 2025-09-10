@@ -10,51 +10,16 @@ using System.Threading.Tasks;
 
 namespace Application.Dtos
 {
-    public record AllEventDetailsDto
+    public record AllEventDetailsDto : AllEvent
     {
-        /// <summary>
-        /// Gets or sets the facilName of the AllEvents.
-        /// </summary>
-        [DataObjectFieldAttribute(true, true, false, 2)]
-        public int FacilNo { get; set; }
-
-        /// <summary>
-        /// Gets or sets the logTypeNo of the AllEvents.
-        /// </summary>
-        [DataObjectFieldAttribute(true, true, false, 2)]
-        public int LogTypeNo { get; set; }
-
-        /// <summary>
-        /// Gets or sets the eventID of the AllEvents.
-        /// </summary>
-        [DataObjectFieldAttribute(true, true, false, 20)]
-        public string EventID { get; set; } = null!;
-
-        /// <summary>
-        /// Gets or sets the eventID_RevNo of the AllEvents.
-        /// </summary>
-        [DataObjectFieldAttribute(true, true, false, 2)]
-        public int EventID_RevNo { get; set; }
-
-        /// <summary>
-        /// Gets or sets the eventIdentifier of the FlowChange.
-        /// </summary>
-        [DataObjectFieldAttribute(false, false, false)]
-        //[NotNullOrEmpty(Key = "DetailsNotEmpty")]
         [Display(Name = "Event ID / Revision")]
         public string EventIDentifier => $"{EventID}/{EventID_RevNo}";
 
-        /// <summary>
-        /// Gets or sets the eventHighlight of the AllEvents.
-        /// </summary>
-        [DataObjectFieldAttribute(false, false, false, 400)]
-        public string EventHighlight { get; set; } = null!;
+        public string EventHighlight => (String.IsNullOrEmpty(Subject) ? string.Empty : (Subject + _CrLf)) + 
+                                        (String.IsNullOrEmpty(Details)? String.Empty : (Details + _CrLf)) + 
+                                        "Updated By: " + UpdatedBy + " on " + UpdateDate;
 
-        /// <summary>
-        /// Gets or sets the eventHeader of the FlowChange.
-        /// </summary>
-        [DataObjectFieldAttribute(false, false, false)]
-        //[NotNullOrEmpty(Key = "DetailsNotEmpty")
+        [Display(Name = "Event Hightlight")]
         public string EventHeader { get; set; } = null!;
         //{
         //    get
@@ -74,10 +39,6 @@ namespace Application.Dtos
         //    }
         //}
 
-        /// <summary>
-        /// Gets or sets the eventTrail of the FlowChange.
-        /// </summary>
-        [DataObjectFieldAttribute(false, false, false)]
         [Display(Name = "Action History")]
         public string EventTrail { get; set; }  = null!;
         //{

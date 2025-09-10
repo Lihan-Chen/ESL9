@@ -19,14 +19,18 @@ namespace Api.Controllers
 
         #region ESLCore
 
+        int _daysOffset = -1;
+        
+        int _pageSize = 20;
+
         // GET: api/ViewAlleventsCurrents/5
         [HttpGet("AllEventsByFacility/{facilNo}")]
         //[Route("AllEvents")]
         public async Task<ActionResult<List<ViewAllEventsCurrent>>> GetAlleventList(int facilNo, int? logTypeNo, DateOnly? startDate, DateOnly? endDate, string? searchString, string? alert, int? page, bool? operatorType = false) // , string active, string sortOrder, string currentFilter, string searchString, int? page)
         {
-            _facilNo = facilNo;
+            int _facilNo = facilNo;
 
-            _operatorType = (bool)operatorType ? "Primary" : "Secondary";
+            string _operatorType = (bool)operatorType ? "Primary" : "Secondary";
 
             // _shiftNo = DateTime.Now
 
@@ -35,13 +39,15 @@ namespace Api.Controllers
             DateOnly _stDt = startDate ?? _enDt.AddDays(_daysOffset); // for DateTime .AddTicks(-1);
 
             // Fix for CS0019: Convert DateOnly to DateTime for comparison with DateTime? type
-            var query = _context.ViewAlleventsCurrents.AsNoTracking()
-                .TagWith("ESL.ESL_ALLEVENTS_ACTIVE_PROC")
-                .Where(a => a.FacilNo == facilNo
-                            && a.EventDate >= _stDt.ToDateTime(TimeOnly.MinValue)
-                            && a.EventDate <= _enDt.ToDateTime(TimeOnly.MaxValue)
-                            && a.OperatorType == _operatorType);
+            //var query = _context.ViewAlleventsCurrents.AsNoTracking()
+            //    .TagWith("ESL.ESL_ALLEVENTS_ACTIVE_PROC")
+            //    .Where(a => a.FacilNo == facilNo
+            //                && a.EventDate >= _stDt.ToDateTime(TimeOnly.MinValue)
+            //                && a.EventDate <= _enDt.ToDateTime(TimeOnly.MaxValue)
+            //                && a.OperatorType == _operatorType);
 
+            var query = _allEventService.GetAllEventsAsync(_facilNo, _stDt, _enDt, searchString, (bool)operatorType).Result.AsQueryable();
+            
             if (logTypeNo != null)
 
                 query = query.Where(e => e.LogTypeNo == logTypeNo);
@@ -66,12 +72,11 @@ namespace Api.Controllers
 
         // not used, revisit if necessary (EF Core version is better)
         [HttpGet("AllEventsByFacilityProcedure/{facilNo}")]
-        public async Task<ActionResult<List<ViewAlleventsCurrent>>> GetAlleventListProcedure(
+        public async Task<ActionResult<IEnumerable<ViewAllEventsCurrent>>> GetAlleventListProcedure(
             int facilNo, int? logTypeNo, DateOnly? startDate, DateOnly? endDate, string? searchString, string? alert, int? page, bool? operatorType = false)
         {
-            _facilNo = facilNo;
-
-            _operatorType = operatorType == true ? "Primary" : "Secondary";
+            int _facilNo = facilNo;
+            string _operatorType = operatorType == true ? "Primary" : "Secondary";
 
             int _page = page ?? 0;
 
@@ -94,8 +99,10 @@ namespace Api.Controllers
             //var sql = "BEGIN ESL.ESL_ALLEVENTS_ACTIVE_PROC(?, ?, ?, ?, ?, ?); END;"; Based on positional parameters as suggested by GitHub Copilot Chat - not working
             var sql = "BEGIN ESL.ESL_ALLEVENTS_ACTIVE_PROC(:inFacilNo, :inLogTypeNo, :inStartDate, :inEndDate, :inOperatorType, :allEventActiveCur); END;";
 
-            var result = await _context.ViewAlleventsCurrents.FromSqlRaw(sql, p_facilNo, p_logTypeNo, p_startDate, p_endDate, p_operatorType, p_allEvents).TagWith("ESL_ALLEVENTS_ACTIVE_PROC")
-                            .ToListAsync();
+            var result = await _allEventService.GetAlleventListProcedureAsync(facilNo, logTypeNo, startDate, endDate, searchString, alert, page, 20, operatorType);
+
+            //var result = await _context.ViewAlleventsCurrents.FromSqlRaw(sql, p_facilNo, p_logTypeNo, p_startDate, p_endDate, p_operatorType, p_allEvents).TagWith("ESL_ALLEVENTS_ACTIVE_PROC")
+            //                .ToListAsync();
 
             //var result = await _context.ViewAlleventsCurrents.FromSqlRaw(sql, p_facilNo, p_logTypeNo, p_startDate, p_endDate, p_operatorType, p_allEvents).ToListAsync();
             // Stored procedure name must be all caps as shown.            
@@ -112,7 +119,7 @@ namespace Api.Controllers
                 return NotFound(alert);
             }
 
-            return result;
+            return Ok(result);
         }
 
         #endregion ESLCore
@@ -122,11 +129,11 @@ namespace Api.Controllers
 
 
         [HttpGet("GetAllEvents")]
-        public IActionResult GetAllEvents(int facilNo, DateOnly startDate, DateOnly endDate, string? keyword, bool primaryOperator)
+        public async Task<IActionResult> GetAllEventsAsync(int facilNo, DateOnly startDate, DateOnly endDate, string? strSearch, bool primaryOperator)
         {
             try
             {
-                var events = _allEventService.GetAllEvents(facilNo, startDate, endDate, keyword, primaryOperator);
+                var events = await _allEventService.GetAllEventsAsync(facilNo, startDate, endDate, strSearch, primaryOperator);
 
                 return Ok(events);
             }
