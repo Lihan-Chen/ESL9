@@ -18,11 +18,12 @@ namespace Application.Services
         public async Task<IEnumerable<ViewAllEventsCurrent>> GetAllEventsAsync(int facilNo, DateOnly startDate, DateOnly endDate, string? strSearch, bool primaryOperator)
         {
             var query = _allEventRepository.GetListQuery(facilNo, null, startDate.ToDateTime(TimeOnly.MinValue), endDate.ToDateTime(TimeOnly.MaxValue), strSearch ?? string.Empty, primaryOperator ? "Primary" : "Secondary"); // "MM/dd/yyyy"
-            if (query == null || !query.Any())
+            if (query == null)
             {
                 return await Task.FromResult<IEnumerable<ViewAllEventsCurrent>>(new List<ViewAllEventsCurrent>());
             }
-            return await Task.FromResult(query.AsEnumerable());
+            
+            return await Task.FromResult(query.Result);
         }
 
         public async Task<IEnumerable<ViewAllEventsCurrent>> GetAllEventsAsync(int facilNo, /*int? logTypeNo,*/ DateOnly startDate, DateOnly endDate, string? strSearch, bool primaryOperator, int? pageNo, int? pageSize)
@@ -31,12 +32,12 @@ namespace Application.Services
             // var query = _allEventRepository.GetListQuery(facilNo, null, startDate.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd"), keyword, primaryOperator ? "Primary" : "Secondary"); // "MM/dd/yyyy"
             var orderedQuery = _allEventRepository.GetOrderedListQuery(facilNo, null, startDate.ToDateTime(TimeOnly.MinValue), endDate.ToDateTime(TimeOnly.MaxValue), strSearch ?? string.Empty, primaryOperator ? "Primary" : "Secondary", pageNo, pageSize); // "MM/dd/yyyy"
 
-            if (orderedQuery == null || !orderedQuery.Any())
+            if (orderedQuery == null)
             {
                 return await Task.FromResult<IEnumerable<ViewAllEventsCurrent>>(new List<ViewAllEventsCurrent>());
             }
 
-            return await Task.FromResult(orderedQuery.AsEnumerable());
+            return await Task.FromResult(orderedQuery.Result);
         }
 
         
@@ -65,12 +66,12 @@ namespace Application.Services
 
             var query = _allEventRepository.GetListQuery(facilNo, null, _startDate.ToDateTime(TimeOnly.MinValue), _endDate.ToDateTime(TimeOnly.MaxValue), keyword ?? string.Empty, operatorType ?? "Primary"); // "MM/dd/yyyy"
 
-            if (query == null || !query.Any())
+            if (query == null)
             {
                 return await Task.FromResult<IEnumerable<ViewAllEventsCurrent>>(new List<ViewAllEventsCurrent>());
             }
 
-            return await Task.FromResult(query.AsEnumerable());
+            return (IEnumerable<ViewAllEventsCurrent>)await Task.FromResult(query);
         }
 
         public Task<IEnumerable<RptAllEvent>> GetReport(int facilNo, string strStartDate, string strEndDate)

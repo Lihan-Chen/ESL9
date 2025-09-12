@@ -9,6 +9,7 @@ using Mvc.Models.Enum;
 using System.Diagnostics;
 using System.Security.Claims;
 using Mvc.ViewModels;
+using System.Text.Json;
 
 namespace Mvc.Controllers;
 
@@ -171,7 +172,7 @@ public class HomeController(ICoreService coreService,
 
             SetSessionValue(AppConstants.AssingedOperatorTypeSessionKey, model.OperatorType);
 
-            SetSessionValue(AppConstants.AssignedFacilNoSessionKey, model.SelectedFacilNo);
+            HttpContext.Session.SetInt32(AppConstants.AssignedFacilNoSessionKey, (int)model.SelectedFacilNo);
 
             SetSessionValue(AppConstants.AssignedRoleSessionKey, role);
 
@@ -189,33 +190,51 @@ public class HomeController(ICoreService coreService,
                 await SetClaim(User, claims, rememberMe);
             }
 
-                var resolvedReturnUrl = TempData["returnUrl"] as string ?? Url.Action("Index", "AllEvents");
+            // Set default _LogFilterPartialViewModel
+            var _logInFilterPartialViewModel = new _LogFilterPartialViewModel()
+            {
+                SelectedFacilNo = (int)model.SelectedFacilNo, // ?? DefaultFacilNo ?? (int)Facil.OCC,
+                StartDate = DefaultStartDate, // DateOnly.FromDateTime(DateTime.Now.AddDays(-1)),
+                EndDate = DefaultEndDate, // DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
+                OperatorType = true // Primary
+            };
 
-                return await Task.FromResult<IActionResult>(Redirect(resolvedReturnUrl!));
+            // Pass the model using TempData or ViewData, or redirect to an action that accepts the model
+            TempData["LogFilter"] = JsonSerializer.Serialize(_logInFilterPartialViewModel);
 
-                // Redirect or return as needed
-                //return RedirectToPage("/Index");
+            var resolvedReturnUrl = TempData["returnUrl"] as string ?? Url.Action("Index", "AllEvents");
+
+            return await Task.FromResult<IActionResult>(Redirect(resolvedReturnUrl!));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error setting plant selection for user {UserId}", UserID);
             return await Task.FromResult<IActionResult>(RedirectToAction(nameof(Error)));
         }
-
-
-        TempData["CheckInSuccess"] = "Check-in recorded.";
-
-        return RedirectToAction(nameof(Confirmed));
     }
 
-    [HttpGet]
-    public IActionResult Confirmed()
-    {
-        if (TempData["CheckInSuccess"] is null)
-            return RedirectToAction(nameof(Index));
+    //[HttpGet]
+    //public async Task<IActionResult> Confirmed()
+    //{
+    //    if (TempData["CheckInSuccess"] is null)
+    //        return RedirectToAction(nameof(Index));
 
-        return View();
-    }
+    //    // Set default _LogFilterPartialViewModel
+    //    var _logInFilterPartialViewModel = new _LogFilterPartialViewModel()
+    //    {
+    //        SelectedFacilNo = HttpContext.Session.GetInt32(AppConstants.AssignedFacilNoSessionKey) ?? DefaultFacilNo ?? (int)Facil.OCC,
+    //        StartDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)),
+    //        EndDate = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
+    //        OperatorType = true // Primary
+    //    };
+
+    //    var resolvedReturnUrl = TempData["returnUrl"] as string ?? Url.Action("Index", "AllEvents");
+
+    //    // Pass the model using TempData or ViewData, or redirect to an action that accepts the model
+    //    TempData["LogFilterPartialViewModel"] = JsonSerializer.Serialize(_logInFilterPartialViewModel);
+
+    //    return await Task.FromResult<IActionResult>(Redirect(resolvedReturnUrl!));
+    //}
 
     [HttpGet]
     public IActionResult CheckInm(string returnUrl)
@@ -255,74 +274,74 @@ public class HomeController(ICoreService coreService,
     // existing actions (Index, SelectPlant, SetPlant, etc.) remain unchanged
 
 
-    public IActionResult CheckInn(string? returnUrl)
-    {
-        ViewData["Title"] = "Check In";
+    //public IActionResult CheckInn(string? returnUrl)
+    //{
+    //    ViewData["Title"] = "Check In";
 
-        if (HttpContext.Session.TryGetValue("SelectedFacilNo", out byte[]? selectedFacilNoBytes))
-        {
-            // Convert the byte array to an integer
-            int selectedFacilNo = BitConverter.ToInt32(selectedFacilNoBytes, 0);
-            ViewBag.SelectedFacilNo = selectedFacilNo;
-        }
-        else
-        {
-            ViewBag.SelectedFacilNo = null; // Handle the case where no plant is selected
-        }
+    //    if (HttpContext.Session.TryGetValue("SelectedFacilNo", out byte[]? selectedFacilNoBytes))
+    //    {
+    //        // Convert the byte array to an integer
+    //        int selectedFacilNo = BitConverter.ToInt32(selectedFacilNoBytes, 0);
+    //        ViewBag.SelectedFacilNo = selectedFacilNo;
+    //    }
+    //    else
+    //    {
+    //        ViewBag.SelectedFacilNo = null; // Handle the case where no plant is selected
+    //    }
 
-        var myOpTypeList = Enum.GetValues(typeof(OperatorType))
-                .Cast<OperatorType>()
-                .Select(s => new { ID = s, Name = s.ToString() });
-        var myShiftList = Enum.GetValues(typeof(Shift))
-            .Cast<Shift>()
-            .Select(s => new { ID = s, Name = s.ToString() });
+    //    var myOpTypeList = Enum.GetValues(typeof(OperatorType))
+    //            .Cast<OperatorType>()
+    //            .Select(s => new { ID = s, Name = s.ToString() });
+    //    var myShiftList = Enum.GetValues(typeof(Shift))
+    //        .Cast<Shift>()
+    //        .Select(s => new { ID = s, Name = s.ToString() });
 
-        Shift _shift;
-        string shiftStartText = "06:00:00";
-        string shiftEndText = "18:30:00";
-        DateTime shiftStartTime = Convert.ToDateTime(shiftStartText); // Converts only the time
-        DateTime shiftEndTime = Convert.ToDateTime(shiftEndText);
-        DateTime now = DateTime.Now;
+    //    Shift _shift;
+    //    string shiftStartText = "06:00:00";
+    //    string shiftEndText = "18:30:00";
+    //    DateTime shiftStartTime = Convert.ToDateTime(shiftStartText); // Converts only the time
+    //    DateTime shiftEndTime = Convert.ToDateTime(shiftEndText);
+    //    DateTime now = DateTime.Now;
 
-        if (now >= shiftStartTime && now < shiftEndTime)
-        {
-            _shift = Shift.Day;
-        }
-        else
-        {
-            _shift = Shift.Night;
-        }
+    //    if (now >= shiftStartTime && now < shiftEndTime)
+    //    {
+    //        _shift = Shift.Day;
+    //    }
+    //    else
+    //    {
+    //        _shift = Shift.Night;
+    //    }
 
-        ViewBag.Shift = _shift;
+    //    ViewBag.Shift = _shift;
 
-        var model = new CheckInModel
-        {
-            UserID = UserID,
-            Shift = _shift,
-            SelectedFacilNo = Facil.OCC, // Default facility
-            OperatorType = OperatorType.Primary,
-            RememberMe = false,
-            FacilOptions = Enum.GetValues(typeof(Facil))
-                .Cast<Facil>()
-                .Select(f => new FacilSelectViewModel
-                {
-                    FacilNo = (int)f,
-                    FacilName = FacilExtensions.GetFacilName(f),
-                    IsSelected = f == Facil.OCC // Default selection
-                })
-                .ToList(),
+    //    var model = new CheckInModel
+    //    {
+    //        UserID = UserID,
+    //        Shift = _shift,
+    //        SelectedFacilNo = Facil.OCC, // Default facility
+    //        OperatorType = OperatorType.Primary,
+    //        RememberMe = false,
+    //        FacilOptions = Enum.GetValues(typeof(Facil))
+    //            .Cast<Facil>()
+    //            .Select(f => new FacilSelectViewModel
+    //            {
+    //                FacilNo = (int)f,
+    //                FacilName = FacilExtensions.GetFacilName(f),
+    //                IsSelected = f == Facil.OCC // Default selection
+    //            })
+    //            .ToList(),
 
 
-            //optionOpType = new SelectList(myOpTypeList, "ID", "Name"),
-            //optionShift = new SelectList(myShiftList, "ID", "Name", _shift)
-        };
+    //        //optionOpType = new SelectList(myOpTypeList, "ID", "Name"),
+    //        //optionShift = new SelectList(myShiftList, "ID", "Name", _shift)
+    //    };
 
-        ViewBag.ReturnUrl = returnUrl;
+    //    ViewBag.ReturnUrl = returnUrl;
 
-        return View(model);
+    //    return View(model);
 
-        return View();
-    }
+    //    return View();
+    //}
 
     public IActionResult SelectPlant(string returnUrl)
     {

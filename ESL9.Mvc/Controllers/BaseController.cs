@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Mvc.Models;
+using System.Linq;
 using System.Security.Claims;
 
 namespace Mvc.Controllers 
@@ -84,10 +85,10 @@ namespace Mvc.Controllers
                 }
 
                 // From sessionkey AssignedFacilNo
-                if (HttpContext.Session.TryGetValue(AppConstants.AssignedFacilNoSessionKey, out var value) && value.Length > 0)
-                {
-                    return BitConverter.ToInt32(value, 0);
-                }
+                //if (HttpContext.Session.TryGetValue(AppConstants.AssignedFacilNoSessionKey, out var value) && value.Length > 0)
+                //{
+                //    return BitConverter.ToInt32(value, 0);
+                //}
 
                 // From claims (mainly used for initail default facilNo)
                 return DefaultFacilNo;
@@ -102,6 +103,16 @@ namespace Mvc.Controllers
                 }
             }
         }
+
+        public static IEnumerable<object> EslOpTypeList = Enum.GetValues(typeof(OperatorType))
+                .Cast<OperatorType>()
+                .Select(s => new { ID = s, Name = s.ToString() });
+                //.Prepend("", "Assigned As");
+
+
+        public static IEnumerable<object> EslShiftList = Enum.GetValues(typeof(Shift))
+                .Cast<Shift>()
+                .Select(s => new { ID = s, Name = s.ToString() });
 
         public bool IsUserAnOperator => FacilNo != null ? !string.IsNullOrEmpty(UserID) && _coreService.IsInRole(UserID, "ESL_OPERATOR", FacilNo).Result : false;
 
@@ -128,6 +139,9 @@ namespace Mvc.Controllers
         public int? UserAssignedFacilNo;  // => GetSessionValue<int>(AppConstants.AssignedFacilNoSessionKey);
 
         public Shift DefaultShift =>  Now >= ShiftStartTime && Now < ShiftEndTime ? Shift.Day : Shift.Night;
+
+        public DateOnly DefaultStartDate => Today.AddDays(DaysOffSet); // 2 days ago
+        public DateOnly DefaultEndDate => Tomorrow; // Today.AddDays(1);
 
         // HttpContext.Session.TryGetValue("FacilNo", out var value) && value.Length > 0 ? BitConverter.ToInt32(value, 0) : null;
 

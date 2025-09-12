@@ -17,6 +17,12 @@ namespace Application.Services
         private readonly ILogTypeRepository _logTypes = logTypeRepository ?? throw new ArgumentNullException(nameof(logTypeRepository));
 
         #region EmployeeService
+
+        public async Task<IEnumerable<Employee>> GetActiveEmployeeListByFacilNo(int? facilNo)
+        {
+            return await _employees.GetListQuery(facilNo).ToListAsync();
+        }
+
         // Check first - employeeFullName = lastName,firstName same as User.Identity.Name
         public async Task<Employee?> GetEmployeeByEmployeeName(string? employeeFullName)
         {
@@ -285,6 +291,8 @@ namespace Application.Services
         #region LogTypeService
 
         public async Task<List<string>> GetLogTypeList() => await _logTypes.GetLogTypeList().ToListAsync();
+
+        public Task<LogType?> GetLogType(int logTypeNo) => _logTypes.GetLogType(logTypeNo).SingleOrDefaultAsync();
 
         #endregion LogTypeService
 

@@ -34,7 +34,7 @@ namespace Infrastructure.DataAccess.Repositories
                 throw new ArgumentException("End Date must not be earlier than Start Date");
             }
 
-            var query = _dbSetCurrent.Where(x => x.FacilNo == facilNo & x.EventDate >= startDate & x.EventDate <= endDate).AsNoTracking();
+            var query = _dbSetCurrent.TagWith("GetDefaultAllEventsCurrentByFacil").Where(x => x.FacilNo == facilNo & x.EventDate >= startDate & x.EventDate <= endDate).AsNoTracking();
 
             if (logTypeNo != null)
             {
@@ -49,7 +49,7 @@ namespace Infrastructure.DataAccess.Repositories
 
         // TODO: consider using value objects for start-end daterange to capture business logic
         // ESL.ESL_AllEvents_Active_Proc
-        public IQueryable<ViewAllEventsCurrent> GetListQuery(int facilNo, int? logTypeNo, DateTime startDate, DateTime endDate, string? strSearch, string strOperatorType)
+        public async Task<IEnumerable<ViewAllEventsCurrent>> GetListQuery(int facilNo, int? logTypeNo, DateTime startDate, DateTime endDate, string? strSearch, string strOperatorType)
         {
             if (endDate < startDate)
             {
@@ -63,18 +63,13 @@ namespace Infrastructure.DataAccess.Repositories
                 return Enumerable.Empty<ViewAllEventsCurrent>().AsQueryable();
             }
 
-            var query = baseQuery.Where(a => a.OperatorType == strOperatorType)
-                       .TagWith("GetListQuery");
-
-            if (logTypeNo != null)
-            {
-                query = baseQuery.Where(a => a.LogTypeNo == logTypeNo);
-            }
+            var queryResult = baseQuery.Where(a => a.OperatorType == strOperatorType)
+                       .AsEnumerable();
 
             if (strSearch != null)
             {
                 string searchUpper = strSearch.ToUpperInvariant();
-                query = query.Where(e =>
+                queryResult = queryResult.Where(e =>
                     e.EventID!.Contains(strSearch, StringComparison.OrdinalIgnoreCase) ||
                     e.Subject!.Contains(strSearch, StringComparison.OrdinalIgnoreCase) ||
                     e.Details!.Contains(strSearch, StringComparison.OrdinalIgnoreCase) ||
@@ -82,27 +77,28 @@ namespace Infrastructure.DataAccess.Repositories
                     //e.Notes!.Contains(strSearch, StringComparison.OrdinalIgnoreCase) ||
                     //e.FacilAbbr.Contains(strSearch, StringComparison.OrdinalIgnoreCase) ||
                     e.UpdateDate!.Contains(strSearch, StringComparison.OrdinalIgnoreCase)
-                );
+                )
+                .OrderByDescending(e => e.EventDate).ThenByDescending(u => u.UpdateDate);
             }
 
-            return query.OrderByDescending(e => e.EventDate).ThenByDescending(u => u.UpdateDate);
+            return queryResult; //.OrderByDescending(e => e.EventDate).ThenByDescending(u => u.UpdateDate);
         }
 
-        public IOrderedQueryable<ViewAllEventsCurrent> GetOrderedListQuery(int facilNo, int? logTypeNo, DateTime startDate, DateTime endDate, string strSearch, string strOperatorType, int? pageNo, int? pageSize)
+        public async Task<IEnumerable<ViewAllEventsCurrent>> GetOrderedListQuery(int facilNo, int? logTypeNo, DateTime startDate, DateTime endDate, string strSearch, string strOperatorType, int? pageNo, int? pageSize)
         {
-            var query = GetListQuery(facilNo, logTypeNo, startDate, endDate, strSearch, strOperatorType).OrderByDescending(o => o.EventDate).ThenByDescending(o => o.EventTime);
+            var queryResult = GetListQuery(facilNo, logTypeNo, startDate, endDate, strSearch, strOperatorType).Result;
 
             if (pageNo.HasValue && pageSize.HasValue)
             {
                 int skip = (pageNo.Value - 1) * pageSize.Value;
-                query = (IOrderedQueryable<ViewAllEventsCurrent>)query.Skip(skip).Take(pageSize.Value);
+                queryResult = queryResult.Skip(skip).Take(pageSize.Value);
             }
             else if (pageSize.HasValue)
             {
-                query = (IOrderedQueryable<ViewAllEventsCurrent>)query.Take(pageSize.Value);
+                queryResult = queryResult.Take(pageSize.Value);
             }
 
-            return query;
+            return queryResult;
         }
 
         public IQueryable<ViewAllEventsCurrent> GetItemQuery(int facilNo, int logTypeNo, string eventID, int? eventID_RevNo)

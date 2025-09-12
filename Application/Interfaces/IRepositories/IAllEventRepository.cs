@@ -16,10 +16,10 @@ namespace Application.Interfaces.IRepositories
         public IQueryable<ViewAllEventsCurrent>? GetDefaultAllEventsCurrentByFacil(int facilNo, int? logTypeNo, DateTime startDate, DateTime endDate);
 
         // EF version of "ESL.ESL_ALLEVENTS_ACTIVE_PROC";
-        public IQueryable<ViewAllEventsCurrent> GetListQuery(int facilNo, int? logTypeNo, DateTime startDate, DateTime endDate, string strSearch, string strOperatorType);
+        public Task<IEnumerable<ViewAllEventsCurrent>> GetListQuery(int facilNo, int? logTypeNo, DateTime startDate, DateTime endDate, string strSearch, string strOperatorType);
 
         // EF version of "ESL.ESL_ALLEVENTS_ACTIVE_PROC";
-        public IOrderedQueryable<ViewAllEventsCurrent> GetOrderedListQuery(int facilNo, int? logTypeNo, DateTime startDate, DateTime endDate, string strSearch, string strOperatorType, int? pageNo, int? pageSize);
+        public Task<IEnumerable<ViewAllEventsCurrent>> GetOrderedListQuery(int facilNo, int? logTypeNo, DateTime startDate, DateTime endDate, string strSearch, string strOperatorType, int? pageNo, int? pageSize);
 
         public IQueryable<ViewAllEventsCurrent> GetItemQuery(int facilNo, int logTypeNo, string eventID, int? eventID_RevNo);
 

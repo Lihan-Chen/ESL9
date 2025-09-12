@@ -88,8 +88,6 @@ namespace Api.Controllers
 
             var result = await _allEventService.GetAlleventListProcedureAsync(facilNo, logTypeNo, startDate, endDate, searchString, alert, page, pageSize, operatorType);
 
-
-
             //var result = await _context.ViewAlleventsCurrents.FromSqlRaw(sql, p_facilNo, p_logTypeNo, p_startDate, p_endDate, p_operatorType, p_allEvents).ToListAsync();
             // Stored procedure name must be all caps as shown.            
             //var result = await _context.ViewAlleventsCurrents.TagWith("ESL.ESL_ALLEVENTS_ACTIVE_PROC")
@@ -97,8 +95,6 @@ namespace Api.Controllers
             //        "BEGIN ESL.ESL_ALLEVENTS_ACTIVE_PROC(:inFacilNo, :inLogTypeNo, :inStartDate, :inEndDate, :inOperatorType, :allEventActiveCur); END;",
             //        [p_facilNo, p_logTypeNo, p_startDate, p_endDate, p_operatorType, p_allEvents])
             //    .ToListAsync();
-
-
 
             if (result == null || !result.Any())
             {

@@ -8,6 +8,8 @@ namespace Application.Interfaces.IServices
         #region Employee-related Services
 
         // Get Employee
+        public Task<IEnumerable<Employee>> GetActiveEmployeeListByFacilNo(int? facilNo);
+
         public Task<Employee?> GetEmployeeByEmployeeName(string? employeeName);
 
         public Task<Employee?> GetEmployeeByEmployeeNo(int employeeNo);
@@ -70,6 +72,9 @@ namespace Application.Interfaces.IServices
 
         // LogType-related Services
         public Task<List<string>> GetLogTypeList();
+
+        public Task<LogType?> GetLogType(int logTypeNo);
+
         #endregion LogType_related Services
 
         #region Session-related Services

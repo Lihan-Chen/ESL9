@@ -32,6 +32,8 @@ namespace Api.Controllers
 
             string _operatorType = (bool)operatorType ? "Primary" : "Secondary";
 
+            int _page = page ?? 1;
+
             // _shiftNo = DateTime.Now
 
             DateOnly _enDt = endDate ?? DateOnly.FromDateTime(DateTime.Now).AddDays(1);
@@ -46,20 +48,20 @@ namespace Api.Controllers
             //                && a.EventDate <= _enDt.ToDateTime(TimeOnly.MaxValue)
             //                && a.OperatorType == _operatorType);
 
-            var query = _allEventService.GetAllEventsAsync(_facilNo, _stDt, _enDt, searchString, (bool)operatorType).Result.AsQueryable();
+            var queryResult = await _allEventService.GetAllEventsAsync(_facilNo, _stDt, _enDt, searchString, (bool)operatorType);
             
             if (logTypeNo != null)
 
-                query = query.Where(e => e.LogTypeNo == logTypeNo);
+            queryResult = queryResult.Where(e => e.LogTypeNo == logTypeNo);
 
-            if (searchString != null)
-            {
-                query = query.Where(e => EF.Functions.Like(e.EventID.ToUpper(), searchString.ToUpper())
-                                      || EF.Functions.Like(e.Subject!.ToUpper(), searchString.ToUpper())
-                                      || EF.Functions.Like(e.Details!.ToUpper(), searchString.ToUpper()));
-            }
+            //if (searchString != null)
+            //{
+            //    queryResult = queryResult.Where(e => EF.Functions.Like(e.EventID.ToUpper(), searchString.ToUpper())
+            //                          || EF.Functions.Like(e.Subject!.ToUpper(), searchString.ToUpper())
+            //                          || EF.Functions.Like(e.Details!.ToUpper(), searchString.ToUpper()));
+            //}
 
-            var currentAllEvents = await query.OrderByDescending(o => o.EventDate).ThenByDescending(o => o.EventTime).Take(_pageSize).Skip(0).ToListAsync();
+            var currentAllEvents = queryResult.OrderByDescending(o => o.EventDate).ThenByDescending(o => o.EventTime).Skip((_page -1)*_pageSize).Take(_pageSize);
 
 
             if (currentAllEvents == null)
@@ -67,7 +69,7 @@ namespace Api.Controllers
                 return NotFound(alert);
             }
 
-            return currentAllEvents;
+            return Ok(currentAllEvents.ToList());
         }
 
         // not used, revisit if necessary (EF Core version is better)
