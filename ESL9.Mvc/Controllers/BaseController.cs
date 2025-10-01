@@ -373,6 +373,21 @@ namespace Mvc.Controllers
                     DefaultShift
                 );
 
+        //public SelectList ShiftOptions => new SelectList(
+        //            Enum.GetValues(typeof(Shift))
+        //                .Cast<Shift>()
+        //                .Select(s => new ShiftSelectViewModel
+        //                {
+        //                    ShiftNo = (int)s,
+        //                    ShiftName = s.ToString(),
+        //                    IsSelected = s == DefaultShift
+        //                })
+        //                .ToList(),
+        //            nameof(ShiftSelectViewModel.ShiftNo),
+        //            nameof(ShiftSelectViewModel.ShiftName),
+        //            DefaultShift
+        //        );
+
         #endregion Helpers
         //public Task<ClaimsPrincipal> SetClaim(string ClaimType, ClaimsTransformation claimTransform)
         //{
