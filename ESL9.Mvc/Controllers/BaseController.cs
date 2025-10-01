@@ -3,9 +3,12 @@ using Core.Models.Enums;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Mvc.Models;
+using Mvc.Models.Enum;
 using System.Linq;
 using System.Security.Claims;
+using LogType = Mvc.Models.Enum.LogType;
 
 namespace Mvc.Controllers 
 {
@@ -64,6 +67,8 @@ namespace Mvc.Controllers
             User.HasClaim(c => c.Type == AppConstants.DefaultFacilNoClaimType)
                 ? int.TryParse(GetClaimValue(User, AppConstants.DefaultFacilNoClaimType), out var result) ? result : (int?)null
                 : null;
+
+        public int? DefaultLogTypeNo;
 
         // Role is valid only if associated with a FacilNo (ValueObject)
         //public string? Role => User.HasClaim(c => c.Type == AppConstants.RoleClaimType) ? GetClaimValue(User, AppConstants.RoleClaimType) : null; // User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
@@ -330,6 +335,43 @@ namespace Mvc.Controllers
             }
             return null;
         }
+
+        // SelectList
+        // Fix for CS0693: Rename the type parameter in GetSelectList<T> to avoid conflict with BaseController<T>
+        internal SelectList GetSelectList<U>(IEnumerable<U> items, string valueField, string textField, object? selectedValue = null)
+        {
+            return new SelectList(items, valueField, textField, selectedValue);
+        }
+
+        public SelectList FacilOptions => new SelectList(
+                    Enum.GetValues(typeof(Facil))
+                        .Cast<Facil>()
+                        .Select(f => new FacilSelectViewModel
+                        {
+                            FacilNo = (int)f,
+                            FacilName = FacilExtensions.GetFacilName(f),
+                            IsSelected = f == (Facil)DefaultFacilNo
+                        })
+                        .ToList(),
+                    nameof(FacilSelectViewModel.FacilNo),
+                    nameof(FacilSelectViewModel.FacilName),
+                    DefaultFacilNo
+                );
+
+        public SelectList LogTypeOptions => new SelectList(
+                    Enum.GetValues(typeof(LogType))
+                        .Cast<LogType>()
+                        .Select(s => new LogTypeSelectViewModel
+                        {
+                            LogTypeNo = (int)s,
+                            LogTypeName = s.ToString(),
+                            IsSelected = s == (LogType)DefaultLogTypeNo
+                        })
+                        .ToList(),
+                    nameof(LogTypeSelectViewModel.LogTypeNo),
+                    nameof(LogTypeSelectViewModel.LogTypeName),
+                    DefaultShift
+                );
 
         #endregion
         //public Task<ClaimsPrincipal> SetClaim(string ClaimType, ClaimsTransformation claimTransform)

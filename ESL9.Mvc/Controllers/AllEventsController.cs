@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.IServices;
+﻿using Application.Dtos;
+using Application.Interfaces.IServices;
 using Core.Models.BusinessEntities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,7 @@ namespace Mvc.Controllers
         int _eventID_RevNo;
 
         string _facilName = string.Empty;
-        string _logTypeName;
+        string _logTypeName = string.Empty;
 
         string? _startDate;
         string? _endDate;
@@ -36,10 +37,6 @@ namespace Mvc.Controllers
 
         string _operatorType = String.Empty;
         bool _opType = true;
-
-        DateOnly tomorrow = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
-
-        int _daysOffSet = -2;
 
         [HttpGet("AllEvents")]
         public IActionResult Index(/*[FromBody]*/ _LogFilterPartialViewModel? logFilterPartial, int? facilNo, DateOnly? startDate, DateOnly? endDate, string? searchString, int? page, bool? operatorType)
@@ -54,7 +51,7 @@ namespace Mvc.Controllers
 
             #region Parameters and Defaults
 
-            if (logFilterPartial.SelectedFacilNo is null)  
+            if (logFilterPartial?.SelectedFacilNo is null)  
             {
                 if (TempData.ContainsKey("LogFilter"))
                 {
@@ -98,13 +95,13 @@ namespace Mvc.Controllers
             //  == "Day" ? 1 : 2;
 
             // Set up default values
-            DateOnly _enDt = logFilterPartial?.EndDate ?? endDate ?? tomorrow; // now.Date; 
-            DateOnly _stDt = logFilterPartial?.StartDate ?? startDate ?? _enDt.AddDays(_daysOffSet); //initialStartDate; 
+            DateOnly _enDt = logFilterPartial?.EndDate ?? endDate ?? Tomorrow; // now.Date; 
+            DateOnly _stDt = logFilterPartial?.StartDate ?? startDate ?? _enDt.AddDays(DaysOffSet); //initialStartDate; 
 
             // force start date to be two days before end date
             if (_stDt > _enDt)
             {
-                _stDt = _enDt.AddDays(_daysOffSet);
+                _stDt = _enDt.AddDays(DaysOffSet);
             }
 
             session.SetString("startDate", _stDt.ToString() ?? string.Empty);
@@ -128,9 +125,9 @@ namespace Mvc.Controllers
                 EndDate = _enDt, //DateOnly.FromDateTime(DateTime.Now.AddDays(1))
                 OperatorType = _opType,
                 CurrentFilter = searchString,
-                facilNos = new SelectList(facilAbbrList, "FacilNo", "FacilAbbr", _facilNo),
-                logTypeNos = new SelectList(logTypeNames, "LogTypeNo", "LogTypeName", _logTypeNo)
-            };
+                facilNos = GetSelectList<FacilDto>(facilAbbrList, "FacilNo", "FacilAbbr", _facilNo), //new SelectList(facilAbbrList, "FacilNo", "FacilAbbr", _facilNo),
+                logTypeNos = GetSelectList<string>(logTypeNames, "LogTypeNo", "LogTypeName", _logTypeNo) //new SelectList(logTypeNames, "LogTypeNo", "LogTypeName", _logTypeNo)
+            };  
 
             var viewmodel = new AllEventsOutstanding()
             {
@@ -274,7 +271,7 @@ namespace Mvc.Controllers
         public async Task<IActionResult> LogSearchAsync(int facilNo, DateOnly startDate, DateOnly endDate, bool operatorType)
         {
             _facilNo = facilNo;
-            startDate = startDate > endDate ? endDate.AddDays(_daysOffSet) : startDate;
+            startDate = startDate > endDate ? endDate.AddDays(DaysOffSet) : startDate;
 
             _endDate = endDate.ToString("MM/dd/yyyy");
             _startDate = startDate.ToString("MM/dd/yyyy");
