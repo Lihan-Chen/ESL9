@@ -61,7 +61,7 @@ namespace Application.Interfaces.IServices
         public Task<Facility?> GetFacility(int? facilNo);
 
         // For Selecting a plant (OCC, DOCC, pumping, treatment, DVL)
-        public Task<List<FacilDto>> GetFaciList();
+        public Task<List<FacilDto>> GetFacilList();
 
         //public Task<SelectList> GetFacilSelectList(int? facilNo);
 

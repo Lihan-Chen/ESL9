@@ -1,19 +1,14 @@
 ﻿using Application.Interfaces.IServices;
 using Core.Models.BusinessEntities;
-using Core.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.OutputCaching;
 using Mvc.Models;
 using Mvc.ViewModels;
-using System.Composition;
-//using System.Web.Mvc;
+using Newtonsoft.Json;
 using X.PagedList;
 using X.PagedList.Extensions;
 using SelectList = Microsoft.AspNetCore.Mvc.Rendering.SelectList;
-//using SelectList = System.Web.Mvc.SelectList;
 
 namespace Mvc.Controllers
 {
@@ -59,15 +54,23 @@ namespace Mvc.Controllers
 
             #region Parameters and Defaults
 
-            if (logFilterPartial is null)  
+            if (logFilterPartial.SelectedFacilNo is null)  
             {
-                logFilterPartial = new _LogFilterPartialViewModel
+                if (TempData.ContainsKey("LogFilter"))
                 {
-                    SelectedFacilNo = 1, //ViewData["SelectedFacilNo"], //GetSessionValue<int?>(AppConstants.SelectedFacilNoSessionKey), // DefaultFacilNo,
-                    // SelectedLogTypeNo = GetSessionValue<int?>(AppConstants.SelectedLogTypeNoSessionKey), // DefaultLogTypeNo,
-                    StartDate = DefaultStartDate,
-                    EndDate = DefaultEndDate
-                };
+                    logFilterPartial = JsonConvert.DeserializeObject<_LogFilterPartialViewModel>((string)TempData["LogFilter"]); //TempData.Get<_LogFilterPartialViewModel>("LogFilter");
+                }
+                
+                
+                //logFilterPartial = new _LogFilterPartialViewModel
+                //{
+                //    SelectedFacilNo = DefaultFacilNo, //ViewData["SelectedFacilNo"], //GetSessionValue<int?>(AppConstants.SelectedFacilNoSessionKey), // DefaultFacilNo,
+                //    // SelectedLogTypeNo = GetSessionValue<int?>(AppConstants.SelectedLogTypeNoSessionKey), // DefaultLogTypeNo,
+                //    StartDate = DefaultStartDate,
+                //    EndDate = DefaultEndDate,
+                //    CurrentFilter = searchString,
+                //    OperatorType = true // DefaultOperatorType
+                //};
                 //logFilterPartial.CurrentFilter = string.Empty,
                 //        OperatorType operatorType ?? false,
             }
@@ -81,7 +84,7 @@ namespace Mvc.Controllers
             //    return NotFound("You have not checked into a facility");
             //}
 
-            _facilNo = 1; // _facilNoNullable.Value;
+            _facilNo = logFilterPartial.SelectedFacilNo ?? (int)DefaultFacilNo!; // _facilNoNullable.Value;
 
             var facility = _coreService.GetFacility(_facilNo).Result;
            
@@ -114,7 +117,7 @@ namespace Mvc.Controllers
 
             // _shiftNo = System.Web.HttpContext.Current.Session["ShiftNo"].ToString() == "Day" ? 1 : 2;
 
-            var facilAbbrList = _coreService.GetFacilTypeList().Result; //GetFacilAbbrList();
+            var facilAbbrList = _coreService.GetFacilList().Result; //GetFacilAbbrList();
             var logTypeNames = _coreService.GetLogTypeList().Result; // GetLogTypeNames();
 
             _LogFilterPartialViewModel _logFilterPartial = new _LogFilterPartialViewModel

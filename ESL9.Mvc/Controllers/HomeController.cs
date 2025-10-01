@@ -360,7 +360,7 @@ public class HomeController(ICoreService coreService,
 
         ViewBag.ReturnUrl = TempData["ReturnUrl"] as string ?? Url.Action("Index", "AllEvents");
 
-        var facils = _coreService.GetFaciList().Result.AsQueryable().Where(f => f.FacilNo <= 13).ToList();
+        var facils = _coreService.GetFacilList().Result.AsQueryable().Where(f => f.FacilNo <= 13).ToList();
 
         return View(facils);
     }

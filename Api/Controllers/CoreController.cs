@@ -18,7 +18,7 @@ namespace Api.Controllers
         {
             try
             {
-                var plants = await _coreService.GetFaciList();
+                var plants = await _coreService.GetFacilList();
                 return Ok(plants);
             }
             catch (Exception ex)

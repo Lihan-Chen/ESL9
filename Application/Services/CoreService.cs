@@ -276,7 +276,7 @@ namespace Application.Services
         // For Selecting a plant (OCC, DOCC, pumping, treatment, DVL)
         public async Task<List<string>> GetFacilTypeList() => await _facilities.GetFacilTypeList().ToListAsync();
 
-        public async Task<List<FacilDto>> GetFaciList() => await _facilities.GetFacilList().ToListAsync();
+        public async Task<List<FacilDto>> GetFacilList() => await _facilities.GetFacilList().ToListAsync();
 
         //public async Task<SelectList> GetFacilSelectList(int? facilNo) // => new SelectList(await _facilities.GetFacilList(), "FacilNo", "FacilAbbr", facilNo);
         //{

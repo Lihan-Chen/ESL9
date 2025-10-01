@@ -1,5 +1,5 @@
 ﻿@using Mvc.ViewModels
-@model _LogFilterPartialViewModel
+@model Mvc.ViewModels.AllEventsOutstanding
 @{
     // ViewData["Title"] = "All Events";
 }
@@ -11,7 +11,7 @@
     <form action="@Url.Action("Index", "AllEvents")" class="row g-3 align-items-end bg-info-subtle">
         <div class="col-md">
                 <label for="SelectedFacilNo" class="form-label">Facility</label>
-                @await Component.InvokeAsync("FacilSelector", new { selectedFacilNo = @Model.SelectedFacilNo })
+                @await Component.InvokeAsync("FacilSelector", new { selectedFacilNo = @Model.logFilterPartial.SelectedFacilNo })
         </div>
 
         @* <div class="col-md">
@@ -20,23 +20,23 @@
         </div> *@
 
         <div class="col-md">
-            <label label-for="StartDate" class="form-label">Start Date</label>
-            <input asp-for="StartDate" type="date" class="form-control" required>
+                <label label-for="logFilterPartial.StartDate" class="form-label">Start Date</label>
+                <input asp-for="logFilterPartial.StartDate" type="date" class="form-control" required>
         </div>
 
         <div class="col-md">
-            <label label-for="EndDate" class="form-label">End Date</label>
-            <input asp-for="EndDate" type="date" class="form-control" required>
+                <label label-for="logFilterPartial.EndDate" class="form-label">End Date</label>
+                <input asp-for="logFilterPartial.EndDate" type="date" class="form-control" required>
         </div>
         
         <div class="form-check col-md">
-            <input asp-for="OperatorType" class="form-check-input" type="checkbox" value="true">  @* checked *@
-            <label class="form-check-label" label-for="OperatorType">Primary Operator?</label>
+                <input asp-for="logFilterPartial.OperatorType" class="form-check-input" type="checkbox" value="true">  @* checked *@
+                <label class="form-check-label" label-for="logFilterPartial.OperatorType">Primary Operator?</label>
         </div>
 
         <div class="col-md-2">
-                <label label-for="CurrentFilter" class="form-label">Keyword</label>
-                <input asp-for="CurrentFilter" type="search" class="form-control" placeholder="Enter keywords">
+                <label label-for="logFilterPartial.CurrentFilter" class="form-label">Keyword</label>
+                <input asp-for="logFilterPartial.CurrentFilter" type="search" class="form-control" placeholder="Enter keywords">
         </div>
 
         <div class="col-md-1">
