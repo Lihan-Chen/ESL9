@@ -373,7 +373,7 @@ namespace Mvc.Controllers
                     DefaultShift
                 );
 
-        #endregion
+        #endregion Helpers
         //public Task<ClaimsPrincipal> SetClaim(string ClaimType, ClaimsTransformation claimTransform)
         //{
         //    switch (ClaimType)
