@@ -20,27 +20,25 @@ namespace Mvc.Controllers
 
         #region Basic DateTime
 
-        protected DateTime ShiftStartTime = DateTime.Today.Add(TimeSpan.Parse(AppConstants.DayShiftStartText));
-        protected DateTime ShiftEndTime = DateTime.Today.Add(TimeSpan.Parse(AppConstants.DayShiftEndText));
-        //protected DateTime Now = DateTime.Now;
+        protected static DateTime ShiftStartTime = DateTime.Today.Add(TimeSpan.Parse(AppConstants.DayShiftStartText));
+        protected static DateTime ShiftEndTime = DateTime.Today.Add(TimeSpan.Parse(AppConstants.DayShiftEndText));
         protected static DateTime Now = DateTime.Now;
-        //DateTime shiftStartTime = Convert.ToDateTime(AppConstants.DayShiftStartText); // Converts only the time
-        //DateTime shiftEndTime = Convert.ToDateTime(AppConstants.DayShiftEndText);
         protected static DateOnly Today = DateOnly.FromDateTime(DateTime.Now);
         protected static DateOnly Tomorrow = Today.AddDays(+1);
+
         // ToDo: check if this format is correct
         protected string YesterdayDate = Today.AddDays(-1).ToString("MM/dd/yyyy");
         protected string TodayDate = Today.ToString("yyyyMMdd");
         protected string TomorrowDate = Tomorrow.ToString("yyyyMMdd");
-        protected int DaysOffSet = -2;
+        
+        protected static int DaysOffSet = -2;
 
         // TimeSpan for two and half hours
-        protected TimeSpan TimeSpan = new(2, 30, 0); // = new TimeSpan(2, 30, 0); 
+        protected static TimeSpan TimeSpan = new(2, 30, 0);
 
         protected bool OkToProceed = false;
 
-        protected int _pageSize = 40;
-
+        protected static int _pageSize = 40;
 
         #endregion
 
@@ -112,14 +110,14 @@ namespace Mvc.Controllers
         public static IEnumerable<object> EslOpTypeList = Enum.GetValues(typeof(OperatorType))
                 .Cast<OperatorType>()
                 .Select(s => new { ID = s, Name = s.ToString() });
-                //.Prepend("", "Assigned As");
+                //.Prepend(new { ID = "", Name = "Assigned As" });
 
 
         public static IEnumerable<object> EslShiftList = Enum.GetValues(typeof(Shift))
                 .Cast<Shift>()
                 .Select(s => new { ID = s, Name = s.ToString() });
 
-        public bool IsUserAnOperator => FacilNo != null ? !string.IsNullOrEmpty(UserID) && _coreService.IsInRole(UserID, "ESL_OPERATOR", FacilNo).Result : false;
+        public bool IsUserAnOperator => FacilNo != null && !string.IsNullOrEmpty(UserID) && _coreService.IsInRole(UserID, "ESL_OPERATOR", FacilNo).Result;
 
         public bool ShowAlert => HttpContext.Session.TryGetValue("ShowAlert", out var value) && value.Length > 0 && BitConverter.ToBoolean(value, 0);
         // Remove the problematic field initializer for userRole
@@ -136,7 +134,7 @@ namespace Mvc.Controllers
                 // GetRole returns a Task<string?>, so we need to await or use .Result
                 var roleTask = _coreService.HasAnyRoles(UserID); //GetRole(UserID, null);
                 bool? role = roleTask?.Result;
-                return role.HasValue && role.Value ? "Internal" : "Public";
+                return IsUserAnOperator ? "Internal" : "Public"; // role.HasValue && role.Value
             }
         }
 
@@ -250,7 +248,8 @@ namespace Mvc.Controllers
             {
                 if (string.IsNullOrEmpty(c.Key) || string.IsNullOrEmpty(c.Value))
                 {
-                    continue; // Skip empty claims
+                    // Skip empty claims
+                    continue;
                 }
 
                 var oldClaim = identity.FindFirst(c.Key);
@@ -327,6 +326,17 @@ namespace Mvc.Controllers
             }
         }
 
+        // Replace the problematic method definition with a non-generic overload for int
+        internal void SetSessionValue(string key, int value)
+        {
+            HttpContext.Session.SetInt32(key, value);
+        }
+
+        internal void SetSessionValue(string key, string value)
+        {
+            HttpContext.Session.SetString(key, value);
+        }
+
         internal T? GetSessionValue<T>(string key) where T : class
         {
             if (HttpContext.Session.TryGetValue(key, out var value))
@@ -370,7 +380,7 @@ namespace Mvc.Controllers
                         .ToList(),
                     nameof(LogTypeSelectViewModel.LogTypeNo),
                     nameof(LogTypeSelectViewModel.LogTypeName),
-                    DefaultShift
+                    DefaultLogTypeNo
                 );
 
         //public SelectList ShiftOptions => new SelectList(

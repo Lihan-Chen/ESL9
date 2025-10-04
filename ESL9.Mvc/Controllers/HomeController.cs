@@ -1,15 +1,19 @@
 using Application.Interfaces.IServices;
 using Core.Models.Enums;
-using Mvc.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Mvc.Extensions;
+using Mvc.Models;
 using Mvc.Models.Enum;
+using Mvc.ViewModels;
 using System.Diagnostics;
 using System.Security.Claims;
-using Mvc.ViewModels;
 using System.Text.Json;
+using AuthorizeAttribute = Microsoft.AspNetCore.Authorization.AuthorizeAttribute;
+using HttpGetAttribute = Microsoft.AspNetCore.Mvc.HttpGetAttribute;
+using HttpPostAttribute = Microsoft.AspNetCore.Mvc.HttpPostAttribute;
+using ValidateAntiForgeryTokenAttribute = Microsoft.AspNetCore.Mvc.ValidateAntiForgeryTokenAttribute;
 
 namespace Mvc.Controllers;
 
@@ -39,13 +43,9 @@ public class HomeController(ICoreService coreService,
 
         string? userName = UserName;
 
-        //bool _isNewSession = IsNewSession;
-
         if (IsNewSession) // where UserID Claim is not present
         {
             _logger.LogInformation("New session detected for user {UserName}", userName);
-
-            //string? userID = UserID;
 
             if (UserID == null)
             {
@@ -79,7 +79,6 @@ public class HomeController(ICoreService coreService,
             if (UserMode == "Public")
             {
                 return RedirectToAction("Index", "Home", new { area = "Public" });
-
             }
 
             if (!showAlert.Equals(true))
@@ -166,11 +165,13 @@ public class HomeController(ICoreService coreService,
         try
         {
             // Get Role
-            var role = await _coreService.GetRole(model.UserID!, (int)model.SelectedFacilNo);
+            var role = await _coreService.GetRole(model.UserID!, (int)model.SelectedFacilNo) ?? UserRole;
 
-            SetSessionValue(AppConstants.AssignedShiftNoSessionKey, model.Shift);
+            SessionExtensions.SetInt32(HttpContext.Session, AppConstants.AssignedShiftNoSessionKey, (int)model.Shift);
 
-            SetSessionValue(AppConstants.AssingedOperatorTypeSessionKey, model.OperatorType);
+            SetSessionValue(AppConstants.AssignedShiftNoSessionKey, ((int)model.Shift));
+
+            SetSessionValue(AppConstants.AssingedOperatorTypeSessionKey, ((int)model.OperatorType));
 
             HttpContext.Session.SetInt32(AppConstants.AssignedFacilNoSessionKey, (int)model.SelectedFacilNo);
 
@@ -191,6 +192,7 @@ public class HomeController(ICoreService coreService,
             }
 
             // Set default _LogFilterPartialViewModel
+            // Serialize only the scalar/ filter fields; recreate SelectList from services.
             var _logInFilterPartialViewModel = new _LogFilterPartialViewModel()
             {
                 SelectedFacilNo = (int)model.SelectedFacilNo, // ?? DefaultFacilNo ?? (int)Facil.OCC,
@@ -211,6 +213,22 @@ public class HomeController(ICoreService coreService,
             _logger.LogError(ex, "Error setting plant selection for user {UserId}", UserID);
             return await Task.FromResult<IActionResult>(RedirectToAction(nameof(Error)));
         }
+    }
+
+    public IActionResult GoToAllEvents(_LogFilterPartialViewModel model)
+    {
+        // Store only simple values
+        var transfer = new LogFilterTransferDto(
+            model.SelectedFacilNo,
+            model.SelectedLogTypeNo,
+            model.StartDate,
+            model.EndDate,
+            model.OperatorType,
+            model.CurrentFilter);
+
+        TempData.Put("LogFilter", transfer);
+
+        return RedirectToAction("Index", "AllEvents");
     }
 
     //[HttpGet]
@@ -272,76 +290,6 @@ public class HomeController(ICoreService coreService,
     
 
     // existing actions (Index, SelectPlant, SetPlant, etc.) remain unchanged
-
-
-    //public IActionResult CheckInn(string? returnUrl)
-    //{
-    //    ViewData["Title"] = "Check In";
-
-    //    if (HttpContext.Session.TryGetValue("SelectedFacilNo", out byte[]? selectedFacilNoBytes))
-    //    {
-    //        // Convert the byte array to an integer
-    //        int selectedFacilNo = BitConverter.ToInt32(selectedFacilNoBytes, 0);
-    //        ViewBag.SelectedFacilNo = selectedFacilNo;
-    //    }
-    //    else
-    //    {
-    //        ViewBag.SelectedFacilNo = null; // Handle the case where no plant is selected
-    //    }
-
-    //    var myOpTypeList = Enum.GetValues(typeof(OperatorType))
-    //            .Cast<OperatorType>()
-    //            .Select(s => new { ID = s, Name = s.ToString() });
-    //    var myShiftList = Enum.GetValues(typeof(Shift))
-    //        .Cast<Shift>()
-    //        .Select(s => new { ID = s, Name = s.ToString() });
-
-    //    Shift _shift;
-    //    string shiftStartText = "06:00:00";
-    //    string shiftEndText = "18:30:00";
-    //    DateTime shiftStartTime = Convert.ToDateTime(shiftStartText); // Converts only the time
-    //    DateTime shiftEndTime = Convert.ToDateTime(shiftEndText);
-    //    DateTime now = DateTime.Now;
-
-    //    if (now >= shiftStartTime && now < shiftEndTime)
-    //    {
-    //        _shift = Shift.Day;
-    //    }
-    //    else
-    //    {
-    //        _shift = Shift.Night;
-    //    }
-
-    //    ViewBag.Shift = _shift;
-
-    //    var model = new CheckInModel
-    //    {
-    //        UserID = UserID,
-    //        Shift = _shift,
-    //        SelectedFacilNo = Facil.OCC, // Default facility
-    //        OperatorType = OperatorType.Primary,
-    //        RememberMe = false,
-    //        FacilOptions = Enum.GetValues(typeof(Facil))
-    //            .Cast<Facil>()
-    //            .Select(f => new FacilSelectViewModel
-    //            {
-    //                FacilNo = (int)f,
-    //                FacilName = FacilExtensions.GetFacilName(f),
-    //                IsSelected = f == Facil.OCC // Default selection
-    //            })
-    //            .ToList(),
-
-
-    //        //optionOpType = new SelectList(myOpTypeList, "ID", "Name"),
-    //        //optionShift = new SelectList(myShiftList, "ID", "Name", _shift)
-    //    };
-
-    //    ViewBag.ReturnUrl = returnUrl;
-
-    //    return View(model);
-
-    //    return View();
-    //}
 
     public IActionResult SelectPlant(string returnUrl)
     {
@@ -458,7 +406,7 @@ public class HomeController(ICoreService coreService,
 
     public IActionResult Privacy() => View();
     
-    [AllowAnonymous]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

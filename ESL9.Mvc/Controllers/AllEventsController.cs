@@ -51,25 +51,36 @@ namespace Mvc.Controllers
 
             #region Parameters and Defaults
 
-            if (logFilterPartial?.SelectedFacilNo is null)  
+            if (IsUserCheckedIn == false)
             {
+                return RedirectToAction("CheckIn", "Home");
+            }
+
+            if (logFilterPartial?.SelectedFacilNo is null) // First time visit or no TempData
+            {
+                //int.TryParse(GetClaimValue(User, AppConstants.DefaultFacilNoClaimType), out int _defaultFacilNo);
+
+
                 if (TempData.ContainsKey("LogFilter"))
                 {
-                    logFilterPartial = JsonConvert.DeserializeObject<_LogFilterPartialViewModel>((string)TempData["LogFilter"]); //TempData.Get<_LogFilterPartialViewModel>("LogFilter");
+                    var logFilterJson = TempData["LogFilter"] as string;
+                    if (!string.IsNullOrEmpty(logFilterJson))
+                    {
+                        logFilterPartial = JsonConvert.DeserializeObject<_LogFilterPartialViewModel>(logFilterJson);
+                    }
                 }
-                
-                
-                //logFilterPartial = new _LogFilterPartialViewModel
-                //{
-                //    SelectedFacilNo = DefaultFacilNo, //ViewData["SelectedFacilNo"], //GetSessionValue<int?>(AppConstants.SelectedFacilNoSessionKey), // DefaultFacilNo,
-                //    // SelectedLogTypeNo = GetSessionValue<int?>(AppConstants.SelectedLogTypeNoSessionKey), // DefaultLogTypeNo,
-                //    StartDate = DefaultStartDate,
-                //    EndDate = DefaultEndDate,
-                //    CurrentFilter = searchString,
-                //    OperatorType = true // DefaultOperatorType
-                //};
-                //logFilterPartial.CurrentFilter = string.Empty,
-                //        OperatorType operatorType ?? false,
+
+               // Set default values
+               //logFilterPartial = new _LogFilterPartialViewModel
+               //{
+               //    SelectedFacilNo = _defaultFacilNo, //ViewData["SelectedFacilNo"], //GetSessionValue<int?>(AppConstants.SelectedFacilNoSessionKey), // DefaultFacilNo,
+               //                                       // SelectedLogTypeNo = GetSessionValue<int?>(AppConstants.SelectedLogTypeNoSessionKey), // DefaultLogTypeNo,
+               //    StartDate = DefaultStartDate,
+               //    EndDate = DefaultEndDate,
+               //    CurrentFilter = string.Empty,
+               //    OperatorType = true // DefaultOperatorType
+               //};
+
             }
 
             // _facilNo & _facilName
@@ -81,7 +92,7 @@ namespace Mvc.Controllers
             //    return NotFound("You have not checked into a facility");
             //}
 
-            _facilNo = logFilterPartial.SelectedFacilNo ?? (int)DefaultFacilNo!; // _facilNoNullable.Value;
+            _facilNo = logFilterPartial?.SelectedFacilNo ?? (int)DefaultFacilNo!; // _facilNoNullable.Value;
 
             var facility = _coreService.GetFacility(_facilNo).Result;
            
@@ -89,14 +100,19 @@ namespace Mvc.Controllers
 
             
             // _shiftNo
-            string? _shiftNoNullable = GetSessionValue<string>(AppConstants.AssignedShiftNoSessionKey);
-            string _shiftNo = _shiftNoNullable ?? string.Empty;
+            int? shiftNoNullable = session.GetInt32(AppConstants.AssignedShiftNoSessionKey);
+            if (shiftNoNullable == null)
+            {
+                _logger.LogError("AssignedShiftNoSessionKey is not set in session.");
+                return NotFound("Shift number is not assigned.");
+            }
+            int _shiftNo = shiftNoNullable.Value;
 
             //  == "Day" ? 1 : 2;
 
             // Set up default values
-            DateOnly _enDt = logFilterPartial?.EndDate ?? endDate ?? Tomorrow; // now.Date; 
-            DateOnly _stDt = logFilterPartial?.StartDate ?? startDate ?? _enDt.AddDays(DaysOffSet); //initialStartDate; 
+            DateOnly _enDt = logFilterPartial?.EndDate ?? Tomorrow; // now.Date; 
+            DateOnly _stDt = logFilterPartial?.StartDate ?? _enDt.AddDays(DaysOffSet); //initialStartDate; 
 
             // force start date to be two days before end date
             if (_stDt > _enDt)
@@ -108,9 +124,9 @@ namespace Mvc.Controllers
 
             session.SetString("endDate", _enDt.ToString());
 
-            searchString = !String.IsNullOrEmpty(logFilterPartial?.CurrentFilter) ? logFilterPartial.CurrentFilter : searchString;
+            searchString = logFilterPartial?.CurrentFilter;
 
-            _opType = operatorType ?? logFilterPartial?.OperatorType ?? true;
+            _opType = logFilterPartial?.OperatorType ?? true;
 
             // _shiftNo = System.Web.HttpContext.Current.Session["ShiftNo"].ToString() == "Day" ? 1 : 2;
 
@@ -129,7 +145,7 @@ namespace Mvc.Controllers
                 logTypeNos = GetSelectList<string>(logTypeNames, "LogTypeNo", "LogTypeName", _logTypeNo) //new SelectList(logTypeNames, "LogTypeNo", "LogTypeName", _logTypeNo)
             };  
 
-            var viewmodel = new AllEventsOutstanding()
+            var viewModel = new AllEventsOutstanding()
             {
                 logFilterPartial = _logFilterPartial
             };
@@ -158,8 +174,8 @@ namespace Mvc.Controllers
                 int pageIndex = (page ?? 1);
                 IPagedList<ViewAllEventsCurrent> allEventAsIPagedList = allEvents.ToPagedList(pageIndex, pageSize);
 
-                viewmodel.count = _Count;
-                viewmodel.AllEventsPagedList = allEventAsIPagedList;
+                viewModel.count = _Count;
+                viewModel.AllEventsPagedList = allEventAsIPagedList;
             }
             else
             {
@@ -167,12 +183,12 @@ namespace Mvc.Controllers
                 
                 ViewBag.ShowSearchList = false;
 
-                return View();
+                return View("Index", viewModel);
             }
 
             ViewBag.Shift = GetSessionValue<string>(AppConstants.AssignedShiftNoSessionKey)?.ToString();
 
-            return View("Index", viewmodel);
+            return View("Index", viewModel);
         }
 
         //[HttpGet]
@@ -512,7 +528,7 @@ namespace Mvc.Controllers
 
             return Ok(empList);
         }
-#endregion
+        #endregion
     }
 }
 

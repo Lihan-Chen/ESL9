@@ -46,6 +46,7 @@
     <Folder Include="Areas\Public\Models\" />
     <Folder Include="Areas\Public\ViewModels\" />
     <Folder Include="Areas\Public\Views\" />
+    <Folder Include="Extentions\" />
   </ItemGroup>
 
 </Project>

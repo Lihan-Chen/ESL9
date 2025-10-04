@@ -9,15 +9,20 @@
 <header>
 <div class="search-form-container">
     <form action="@Url.Action("Index", "AllEvents")" class="row g-3 align-items-end bg-info-subtle">
-        <div class="col-md">
+        @* <div class="col-md">
                 <label for="SelectedFacilNo" class="form-label">Facility</label>
                 @await Component.InvokeAsync("FacilSelector", new { selectedFacilNo = @Model.logFilterPartial.SelectedFacilNo })
-        </div>
+        </div> *@
 
         @* <div class="col-md">
             <label for="logTypeId" class="form-label">Log Type</label>           
             @await Component.InvokeAsync("LogTypeSelector", new { selectedLogType = ViewBag.SelectedLogType })
         </div> *@
+
+        <div class="col-md">
+            <label label-for="logFilterPartial.SelectedFacilNo" class="form-label">Start Date</label>
+            <input asp-for="logFilterPartial.SelectedFacilNo" type="select" class="form-control" required>
+        </div>
 
         <div class="col-md">
                 <label label-for="logFilterPartial.StartDate" class="form-label">Start Date</label>
