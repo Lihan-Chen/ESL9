@@ -204,6 +204,9 @@ public class HomeController(ICoreService coreService,
             // Pass the model using TempData or ViewData, or redirect to an action that accepts the model
             TempData["LogFilter"] = JsonSerializer.Serialize(_logInFilterPartialViewModel);
 
+            // the following code is not working because TempData is not properly serialized/deserialized
+            //TempData["LogFilter"] = _logInFilterPartialViewModel;
+
             var resolvedReturnUrl = TempData["returnUrl"] as string ?? Url.Action("Index", "AllEvents");
 
             return await Task.FromResult<IActionResult>(Redirect(resolvedReturnUrl!));

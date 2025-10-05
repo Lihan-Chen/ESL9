@@ -39,7 +39,7 @@ namespace Mvc.Controllers
         bool _opType = true;
 
         [HttpGet("AllEvents")]
-        public IActionResult Index(/*[FromBody]*/ _LogFilterPartialViewModel? logFilterPartial, int? facilNo, DateOnly? startDate, DateOnly? endDate, string? searchString, int? page, bool? operatorType)
+        public IActionResult Index(/*[FromBody]*/ _LogFilterPartialViewModel? logFilterPartial, /*int? facilNo, DateOnly? startDate, DateOnly? endDate, string? searchString,*/ int? page/*, bool? operatorType*/)
         {
             //HttpContext? httpContext = _httpContextAccessor.HttpContext;
 
@@ -70,16 +70,22 @@ namespace Mvc.Controllers
                     }
                 }
 
-               // Set default values
-               //logFilterPartial = new _LogFilterPartialViewModel
-               //{
-               //    SelectedFacilNo = _defaultFacilNo, //ViewData["SelectedFacilNo"], //GetSessionValue<int?>(AppConstants.SelectedFacilNoSessionKey), // DefaultFacilNo,
-               //                                       // SelectedLogTypeNo = GetSessionValue<int?>(AppConstants.SelectedLogTypeNoSessionKey), // DefaultLogTypeNo,
-               //    StartDate = DefaultStartDate,
-               //    EndDate = DefaultEndDate,
-               //    CurrentFilter = string.Empty,
-               //    OperatorType = true // DefaultOperatorType
-               //};
+                // the following code is not working because TempData is not properly serialized/deserialized
+                //if (TempData["LogFilter"] is _LogFilterPartialViewModel tempLogFilterPartial) // / Now 'student' contains the model data from TempData
+                //{
+                //    logFilterPartial = tempLogFilterPartial;
+                //}
+
+                // Set default values
+                //logFilterPartial = new _LogFilterPartialViewModel
+                //{
+                //    SelectedFacilNo = _defaultFacilNo, //ViewData["SelectedFacilNo"], //GetSessionValue<int?>(AppConstants.SelectedFacilNoSessionKey), // DefaultFacilNo,
+                //                                       // SelectedLogTypeNo = GetSessionValue<int?>(AppConstants.SelectedLogTypeNoSessionKey), // DefaultLogTypeNo,
+                //    StartDate = DefaultStartDate,
+                //    EndDate = DefaultEndDate,
+                //    CurrentFilter = string.Empty,
+                //    OperatorType = true // DefaultOperatorType
+                //};
 
             }
 
@@ -124,7 +130,7 @@ namespace Mvc.Controllers
 
             session.SetString("endDate", _enDt.ToString());
 
-            searchString = logFilterPartial?.CurrentFilter;
+            string searchString = logFilterPartial?.CurrentFilter ?? string.Empty;
 
             _opType = logFilterPartial?.OperatorType ?? true;
 
@@ -172,7 +178,7 @@ namespace Mvc.Controllers
 
                 int pageSize = _pageSize;
                 int pageIndex = (page ?? 1);
-                IPagedList<ViewAllEventsCurrent> allEventAsIPagedList = allEvents.ToPagedList(pageIndex, pageSize);
+                IPagedList<ViewAllEventsCurrent> allEventAsIPagedList = allEvents.ToPagedList(pageIndex, pageSize, _Count);
 
                 viewModel.count = _Count;
                 viewModel.AllEventsPagedList = allEventAsIPagedList;

@@ -13,13 +13,14 @@ namespace Mvc.ViewModels
         [Display(Name = "Log Type")]
         public int? SelectedLogTypeNo { get; set; }
 
+        // Ensures the date is formatted as "yyyy-MM-dd" in edit mode, not "MM/dd/yyyy" which does not work well with HTML5 date input
         [DataType(DataType.Date)]
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]
         [Display(Name = "Start Date")]
         public DateOnly? StartDate { get; set; }
 
         [DataType(DataType.Date)]
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]
         [Display(Name = "End Date")]
         public DateOnly? EndDate { get; set; }
 
