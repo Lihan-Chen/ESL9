@@ -2,13 +2,13 @@ using Application.Interfaces.IRepositories;
 using Application.Interfaces.IServices;
 using Infrastructure.DataAccess;
 using Infrastructure.DataAccess.Repositories;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
-using System.Security.Claims;
 
 namespace Mvc;
 
@@ -50,15 +50,41 @@ public class Program
 
         // configure services https://github.com/sanckh/YourLibraryApp/blob/main/YourLibrary/Startup.cs
         builder.Services.AddScoped<ICoreService, Application.Services.CoreService>();
-        builder.Services.AddScoped<IAllEventService, Application.Services.AllEventService>();  
+        builder.Services.AddScoped<IAllEventService, Application.Services.AllEventService>();
 
         //builder.Services.AddHttpContextAccessor();
 
         // Remaining code unchanged
-        builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+        //builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+        })
             .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
             .EnableTokenAcquisitionToCallDownstreamApi()
             .AddInMemoryTokenCaches();
+
+        builder.Services.Configure<CookieAuthenticationOptions>(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            options =>
+            {
+                // App auth cookie
+                options.Cookie.SameSite = SameSiteMode.Lax;   // works with OIDC redirects
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.SlidingExpiration = true;
+            });
+
+        // Configure OIDC options added by Microsoft.Identity.Web
+        builder.Services.PostConfigure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
+        {
+            // Required for cross-site OIDC redirect flows
+            options.CorrelationCookie.SameSite = SameSiteMode.None;
+            options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+
+            options.NonceCookie.SameSite = SameSiteMode.None;
+            options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
+        });
 
         // Add OpenIdConnect options separately, after AddMicrosoftIdentityWebApp
         //builder.Services.PostConfigure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, static options =>
@@ -153,13 +179,16 @@ public class Program
 
         builder.Services.AddRazorPages()
             .AddMicrosoftIdentityUI();
-        // New place for Authentication configuration
 
         // to support AddSession below in a single server setup
         builder.Services.AddDistributedMemoryCache(); // Or another IDistributedCache implementation
 
         builder.Services.AddSession(options =>
         {
+            // Required for oidc cross-site session cookie usage
+            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+
             options.IdleTimeout = TimeSpan.FromMinutes(180); // Set session timeout
             options.Cookie.Name = ".ESL.Session"; // Make unique Cookie name to avoid "Error unprotecting the session cookie"
             options.Cookie.HttpOnly = true;
@@ -178,6 +207,15 @@ public class Program
         }
 
         app.UseHttpsRedirection();
+
+        // HTTPS Configuration
+        //Ensure that your application is running over HTTPS, as some browsers enforce stricter cookie policies for non - secure connections       
+         app.UseCookiePolicy(new CookiePolicyOptions
+        {
+            MinimumSameSitePolicy = SameSiteMode.None,
+            Secure = CookieSecurePolicy.Always
+        });
+
         app.UseStaticFiles();
 
         app.UseRouting();

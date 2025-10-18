@@ -18,6 +18,8 @@ namespace Mvc.Controllers
 
         ILogger<T> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
+        ISession session => HttpContext.Session;
+
         #region Basic DateTime
 
         protected static DateTime ShiftStartTime = DateTime.Today.Add(TimeSpan.Parse(AppConstants.DayShiftStartText));
@@ -57,8 +59,9 @@ namespace Mvc.Controllers
               _coreService.GetEmployeeIDByEmployeeName(UserName!) ?? string.Empty;
 
         // User is checked in and ready to go only if DefaultFacilNo claim is present, Public user does not have this claim
-        public bool IsUserCheckedIn => !User.HasClaim(c => c.Type == AppConstants.DefaultFacilNoClaimType);
-
+        public bool IsUserCheckedIn => User.HasClaim(c => c.Type == AppConstants.DefaultFacilNoClaimType);  // 
+        
+        public int? UserAssignedFacilNo => HttpContext.Session.GetInt32(AppConstants.AssignedFacilNoSessionKey);
 
         // Update DefaultFacilNo property to parse the claim value to int? instead of returning string
         public int? DefaultFacilNo =>
@@ -101,7 +104,7 @@ namespace Mvc.Controllers
             {
                 if (value is not null)
                 {
-                    UserAssignedFacilNo = value;
+                    //UserAssignedFacilNo = value;
                     HttpContext.Session.SetInt32(AppConstants.AssignedFacilNoSessionKey, value.Value);
                 }
             }
@@ -139,7 +142,7 @@ namespace Mvc.Controllers
         }
 
         // This is a temporary storage for the selected FacilNo during the current request
-        public int? UserAssignedFacilNo;  // => GetSessionValue<int>(AppConstants.AssignedFacilNoSessionKey);
+        //public int? UserAssignedFacilNo;  // => GetSessionValue<int>(AppConstants.AssignedFacilNoSessionKey);
 
         public Shift DefaultShift =>  Now >= ShiftStartTime && Now < ShiftEndTime ? Shift.Day : Shift.Night;
 
@@ -202,7 +205,7 @@ namespace Mvc.Controllers
             return user.Claims.FirstOrDefault(c => c.Type == claimType);
         }
 
-        internal Task<ClaimsPrincipal>? SetClaim(ClaimsPrincipal user, string? claimType, string? claimValue, bool rememberMe)
+        internal async Task<ClaimsPrincipal>? SetClaim(ClaimsPrincipal user, string? claimType, string? claimValue, bool rememberMe)
         {
             if (string.IsNullOrEmpty(claimType) || string.IsNullOrEmpty(claimValue))
             {
@@ -218,8 +221,28 @@ namespace Mvc.Controllers
                 identity.RemoveClaim(oldClaim);
             }
 
+
             // Add new claim
             var newClaim = new Claim(claimType, claimValue);
+
+            //// Create claims identity
+            //var claimsIdentity = new ClaimsIdentity(
+            //    (IEnumerable<Claim>?)newClaim,
+            //    CookieAuthenticationDefaults.AuthenticationScheme);
+
+            //// Create claims principal
+            //var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            //var identity = (ClaimsIdentity)user.Identity!;
+
+            //// Remove old claim if it exists
+            //var oldClaim = identity.FindFirst(claimType);
+            //if (oldClaim != null)
+            //{
+            //    identity.RemoveClaim(oldClaim);
+            //}
+
+
             identity.AddClaim(newClaim);
 
             // Set authentication properties
@@ -232,11 +255,11 @@ namespace Mvc.Controllers
             // Sign in again to update claims and persist the changes
             HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(identity),
+                new ClaimsPrincipal(identity), // claimsPrincipal, 
                 authProperties
             ).Wait(); // Wait for the sign-in to complete
 
-            return Task.FromResult(new ClaimsPrincipal(identity));
+            return await Task.FromResult(new ClaimsPrincipal(identity));
         }
 
         // Fix the method signature to use IEnumerable<KeyValuePair<string, string>> instead of IEnumerable<string, string>

@@ -20,11 +20,10 @@ namespace Mvc.Controllers
         private readonly ICoreService _coreService = coreService ?? throw new ArgumentNullException(nameof(coreService));
 
         private readonly ILogger<AllEventsController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-        // GET: /AllEvents/
+       
         int _facilNo;
         int _logTypeNo;
-        string _eventID = string.Empty; // = string.Empty;
+        string _eventID = string.Empty;
         int _eventID_RevNo;
 
         string _facilName = string.Empty;
@@ -38,28 +37,22 @@ namespace Mvc.Controllers
         string _operatorType = String.Empty;
         bool _opType = true;
 
+        // GET: /AllEvents/
         [HttpGet("AllEvents")]
-        public IActionResult Index(/*[FromBody]*/ _LogFilterPartialViewModel? logFilterPartial, /*int? facilNo, DateOnly? startDate, DateOnly? endDate, string? searchString,*/ int? page/*, bool? operatorType*/)
+        public async Task<IActionResult> Index(/*[FromBody]*/ _LogFilterPartialViewModel? logFilterPartial, int? page = null)
         {
-            //HttpContext? httpContext = _httpContextAccessor.HttpContext;
-
-            //if (httpContext != null && httpContext.User != null && httpContext.User.Identity.IsAuthenticated)
+            string? returnUrl = HttpContext.Request.Query.TryGetValue("ReturnUrl", out var returnUrlValues) ? returnUrlValues.ToString() : null;
 
             ISession session = HttpContext!.Session;
 
-            //TempData.TryGetValue("LogFilter", out _LogFilterPartialViewModel? logFilterParial);
+            //if (!IsUserCheckedIn)
+            //{
+            //    return RedirectToAction("CheckIn", "Home");
+            //}
 
-            #region Parameters and Defaults
-
-            if (IsUserCheckedIn == false)
-            {
-                return RedirectToAction("CheckIn", "Home");
-            }
-
-            if (logFilterPartial?.SelectedFacilNo is null) // First time visit or no TempData
+            if (logFilterPartial?.SelectedFacilNo is null) // First time visit => Check TempData
             {
                 //int.TryParse(GetClaimValue(User, AppConstants.DefaultFacilNoClaimType), out int _defaultFacilNo);
-
 
                 if (TempData.ContainsKey("LogFilter"))
                 {
@@ -69,52 +62,26 @@ namespace Mvc.Controllers
                         logFilterPartial = JsonConvert.DeserializeObject<_LogFilterPartialViewModel>(logFilterJson);
                     }
                 }
-
-                // the following code is not working because TempData is not properly serialized/deserialized
-                //if (TempData["LogFilter"] is _LogFilterPartialViewModel tempLogFilterPartial) // / Now 'student' contains the model data from TempData
-                //{
-                //    logFilterPartial = tempLogFilterPartial;
-                //}
-
-                // Set default values
-                //logFilterPartial = new _LogFilterPartialViewModel
-                //{
-                //    SelectedFacilNo = _defaultFacilNo, //ViewData["SelectedFacilNo"], //GetSessionValue<int?>(AppConstants.SelectedFacilNoSessionKey), // DefaultFacilNo,
-                //                                       // SelectedLogTypeNo = GetSessionValue<int?>(AppConstants.SelectedLogTypeNoSessionKey), // DefaultLogTypeNo,
-                //    StartDate = DefaultStartDate,
-                //    EndDate = DefaultEndDate,
-                //    CurrentFilter = string.Empty,
-                //    OperatorType = true // DefaultOperatorType
-                //};
+                else
+                {
+                    logFilterPartial = new _LogFilterPartialViewModel
+                    {
+                        SelectedFacilNo = UserAssignedFacilNo, // DefaultFacilNo, // ViewData["SelectedFacilNo"], //GetSessionValue<int?>(AppConstants.SelectedFacilNoSessionKey), // DefaultFacilNo,
+                        // SelectedLogTypeNo = GetSessionValue<int?>(AppConstants.SelectedLogTypeNoSessionKey), // DefaultLogTypeNo,
+                        StartDate = DefaultStartDate,
+                        EndDate = DefaultEndDate,
+                        CurrentFilter = string.Empty,
+                        OperatorType = true // DefaultOperatorType
+                    }; 
+                }
 
             }
-
-            // _facilNo & _facilName
-            //int? _facilNoNullable = logFilterPartial?.SelectedFacilNo ?? facilNo ?? FacilNo;
-
-            //if (_facilNoNullable == null)
-            //{
-            //    _logger.LogError("Facility not found for facilNo: {FacilNo}", _facilNoNullable);
-            //    return NotFound("You have not checked into a facility");
-            //}
 
             _facilNo = logFilterPartial?.SelectedFacilNo ?? (int)DefaultFacilNo!; // _facilNoNullable.Value;
 
             var facility = _coreService.GetFacility(_facilNo).Result;
            
             _facilName = facility?.FacilName ?? string.Empty;
-
-            
-            // _shiftNo
-            int? shiftNoNullable = session.GetInt32(AppConstants.AssignedShiftNoSessionKey);
-            if (shiftNoNullable == null)
-            {
-                _logger.LogError("AssignedShiftNoSessionKey is not set in session.");
-                return NotFound("Shift number is not assigned.");
-            }
-            int _shiftNo = shiftNoNullable.Value;
-
-            //  == "Day" ? 1 : 2;
 
             // Set up default values
             DateOnly _enDt = logFilterPartial?.EndDate ?? Tomorrow; // now.Date; 
@@ -134,10 +101,8 @@ namespace Mvc.Controllers
 
             _opType = logFilterPartial?.OperatorType ?? true;
 
-            // _shiftNo = System.Web.HttpContext.Current.Session["ShiftNo"].ToString() == "Day" ? 1 : 2;
-
-            var facilAbbrList = _coreService.GetFacilList().Result; //GetFacilAbbrList();
-            var logTypeNames = _coreService.GetLogTypeList().Result; // GetLogTypeNames();
+            var facilAbbrList = await _coreService.GetFacilList(); //GetFacilAbbrList();
+            var logTypeNames = await _coreService.GetLogTypeList(); // GetLogTypeNames();
 
             _LogFilterPartialViewModel _logFilterPartial = new _LogFilterPartialViewModel
             {
@@ -156,7 +121,7 @@ namespace Mvc.Controllers
                 logFilterPartial = _logFilterPartial
             };
 
-            var selectedFacility = _coreService.GetFacility(_facilNo).Result;
+            var selectedFacility = await _coreService.GetFacility(_facilNo);
             ViewBag.FacilSelected = selectedFacility?.FacilName ?? string.Empty;
             ViewBag.Title = "All Events for " + _facilName;
             ViewBag.ShowSearchList = true;
@@ -164,16 +129,10 @@ namespace Mvc.Controllers
             //string _endDate = _enDt.ToString("MM/dd/yyyy");
             bool _operatorType = _opType;
 
-            var allEvents = _allEventService.GetAllEventsAsync(_facilNo, _stDt, _enDt, searchString, _opType).Result;
-                // _allEventService.GetList(_facilNo, _logTypeNo, _startDate, _endDate, _operatorType).Result?.AsEnumerable();
+            var allEvents = await _allEventService.GetAllEventsAsync(_facilNo, _stDt, _enDt, searchString, _opType);
 
             if (allEvents != null)
             {
-                //if (!String.IsNullOrEmpty(searchString))
-                //{
-                //    allEvents = allEvents.Where(e => $"{e.EventID} {e.EventID_RevNo} {e.Subject} {e.Details}".Contains(searchString, StringComparison.CurrentCultureIgnoreCase));
-                //}
-
                 int _Count = allEvents.Count();
 
                 int pageSize = _pageSize;
@@ -192,7 +151,7 @@ namespace Mvc.Controllers
                 return View("Index", viewModel);
             }
 
-            ViewBag.Shift = GetSessionValue<string>(AppConstants.AssignedShiftNoSessionKey)?.ToString();
+            //ViewBag.Shift = GetSessionValue<string>(AppConstants.AssignedShiftNoSessionKey)?.ToString();
 
             return View("Index", viewModel);
         }
@@ -303,17 +262,17 @@ namespace Mvc.Controllers
             ViewBag.StartDate = _startDate;
             ViewBag.EndDate = _endDate;
 
-            var allEvents = _allEventService.GetList(_facilNo, _logTypeNo, _startDate, _endDate, null, _operatorType).Result;
+            // Use await for asynchronous calls
+            var allEvents = await _allEventService.GetList(_facilNo, _logTypeNo, _startDate, _endDate, null, _operatorType);
 
-            // Fix for CS1061: Replace Request.IsAjaxRequest() with header check
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")  // IsAjaxRequest()
             {
                 if (allEvents != null)
                 {
                     int _Count = allEvents.Count();
                     ViewBag.FacilNoSelected = facilNo;
-                    ViewBag.FacilSelected = _coreService.GetFacility(_facilNo)?.Result?.FacilName;
-                    var logTypeNames = _coreService.GetLogType(_logTypeNo)?.Result?.LogTypeName;
+                    ViewBag.FacilSelected = (await _coreService.GetFacility(_facilNo))?.FacilName;
+                    var logTypeNames = (await _coreService.GetLogType(_logTypeNo))?.LogTypeName;
 
                     AllEventsViewModel allEventsViewModel = new AllEventsViewModel
                     {
@@ -534,7 +493,6 @@ namespace Mvc.Controllers
 
             return Ok(empList);
         }
-        #endregion
     }
 }
 

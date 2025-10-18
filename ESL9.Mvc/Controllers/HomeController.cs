@@ -164,6 +164,8 @@ public class HomeController(ICoreService coreService,
 
         try
         {
+            ClaimsPrincipal user = HttpContext.User;
+
             // Get Role
             var role = await _coreService.GetRole(model.UserID!, (int)model.SelectedFacilNo) ?? UserRole;
 
@@ -181,14 +183,47 @@ public class HomeController(ICoreService coreService,
             {
                 string _facilNoClaim = FacilHelper.GetFacilNumber(model.SelectedFacilNo).ToString();
 
-                IEnumerable<KeyValuePair<string, string>> claims = new List<KeyValuePair<string, string>>
-                {
-                    new KeyValuePair<string, string>(AppConstants.DefaultFacilNoClaimType, _facilNoClaim),
-                    new KeyValuePair<string, string>(AppConstants.DefaultRoleClaimType, role ?? string.Empty)
-                };
+                //await SetClaim(User, AppConstants.DefaultFacilNoClaimType, _facilNoClaim, rememberMe = true);
 
-                // Set claims and sign in again for DefaultFacilNo and DefaultRole
-                await SetClaim(User, claims, rememberMe);
+                // Set UserID claim if not present with the value from UserID property and rememberMe = true
+                var updatedUserTask = SetClaim(User, AppConstants.DefaultFacilNoClaimType, _facilNoClaim, rememberMe: true);
+
+                if (updatedUserTask != null)
+                {
+                    var updatedUser = updatedUserTask.Result;
+                    if (updatedUser != null)
+                    {
+                        user = updatedUser;
+                    }
+                }
+
+                ////var claims = new List<Claim>
+                ////{
+                ////    new Claim(AppConstants.DefaultFacilNoClaimType, _facilNoClaim),
+                ////    new Claim(AppConstants.DefaultRoleClaimType, role ?? string.Empty)
+                ////};
+
+                //IEnumerable<KeyValuePair<string, string>> claims = new List<KeyValuePair<string, string>>
+                //{
+                //    new KeyValuePair<string, string>(AppConstants.DefaultFacilNoClaimType, _facilNoClaim),
+                //    new KeyValuePair<string, string>(AppConstants.DefaultRoleClaimType, role ?? string.Empty)
+                //};
+
+                ////// Set claims and sign in again for DefaultFacilNo and DefaultRole
+                //await SetClaim(User, claims, rememberMe);
+            }
+
+            if (!string.IsNullOrEmpty(role) && !User.HasClaim(c => c.Type == AppConstants.DefaultRoleClaimType && c.Value == role))
+            {
+                var updatedUserTask = SetClaim(User, AppConstants.DefaultRoleClaimType, role, rememberMe: true);
+                if (updatedUserTask != null)
+                {
+                    var updatedUser = updatedUserTask.Result;
+                    if (updatedUser != null)
+                    {
+                        user = updatedUser;
+                    }
+                }
             }
 
             // Set default _LogFilterPartialViewModel

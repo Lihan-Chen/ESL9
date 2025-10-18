@@ -11,8 +11,8 @@
 <h4>Checking In @_firstName @_lastName</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="CheckIn" method="post" class="needs-validation" novalidate>
+    <div class="col-md-6">
+        <form asp-action="CheckIn" method="post" class="needs-validation bg-primary-subtle" novalidate>
             @Html.AntiForgeryToken()
             <fieldset class="border rounded-3 p-3 mb-4">
             <legend class="float-none w-auto px-2 fw-semibold">@_firstName @_lastName</legend>
